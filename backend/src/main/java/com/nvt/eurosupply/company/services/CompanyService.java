@@ -5,7 +5,9 @@ import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.dtos.ReviewCompanyRequestDto;
 import com.nvt.eurosupply.company.mappers.CompanyMapper;
 import com.nvt.eurosupply.company.models.Company;
+import com.nvt.eurosupply.company.models.RequestStatus;
 import com.nvt.eurosupply.company.repositories.CompanyRepository;
+import com.nvt.eurosupply.email.services.CompanyEmailService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
@@ -13,6 +15,7 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
+import com.nvt.eurosupply.user.models.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ public class CompanyService {
     private final CityService cityService;
     private final CountryService countryService;
     private final FileService fileService;
+    private final CompanyEmailService emailService;
 
     private final CompanyRepository repository;
 
@@ -50,7 +54,11 @@ public class CompanyService {
     public CompanyResponseDto reviewCompany(Long id, ReviewCompanyRequestDto request) {
         Company company = find(id);
         company.setStatus(request.getStatus());
-        return mapper.toResponse(repository.save(company));
+        Company saved = repository.save(company);
+        User customer = company.getOwner();
+
+        sendReviewEmail(company, customer, request.getStatus(), request.getRejectionReason());
+        return mapper.toResponse(saved);
     }
 
     public List<FileResponseDto> uploadFiles(Long id, List<MultipartFile> files) {
@@ -64,4 +72,18 @@ public class CompanyService {
     public Company find(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found"));
     }
+
+    private void sendReviewEmail(Company company, User customer, RequestStatus status, String rejectionReason) {
+        if (status == RequestStatus.APPROVED) {
+            emailService.sendApprovalEmail(company, customer.getEmail(), customer.getUsername());
+        } else if (status == RequestStatus.REJECTED) {
+            emailService.sendRejectionEmail(
+                    company,
+                    customer.getEmail(),
+                    customer.getUsername(),
+                    rejectionReason
+            );
+        }
+    }
+
 }

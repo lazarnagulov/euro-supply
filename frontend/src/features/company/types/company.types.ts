@@ -1,6 +1,7 @@
-import type {City, Country} from "./location.types.ts";
+import type {City, Country} from "../../../types/location.types.ts";
 
-export enum CompanyStatus {
+
+export enum RequestStatus {
     PENDING = 'PENDING',
     APPROVED = 'APPROVED',
     REJECTED = 'REJECTED',
@@ -14,7 +15,7 @@ export interface Company {
     country: Country;
     latitude: number;
     longitude: number;
-    status: CompanyStatus;
+    status: RequestStatus;
     createdAt: string;
     updatedAt: string;
 }
@@ -32,7 +33,7 @@ export interface CompanyFile {
     id: number;
     filename: string;
     url: string;
-    type: 'IMAGE' | 'DOCUMENT';
+    type: 'IMAGE' | 'PDF';
     uploadedAt: string;
 }
 
@@ -41,6 +42,6 @@ export interface CompanyWithFiles extends Company {
 }
 
 export interface ReviewCompanyRequest {
-    status: CompanyStatus;
+    status: RequestStatus;
     rejectionReason?: string;
 }

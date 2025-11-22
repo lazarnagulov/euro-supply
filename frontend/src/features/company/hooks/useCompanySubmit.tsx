@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { validateFiles } from '../schemas/companySchema';
-import type {Company, RegisterCompanyRequest} from "../../../types/company.types.ts";
+import type {Company, RegisterCompanyRequest} from "../types/company.types.ts";
 import {companyService} from "../../../api/services/companyService.ts";
 
 type SubmitStatus = 'idle' | 'loading' | 'success' | 'error';
