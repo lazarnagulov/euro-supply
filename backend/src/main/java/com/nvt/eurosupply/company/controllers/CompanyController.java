@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.company.controller;
+package com.nvt.eurosupply.company.controllers;
 
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
