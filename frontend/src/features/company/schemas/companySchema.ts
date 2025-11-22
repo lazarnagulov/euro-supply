@@ -15,11 +15,13 @@ export const companyRegistrationSchema = z.object({
 
     countryId: z
         .number()
-        .min(1, 'Please select a country'),
+        .int()
+        .positive('Please select a country'),
 
     cityId: z
         .number()
-        .min(1, 'Please select a city'),
+        .int()
+        .positive('Please select a city'),
 
     latitude: z
         .number()

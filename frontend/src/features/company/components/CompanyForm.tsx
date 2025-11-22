@@ -158,7 +158,7 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({ onSuccess }) => {
                                 Country *
                             </label>
                             <select
-                                {...register('countryId')}
+                                {...register('countryId', { valueAsNumber: true })}
                                 disabled={isLoadingCountries}
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 ${
                                     errors.countryId ? 'border-red-500' : 'border-gray-300'
@@ -179,7 +179,7 @@ export const CompanyForm: React.FC<CompanyFormProps> = ({ onSuccess }) => {
                                 City *
                             </label>
                             <select
-                                {...register('cityId')}
+                                {...register('cityId', { valueAsNumber: true })}
                                 disabled={isLoadingCities || cities.length === 0}
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 ${
                                     errors.cityId ? 'border-red-500' : 'border-gray-300'

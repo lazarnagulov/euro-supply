@@ -1,7 +1,7 @@
 package com.nvt.eurosupply.shared.services;
 
-import com.nvt.eurosupply.shared.dtos.CityResponseDto;
-import com.nvt.eurosupply.shared.dtos.CountryResponseDto;
+import com.nvt.eurosupply.shared.dtos.CityDto;
+import com.nvt.eurosupply.shared.dtos.CountryDto;
 import com.nvt.eurosupply.shared.mappers.CityMapper;
 import com.nvt.eurosupply.shared.mappers.CountryMapper;
 import com.nvt.eurosupply.shared.models.Country;
@@ -21,12 +21,12 @@ public class CountryService {
     private final CountryMapper mapper;
     private final CityMapper cityMapper;
 
-    public List<CountryResponseDto> getAll() {
+    public List<CountryDto> getAll() {
         return repository.findAll().stream()
                 .map(mapper::toResponse).toList();
     }
 
-    public List<CityResponseDto> getCountryCities(Long id) {
+    public List<CityDto> getCountryCities(Long id) {
         return find(id).getCities().stream().map(cityMapper::toResponse).toList();
     }
 

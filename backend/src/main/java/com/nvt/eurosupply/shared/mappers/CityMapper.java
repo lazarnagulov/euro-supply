@@ -1,6 +1,6 @@
 package com.nvt.eurosupply.shared.mappers;
 
-import com.nvt.eurosupply.shared.dtos.CityResponseDto;
+import com.nvt.eurosupply.shared.dtos.CityDto;
 import com.nvt.eurosupply.shared.models.City;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -12,7 +12,7 @@ public class CityMapper {
 
     private final ModelMapper modelMapper;
 
-    public CityResponseDto toResponse(City city) {
-        return modelMapper.map(city, CityResponseDto.class);
+    public CityDto toResponse(City city) {
+        return modelMapper.map(city, CityDto.class);
     }
 }

@@ -46,7 +46,7 @@ export const useCompanySubmit = () => {
                 latitude: formData.latitude,
                 longitude: formData.longitude,
             };
-
+            console.log(companyData);
             const company = await companyService.registerCompany(companyData);
 
             const allFiles = [...files.companyImages, ...files.documents];

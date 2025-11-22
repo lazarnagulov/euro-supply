@@ -5,8 +5,8 @@ import {
     companyRegistrationSchema,
     type CompanyRegistrationFormData
 } from '../schemas/companySchema';
-import type {City, Country} from "../../../types/location.types.ts";
-import {locationService} from "../../../api/services/locationService.ts";
+import type { City, Country } from '../../../types/location.types';
+import { locationService } from '../../../api/services/locationService';
 
 export const useCompanyForm = () => {
     const [countries, setCountries] = useState<Country[]>([]);
@@ -28,8 +28,8 @@ export const useCompanyForm = () => {
         defaultValues: {
             name: '',
             address: '',
-            countryId: 1,
-            cityId: 1,
+            countryId: 0,
+            cityId: 0,
             latitude: null,
             longitude: null,
         },
@@ -55,13 +55,13 @@ export const useCompanyForm = () => {
     }, []);
 
     useEffect(() => {
-        if (countryId) {
+        if (countryId && countryId > 0) {
             const fetchCities = async () => {
                 setIsLoadingCities(true);
                 try {
                     const data = await locationService.getCitiesByCountry(countryId);
                     setCities(data);
-                    setValue('cityId', 1);
+                    setValue('cityId', 0);
                 } catch (error) {
                     console.error('Failed to fetch cities:', error);
                     setLocationError('Failed to load cities');
@@ -72,6 +72,7 @@ export const useCompanyForm = () => {
             fetchCities();
         } else {
             setCities([]);
+            setValue('cityId', 0);
         }
     }, [countryId, setValue]);
 
@@ -79,7 +80,6 @@ export const useCompanyForm = () => {
         setValue('latitude', latitude, { shouldValidate: true });
         setValue('longitude', longitude, { shouldValidate: true });
     };
-
 
     const getLocation = (): [number, number] | null => {
         const lat = getValues('latitude');
