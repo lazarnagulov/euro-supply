@@ -28,5 +28,16 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ExceptionResponse> handleIllegalStateException(IllegalStateException e) {
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(e.getMessage())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .timestamp(Instant.now())
+                .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
 }
 
