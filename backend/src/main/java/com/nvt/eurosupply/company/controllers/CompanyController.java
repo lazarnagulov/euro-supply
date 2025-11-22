@@ -4,6 +4,7 @@ import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.dtos.ReviewCompanyRequestDto;
 import com.nvt.eurosupply.company.services.CompanyService;
+import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -52,8 +53,8 @@ public class CompanyController {
             @ApiResponse(responseCode = "400", description = "Invalid file data")
     })
     @PostMapping("/{id}/files")
-    public ResponseEntity<Void> uploadFiles(@PathVariable Long id, @Valid @RequestBody List<MultipartFile> files) {
-        return null;
+    public ResponseEntity<List<FileResponseDto>> uploadFiles(@PathVariable Long id, @Valid @RequestBody List<MultipartFile> files) {
+        return ResponseEntity.ok(service.uploadFiles(id, files));
     }
 
     @Operation(
