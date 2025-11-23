@@ -3,9 +3,9 @@ package com.nvt.eurosupply.company.services;
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.dtos.ReviewCompanyRequestDto;
+import com.nvt.eurosupply.company.enums.RequestStatus;
 import com.nvt.eurosupply.company.mappers.CompanyMapper;
 import com.nvt.eurosupply.company.models.Company;
-import com.nvt.eurosupply.company.models.RequestStatus;
 import com.nvt.eurosupply.company.repositories.CompanyRepository;
 import com.nvt.eurosupply.email.services.CompanyEmailService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
@@ -47,6 +47,9 @@ public class CompanyService {
         company.setCity(city);
         company.setCountry(country);
         // TODO: set owner (logged in user)
+        User mockUser = new User();
+        mockUser.setId(1L);
+        company.setOwner(mockUser);
 
         return mapper.toResponse(repository.save(company));
     }
@@ -72,7 +75,10 @@ public class CompanyService {
     }
 
     public List<FileResponseDto> uploadFiles(Long id, List<MultipartFile> files) {
+        Company company = find(id);
         List<StoredFile> stored = fileService.uploadFiles(FOLDER_NAME, id, files);
+        company.setFiles(stored);
+        repository.save(company);
 
         return stored.stream()
                 .map(file -> fileService.toResponse(FOLDER_NAME, id, file))

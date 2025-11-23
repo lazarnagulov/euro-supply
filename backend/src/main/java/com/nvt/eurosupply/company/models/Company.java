@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.company.models;
 
+import com.nvt.eurosupply.company.enums.RequestStatus;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
 import com.nvt.eurosupply.shared.models.StoredFile;
@@ -46,8 +47,7 @@ public class Company {
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
-    // TODO: Add optional = false
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private User owner;
 
     @Column(nullable = false, updatable = false)

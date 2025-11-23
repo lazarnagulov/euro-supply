@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.shared.models;
 
+import com.nvt.eurosupply.shared.enums.FileType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "images")
+@Table(name = "files")
 public class StoredFile {
 
     @Id

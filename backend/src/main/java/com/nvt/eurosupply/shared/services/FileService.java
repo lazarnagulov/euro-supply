@@ -2,7 +2,7 @@ package com.nvt.eurosupply.shared.services;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.exceptions.FileUploadException;
-import com.nvt.eurosupply.shared.models.FileType;
+import com.nvt.eurosupply.shared.enums.FileType;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.repositories.StoredFileRepository;
 import lombok.RequiredArgsConstructor;
