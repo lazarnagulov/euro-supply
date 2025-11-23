@@ -28,7 +28,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
 }) => {
     return (
     <div className={className}>
-        <div className="rounded-lg overflow-hidden border-2 border-gray-300">
+        <div className="rounded-lg overflow-hidden border-2 border-gray-300 z-10">
             <MapContainer
                 center={center}
                 zoom={zoom}

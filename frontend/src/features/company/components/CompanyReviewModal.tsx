@@ -1,7 +1,8 @@
 import React, {useState} from "react";
-import {AlertCircle, Building2, CheckCircle, FileText, Image, X, XCircle} from "lucide-react";
+import {AlertCircle, Building2, CheckCircle, FileText, Image, MapPin, X, XCircle} from "lucide-react";
 import {type CompanyResponse, RequestStatus} from "../types/company.types.ts";
 import {companyService} from "../../../api/services/companyService.ts";
+import {InteractiveMap} from "../../../components/map/InteractiveMap.tsx";
 
 interface CompanyReviewModelProps {
     company: CompanyResponse;
@@ -46,7 +47,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
+                <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl z-10">
                     <div className="flex justify-between items-start">
                         <div>
                             <h2 className="text-2xl font-bold mb-1">Review Company Registration</h2>
@@ -64,7 +65,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                 <div className="p-6 space-y-6">
                     <section>
                         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <Building2 className="w-5 h-5 text-indigo-600" />
+                            <Building2 className="w-5 h-5 text-indigo-600"/>
                             Company Information
                         </h3>
                         <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl">
@@ -103,7 +104,27 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
 
                     <section>
                         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <Image className="w-5 h-5 text-indigo-600" />
+                            <MapPin className="w-5 h-5 text-indigo-600"/>
+                            Company Location
+                        </h3>
+                        <div className="rounded-xl overflow-hidden border-2 border-gray-200 shadow-sm">
+                            <InteractiveMap
+                                center={[company.latitude, company.longitude]}
+                                zoom={15}
+                                selectedPosition={[company.latitude, company.longitude]}
+                                height="400px"
+                                readOnly={true}
+                                showCoordinates={false}
+                            />
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">
+                            Verify that the marked location matches the company's actual address: {company.address}
+                        </p>
+                    </section>
+
+                    <section>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <Image className="w-5 h-5 text-indigo-600"/>
                             Company Images ({images.length})
                         </h3>
 
@@ -138,7 +159,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
 
                     <section>
                         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-indigo-600" />
+                            <FileText className="w-5 h-5 text-indigo-600"/>
                             Ownership Documents ({documents.length})
                         </h3>
                         <div className="space-y-2">
@@ -149,7 +170,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-red-100 rounded-lg">
-                                            <FileText className="w-5 h-5 text-red-600" />
+                                            <FileText className="w-5 h-5 text-red-600"/>
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-800">{doc.filename}</p>
@@ -181,7 +202,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                             >
                                 <CheckCircle className={`w-10 h-10 mx-auto mb-3 ${
                                     selectedStatus === 'APPROVED' ? 'text-green-600' : 'text-gray-400'
-                                }`} />
+                                }`}/>
                                 <p className="font-semibold text-center text-lg">Approve</p>
                                 <p className="text-sm text-gray-600 text-center mt-1">
                                     Company registration will be approved
@@ -198,7 +219,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                             >
                                 <XCircle className={`w-10 h-10 mx-auto mb-3 ${
                                     selectedStatus === 'REJECTED' ? 'text-red-600' : 'text-gray-400'
-                                }`} />
+                                }`}/>
                                 <p className="font-semibold text-center text-lg">Reject</p>
                                 <p className="text-sm text-gray-600 text-center mt-1">
                                     Company registration will be rejected
@@ -219,7 +240,8 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                                     className="w-full px-4 py-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                                 />
                                 <p className="text-xs text-gray-600 mt-2">
-                                    Be specific and constructive. Help the customer understand what needs to be corrected.
+                                    Be specific and constructive. Help the customer understand what needs to be
+                                    corrected.
                                 </p>
                             </div>
                         )}
@@ -227,13 +249,14 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
 
                     {error && (
                         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0"/>
                             <p className="text-red-800">{error}</p>
                         </div>
                     )}
                 </div>
 
-                <div className="sticky bottom-0 bg-gray-50 p-6 border-t border-gray-200 rounded-b-2xl flex justify-end gap-4">
+                <div
+                    className="sticky bottom-0 bg-gray-50 p-6 border-t border-gray-200 rounded-b-2xl flex justify-end gap-4 z-10">
                     <button
                         onClick={onClose}
                         disabled={loading}
