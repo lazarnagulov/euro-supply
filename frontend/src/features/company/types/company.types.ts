@@ -1,4 +1,5 @@
 import type {City, Country} from "../../../types/location.types.ts";
+import type {FileResponse, StoredFile} from "../../../types/file.types.ts";
 
 
 export enum RequestStatus {
@@ -29,19 +30,23 @@ export interface RegisterCompanyRequest {
     longitude: number;
 }
 
-export interface CompanyFile {
-    id: number;
-    filename: string;
-    url: string;
-    type: 'IMAGE' | 'PDF';
-    uploadedAt: string;
-}
-
 export interface CompanyWithFiles extends Company {
-    files: CompanyFile[];
+    files: StoredFile[];
 }
 
 export interface ReviewCompanyRequest {
     status: RequestStatus;
     rejectionReason?: string;
+}
+
+export interface CompanyResponse {
+    id: number;
+    name: string;
+    address: string;
+    city: string;
+    country: string;
+    files: FileResponse[];
+    owner: any;
+    latitude: number;
+    longitude: number;
 }

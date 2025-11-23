@@ -28,11 +28,11 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
 }) => {
     return (
     <div className={className}>
-        <div className="rounded-lg overflow-hidden border-2 border-gray-300">
+        <div className="rounded-lg overflow-hidden border-2 border-gray-300 z-10">
             <MapContainer
                 center={center}
                 zoom={zoom}
-                style={{ height, width: '100%' }}
+                style={{ height, width: '100%', zIndex: 1 }}
                 scrollWheelZoom={true}>
                 <TileLayer
                     url={MAP_DEFAULTS.tileLayerUrl}

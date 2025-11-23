@@ -4,8 +4,10 @@ import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.enums.RequestStatus;
+import com.nvt.eurosupply.shared.models.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,6 +27,17 @@ public class CompanyMapper {
     }
 
     public CompanyResponseDto toResponse(Company company) {
-        return modelMapper.map(company, CompanyResponseDto.class);
+        CompanyResponseDto response = modelMapper.map(company, CompanyResponseDto.class);
+        response.setCity(company.getCity().getName());
+        response.setCountry(company.getCountry().getName());
+        return response;
+    }
+
+    public PagedResponse<CompanyResponseDto> toPagedResponse(Page<Company> page) {
+        return new PagedResponse<>(
+                page.getContent().stream().map(this::toResponse).toList(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
     }
 }
