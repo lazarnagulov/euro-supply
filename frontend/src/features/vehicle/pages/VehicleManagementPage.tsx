@@ -31,7 +31,6 @@ const VehicleManagementPage = () => {
         setLoading(true);
         try {
             const data = await vehicleService.getVehicles(currentPage, pageSize, searchParams);
-            console.log(data);
             setVehicles(data.content);
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);

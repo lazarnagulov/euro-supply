@@ -15,5 +15,4 @@ public class VehicleSearchRequestDto {
     private Long modelId;
     private Double minLoad;
     private Double maxLoad;
-    private String search;
 }

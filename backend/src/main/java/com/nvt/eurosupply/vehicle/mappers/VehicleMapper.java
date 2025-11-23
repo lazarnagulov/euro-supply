@@ -1,6 +1,5 @@
 package com.nvt.eurosupply.vehicle.mappers;
 
-import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleBrandDto;

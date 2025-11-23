@@ -30,6 +30,5 @@ export interface VehicleSearchParams {
     modelId?: number;
     minLoad?: number;
     maxLoad?: number;
-    search?: string;
 }
 

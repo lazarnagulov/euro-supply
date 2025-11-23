@@ -9,10 +9,13 @@ import apiClient from "../client.ts";
 
 export const vehicleService = {
     getVehicles: async (page: number, size: number, params: VehicleSearchParams) => {
+        const isSearch = params && Object.keys(params).length !== 0;
+        console.log(isSearch);
         const response = await apiClient.get(
-            '/api/v1/vehicles',
+            isSearch ? '/api/v1/vehicles/search' : '/api/v1/vehicles',
             { params: { page, size, ...params } }
         );
+
         return response.data;
     },
 
@@ -29,7 +32,6 @@ export const vehicleService = {
     },
 
     createVehicle: async (data: Vehicle, images: File[]) => {
-        console.log(data);
         const vehicleResponse = await apiClient.post<VehicleResponse>(
             '/api/v1/vehicles',
             data

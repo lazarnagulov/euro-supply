@@ -63,7 +63,6 @@ const SearchFilters: React.FC<SearchFilterProps> = ({ onSearch, onClose }) => {
         onSearch({});
     };
 
-    // Helpers
     const getNumberOrUndefined = (v: string): number | undefined =>
         v === "" ? undefined : Number(v);
 
@@ -85,9 +84,9 @@ const SearchFilters: React.FC<SearchFilterProps> = ({ onSearch, onClose }) => {
                     <input
                         type="text"
                         placeholder="Search registration..."
-                        value={filters.search ?? ""}
+                        value={filters.registration ?? ""}
                         onChange={(e) =>
-                            setFilters({ ...filters, search: e.target.value })
+                            setFilters({ ...filters, registration: e.target.value })
                         }
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />

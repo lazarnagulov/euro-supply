@@ -114,7 +114,7 @@ public class VehicleController {
         @ModelAttribute VehicleSearchRequestDto request,
         Pageable pageable
     ) {
-        return null;
+        return ResponseEntity.ok(service.searchVehicles(request, pageable));
     }
 
     @Operation(

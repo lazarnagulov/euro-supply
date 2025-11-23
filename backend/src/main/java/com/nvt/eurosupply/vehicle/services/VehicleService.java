@@ -7,15 +7,18 @@ import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
 import com.nvt.eurosupply.vehicle.dtos.UpdateVehicleRequestDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
+import com.nvt.eurosupply.vehicle.dtos.VehicleSearchRequestDto;
 import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
 import com.nvt.eurosupply.vehicle.models.Vehicle;
 import com.nvt.eurosupply.vehicle.models.VehicleBrand;
 import com.nvt.eurosupply.vehicle.models.VehicleModel;
 import com.nvt.eurosupply.vehicle.repositories.VehicleRepository;
+import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,7 +68,6 @@ public class VehicleService {
 
     public PagedResponse<VehicleResponseDto> getVehicles(Pageable pageable) {
         return mapper.toPagedResponse(repository.findAll(pageable));
-
     }
 
     public void deleteVehicle(Long id) {
@@ -91,5 +93,10 @@ public class VehicleService {
 
         // TODO: Update images once they are served with enginx
         return mapper.toResponse(repository.save(vehicle));
+    }
+
+    public PagedResponse<VehicleResponseDto> searchVehicles(VehicleSearchRequestDto request, Pageable pageable) {
+        Specification<Vehicle> specification = VehicleSpecification.search(request);
+        return mapper.toPagedResponse(repository.findAll(specification, pageable));
     }
 }
