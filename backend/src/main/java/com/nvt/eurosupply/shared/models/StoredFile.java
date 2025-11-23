@@ -14,7 +14,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "images")
+@Table(name = "files")
 public class StoredFile {
 
     @Id

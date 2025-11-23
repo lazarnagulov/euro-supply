@@ -40,7 +40,9 @@ public class CompanyService {
         company.setCity(city);
         company.setCountry(country);
         // TODO: set owner (logged in user)
-        company.setOwner(new User());
+        User mockUser = new User();
+        mockUser.setId(1L);
+        company.setOwner(mockUser);
 
         return mapper.toResponse(repository.save(company));
     }
@@ -56,7 +58,10 @@ public class CompanyService {
     }
 
     public List<FileResponseDto> uploadFiles(Long id, List<MultipartFile> files) {
+        Company company = find(id);
         List<StoredFile> stored = fileService.uploadFiles("company", id, files);
+        company.setFiles(stored);
+        repository.save(company);
 
         return stored.stream()
                 .map(file -> fileService.toResponse("company", id, file))
