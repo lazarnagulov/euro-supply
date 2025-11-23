@@ -5,10 +5,11 @@ import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
-import com.nvt.eurosupply.vehicle.dtos.VehicleBrandDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
 import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
 import com.nvt.eurosupply.vehicle.models.Vehicle;
+import com.nvt.eurosupply.vehicle.models.VehicleBrand;
+import com.nvt.eurosupply.vehicle.models.VehicleModel;
 import com.nvt.eurosupply.vehicle.repositories.VehicleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.List;
 public class VehicleService {
 
     private final VehicleRepository repository;
+    private final VehicleBrandService brandService;
     private final FileService fileService;
 
     private final VehicleMapper mapper;
@@ -31,6 +33,10 @@ public class VehicleService {
 
     public VehicleResponseDto createVehicle(CreateVehicleRequestDto request) {
         Vehicle vehicle = mapper.fromCreateRequest(request);
+        VehicleBrand brand = brandService.findBrand(request.getBrandId());
+        VehicleModel model = brandService.findModel(request.getModelId());
+        vehicle.setBrand(brand);
+        vehicle.setModel(model);
         return mapper.toResponse(repository.save(vehicle));
     }
 

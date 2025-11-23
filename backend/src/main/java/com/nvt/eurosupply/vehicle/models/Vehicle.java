@@ -25,7 +25,7 @@ public class Vehicle {
     private String registrationNumber;
 
     @Column(nullable = false)
-    private Double weightLimitKg;
+    private Double maxLoadKg;
 
     @ManyToOne(optional = false)
     private VehicleBrand brand;

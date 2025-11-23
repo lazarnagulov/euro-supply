@@ -17,7 +17,7 @@ export interface VehicleModel {
 
 export interface VehicleResponse {
     id: number;
-    registrationPlate: string;
+    registrationNumber: string;
     maxLoadKg: number;
     brand: VehicleBrand;
     model: VehicleModel;

@@ -22,6 +22,7 @@ import java.util.List;
 @RequestMapping("/api/v1/vehicles")
 @RequiredArgsConstructor
 @Tag(name = "Vehicles", description = "Vehicle management API")
+@CrossOrigin
 public class VehicleController {
 
     private final VehicleService service;
@@ -33,6 +34,7 @@ public class VehicleController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Vehicle created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "404", description = "Model or Brand not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping

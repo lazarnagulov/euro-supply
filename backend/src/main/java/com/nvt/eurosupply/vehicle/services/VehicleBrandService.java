@@ -4,7 +4,9 @@ import com.nvt.eurosupply.vehicle.dtos.VehicleBrandDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleModelDto;
 import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
 import com.nvt.eurosupply.vehicle.models.VehicleBrand;
+import com.nvt.eurosupply.vehicle.models.VehicleModel;
 import com.nvt.eurosupply.vehicle.repositories.VehicleBrandRepository;
+import com.nvt.eurosupply.vehicle.repositories.VehicleModelRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.List;
 public class VehicleBrandService {
 
     private final VehicleBrandRepository repository;
+    private final VehicleModelRepository modelRepository;
 
     private final VehicleMapper mapper;
 
@@ -24,10 +27,14 @@ public class VehicleBrandService {
     }
 
     public List<VehicleModelDto> getBrandModels(Long id) {
-        return find(id).getModels().stream().map(mapper::toResponse).toList();
+        return findBrand(id).getModels().stream().map(mapper::toResponse).toList();
     }
 
-    public VehicleBrand find(Long id) {
+    public VehicleBrand findBrand(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Brand not found"));
+    }
+
+    public VehicleModel findModel(Long id) {
+        return modelRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Brand not found"));
     }
 }

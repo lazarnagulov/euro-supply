@@ -21,14 +21,14 @@ public class VehicleMapper {
     private final ModelMapper modelMapper;
 
     public Vehicle fromCreateRequest(CreateVehicleRequestDto request) {
-        return modelMapper.map(request, Vehicle.class);
+        return Vehicle.builder()
+                .maxLoadKg(request.getMaxLoadKg())
+                .registrationNumber(request.getRegistrationPlate())
+                .build();
     }
 
     public VehicleResponseDto toResponse(Vehicle vehicle) {
-        VehicleResponseDto response = modelMapper.map(vehicle, VehicleResponseDto.class);
-        response.setBrand(vehicle.getBrand().getName());
-        response.setModel(vehicle.getModel().getName());
-        return response;
+        return modelMapper.map(vehicle, VehicleResponseDto.class);
     }
 
     public VehicleBrandDto toResponse(VehicleBrand brand) {

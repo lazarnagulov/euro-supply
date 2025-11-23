@@ -13,9 +13,9 @@ import java.util.List;
 @Builder
 public class VehicleResponseDto {
     private Long id;
-    private String registrationPlate;
+    private String registrationNumber;
     private Double maxLoadKg;
-    private String brand;
-    private String model;
+    private VehicleBrandDto brand;
+    private VehicleModelDto model;
     private List<String> imageUrls;
 }

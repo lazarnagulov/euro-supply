@@ -15,7 +15,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onDelete }) 
                 {vehicle.imageUrls && vehicle.imageUrls[0] ? (
                     <img
                         src={vehicle.imageUrls[0]}
-                        alt={vehicle.registrationPlate}
+                        alt={vehicle.registrationNumber}
                         className="w-full h-full object-cover"
                     />
                 ) : (
@@ -31,7 +31,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onDelete }) 
             </div>
 
             <div className="p-4">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">{vehicle.registrationPlate}</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">{vehicle.registrationNumber}</h3>
                 <div className="space-y-2 text-sm text-gray-600 mb-4">
                     <p>
                         <span className="font-semibold">Brand:</span> {vehicle.brand.name}
