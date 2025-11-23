@@ -1,7 +1,5 @@
 package com.nvt.eurosupply.company.dtos;
 
-import com.nvt.eurosupply.shared.dtos.CityDto;
-import com.nvt.eurosupply.shared.dtos.CountryDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
