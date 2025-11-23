@@ -4,8 +4,10 @@ import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.enums.RequestStatus;
+import com.nvt.eurosupply.shared.models.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
