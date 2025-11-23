@@ -13,6 +13,7 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
+import com.nvt.eurosupply.user.models.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class CompanyService {
         company.setCity(city);
         company.setCountry(country);
         // TODO: set owner (logged in user)
+        company.setOwner(new User());
 
         return mapper.toResponse(repository.save(company));
     }

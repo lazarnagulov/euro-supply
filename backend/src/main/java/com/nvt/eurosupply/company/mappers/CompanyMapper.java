@@ -3,7 +3,7 @@ package com.nvt.eurosupply.company.mappers;
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.models.Company;
-import com.nvt.eurosupply.company.models.RequestStatus;
+import com.nvt.eurosupply.company.enums.RequestStatus;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;

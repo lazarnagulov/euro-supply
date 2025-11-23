@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.shared.models;
 
+import com.nvt.eurosupply.shared.enums.FileType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

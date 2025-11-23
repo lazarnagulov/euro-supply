@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.shared.models;
+package com.nvt.eurosupply.shared.enums;
 
 public enum FileType {
     IMAGE,

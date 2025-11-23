@@ -1,8 +1,10 @@
 package com.nvt.eurosupply.company.models;
 
+import com.nvt.eurosupply.company.enums.RequestStatus;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
 import com.nvt.eurosupply.shared.models.StoredFile;
+import com.nvt.eurosupply.user.models.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,8 +47,8 @@ public class Company {
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
-//    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-//    private User owner;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    private User owner;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
