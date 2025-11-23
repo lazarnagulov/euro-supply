@@ -3,8 +3,12 @@ package com.nvt.eurosupply.vehicle.mappers;
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
+import com.nvt.eurosupply.vehicle.dtos.VehicleBrandDto;
+import com.nvt.eurosupply.vehicle.dtos.VehicleModelDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
 import com.nvt.eurosupply.vehicle.models.Vehicle;
+import com.nvt.eurosupply.vehicle.models.VehicleBrand;
+import com.nvt.eurosupply.vehicle.models.VehicleModel;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -25,6 +29,14 @@ public class VehicleMapper {
         response.setBrand(vehicle.getBrand().getName());
         response.setModel(vehicle.getModel().getName());
         return response;
+    }
+
+    public VehicleBrandDto toResponse(VehicleBrand brand) {
+        return modelMapper.map(brand, VehicleBrandDto.class);
+    }
+
+    public VehicleModelDto toResponse(VehicleModel model) {
+        return modelMapper.map(model, VehicleModelDto.class);
     }
 
     public PagedResponse<VehicleResponseDto> toPagedResponse(Page<Vehicle> page) {

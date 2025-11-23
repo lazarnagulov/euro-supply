@@ -8,5 +8,4 @@ import lombok.Data;
 public class VehicleModelDto {
     private Long id;
     private String name;
-    private Long brandId;
 }

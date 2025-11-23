@@ -2,9 +2,7 @@ package com.nvt.eurosupply.vehicle.controllers;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
-import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
-import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
-import com.nvt.eurosupply.vehicle.dtos.VehicleSearchRequestDto;
+import com.nvt.eurosupply.vehicle.dtos.*;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

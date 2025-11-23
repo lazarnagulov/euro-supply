@@ -5,6 +5,7 @@ import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
+import com.nvt.eurosupply.vehicle.dtos.VehicleBrandDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
 import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
 import com.nvt.eurosupply.vehicle.models.Vehicle;
