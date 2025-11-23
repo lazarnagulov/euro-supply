@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CompanyForm } from '../components/CompanyForm';
 import {fixLeafletIcons} from "../../../config/map.config.ts";
-import type {Company} from "../../../types/company.types.ts";
+import type {Company} from "../types/company.types.ts";
 
 export const CompanyRegistrationPage: React.FC = () => {
     const navigate = useNavigate();

@@ -4,7 +4,7 @@ import type {
     CompanyWithFiles,
     RegisterCompanyRequest,
     ReviewCompanyRequest
-} from "../../types/company.types.ts";
+} from "../../features/company/types/company.types.ts";
 
 export const companyService = {
 

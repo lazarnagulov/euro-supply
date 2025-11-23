@@ -5,12 +5,14 @@ import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.dtos.ReviewCompanyRequestDto;
 import com.nvt.eurosupply.company.services.CompanyService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.models.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -69,6 +71,20 @@ public class CompanyController {
     public ResponseEntity<CompanyResponseDto> getCompany(@Valid @PathVariable Long id) {
         return ResponseEntity.ok(service.getCompany(id));
     }
+
+    @Operation(
+            summary = "Get pending companies",
+            description = "Returns the list of pending companies."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Company retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Company not found")
+    })
+    @GetMapping("/pending")
+    public ResponseEntity<PagedResponse<CompanyResponseDto>> getPendingCompanies(Pageable pageable) {
+        return ResponseEntity.ok(service.getPendingCompanies(pageable));
+    }
+
     @Operation(
             summary = "Review a company",
             description = "Updates the status of a company (e.g., APPROVED or REJECTED)."

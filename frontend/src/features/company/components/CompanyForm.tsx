@@ -4,7 +4,7 @@ import {useCompanyForm} from "../hooks/useCompanyForm.tsx";
 import type {LatLngTuple} from "leaflet";
 import {MapField} from "../../../components/map/MapField.tsx";
 import {useCompanySubmit} from "../hooks/useCompanySubmit.tsx";
-import type {Company} from "../../../types/company.types.ts";
+import type {Company} from "../types/company.types.ts";
 
 interface CompanyFormProps {
     onSuccess?: (company: Company) => void;
