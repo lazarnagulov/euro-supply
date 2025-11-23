@@ -1,3 +1,4 @@
+import type {City, Country} from "./location.types.ts";
 
 export enum CompanyStatus {
     PENDING = 'PENDING',
@@ -9,8 +10,8 @@ export interface Company {
     id: number;
     name: string;
     address: string;
-    city: string;
-    country: string;
+    city: City;
+    country: Country;
     latitude: number;
     longitude: number;
     status: CompanyStatus;

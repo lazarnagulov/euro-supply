@@ -1,9 +1,10 @@
-package com.nvt.eurosupply.company.controller;
+package com.nvt.eurosupply.company.controllers;
 
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.dtos.ReviewCompanyRequestDto;
 import com.nvt.eurosupply.company.services.CompanyService;
+import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -21,6 +22,8 @@ import java.util.List;
 @RequestMapping("/api/v1/companies")
 @RequiredArgsConstructor
 @Tag(name = "Companies", description = "Company management API")
+//TODO: Remove later
+@CrossOrigin
 public class CompanyController {
 
     private final CompanyService service;
@@ -32,6 +35,7 @@ public class CompanyController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Company created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "404", description = "Country or City does not exist"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
@@ -49,8 +53,8 @@ public class CompanyController {
             @ApiResponse(responseCode = "400", description = "Invalid file data")
     })
     @PostMapping("/{id}/files")
-    public ResponseEntity<Void> uploadFiles(@PathVariable Long id, @Valid @RequestBody List<MultipartFile> files) {
-        return null;
+    public ResponseEntity<List<FileResponseDto>> uploadFiles(@PathVariable Long id, @Valid @RequestBody List<MultipartFile> files) {
+        return ResponseEntity.ok(service.uploadFiles(id, files));
     }
 
     @Operation(
@@ -65,8 +69,6 @@ public class CompanyController {
     public ResponseEntity<CompanyResponseDto> getCompany(@Valid @PathVariable Long id) {
         return ResponseEntity.ok(service.getCompany(id));
     }
-
-
     @Operation(
             summary = "Review a company",
             description = "Updates the status of a company (e.g., APPROVED or REJECTED)."

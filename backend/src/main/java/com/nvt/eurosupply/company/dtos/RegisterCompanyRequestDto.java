@@ -1,16 +1,18 @@
 package com.nvt.eurosupply.company.dtos;
 
+import com.nvt.eurosupply.shared.dtos.CityDto;
+import com.nvt.eurosupply.shared.dtos.CountryDto;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class RegisterCompanyRequestDto {
 
@@ -22,12 +24,11 @@ public class RegisterCompanyRequestDto {
     @Size(min = 2, max = 50, message = "Address must be between 2 and 50 characters")
     private String address;
 
-    @NotNull(message = "City ID is required")
+    @NotNull(message = "CityId is required")
     private Long cityId;
 
-    @NotNull(message = "Country ID is required")
+    @NotNull(message = "CountryId is required")
     private Long countryId;
-
 
     @NotNull(message = "Latitude is required")
     private Double latitude;

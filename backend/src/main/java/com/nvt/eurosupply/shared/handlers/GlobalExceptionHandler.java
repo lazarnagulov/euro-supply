@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.shared.handlers;
 
+import com.nvt.eurosupply.shared.exceptions.FileUploadException;
 import com.nvt.eurosupply.shared.models.ExceptionResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +38,22 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .timestamp(Instant.now())
                 .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ExceptionResponse> handleFileUploadException(
+            EntityNotFoundException ex,
+            HttpServletRequest request) {
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .timestamp(Instant.now())
+                .build();
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
