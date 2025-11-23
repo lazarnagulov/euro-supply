@@ -77,8 +77,7 @@ public class CompanyController {
             description = "Returns the list of pending companies."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Company retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Company not found")
+            @ApiResponse(responseCode = "200", description = "Pending Companies retrieved successfully"),
     })
     @GetMapping("/pending")
     public ResponseEntity<PagedResponse<CompanyResponseDto>> getPendingCompanies(Pageable pageable) {

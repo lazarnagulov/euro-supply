@@ -82,6 +82,7 @@ public class FileService {
                 .filename(file.getFilename())
                 .storedName(file.getPath())
                 .contentType(file.getContentType())
+                .type(file.getType())
                 .url(generatePublicUrl(folder, entityId, file.getPath()))
                 .build();
     }

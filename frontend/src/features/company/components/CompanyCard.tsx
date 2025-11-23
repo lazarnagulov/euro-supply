@@ -1,15 +1,15 @@
-import {FileText, MapPin} from "lucide-react";
-import type {CompanyWithFiles} from "../types/company.types.ts";
+import {FileText, Image, MapPin, User} from "lucide-react";
+import type {CompanyResponse} from "../types/company.types.ts";
 import React, {type MouseEventHandler} from "react";
 
 interface CompanyCardProps {
-    company: CompanyWithFiles;
+    company: CompanyResponse;
     onReview: MouseEventHandler<HTMLButtonElement>
-};
+}
 
 const CompanyCard: React.FC<CompanyCardProps> = ({ company, onReview }) => {
-    const images = company.files.filter(f => f.type == "IMAGE");
-    const pdfs = company.files.filter(f => f.type == "PDF");
+    const images = company.files.filter(file => file.type === 'IMAGE');
+    const documents = company.files.filter(file => file.type === 'PDF');
 
     return (
         <div className="bg-white rounded-xl shadow hover:shadow-xl transition-shadow p-6">
@@ -29,19 +29,22 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onReview }) => {
                             <div className="space-y-1 text-sm text-gray-600">
                                 <p className="flex items-center gap-2">
                                     <MapPin className="w-4 h-4" />
-                                    {company.address}, {company.city.name}, {company.country.name}
+                                    {company.address}, {company.city}, {company.country}
                                 </p>
-                                {/*<p>Customer: {company.customer.name} ({company.customer.email})</p>*/}
-                                <p>Submitted: {new Date(company.createdAt).toLocaleDateString()}</p>
+                                <p className="flex items-center gap-2">
+                                    <User className="w-4 h-4" />
+                                    {company.owner.username} ({company.owner.email})
+                                </p>
                             </div>
 
                             <div className="flex gap-4 mt-3">
                                 <span className="inline-flex items-center gap-1 text-sm text-gray-600">
-                                  <img className="w-4 h-4" />
+                                  <Image className="w-4 h-4" />
                                     {images.length} images
                                 </span>
-                                    <span className="inline-flex items-center gap-1 text-sm text-gray-600">
-                                    <FileText className="w-4 h-4" /> { pdfs.length } documents
+                                <span className="inline-flex items-center gap-1 text-sm text-gray-600">
+                                  <FileText className="w-4 h-4" />
+                                    {documents.length} documents
                                 </span>
                             </div>
                         </div>
@@ -58,5 +61,4 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onReview }) => {
         </div>
     );
 };
-
 export default CompanyCard;

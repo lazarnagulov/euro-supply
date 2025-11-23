@@ -1,11 +1,12 @@
 import React, {useState} from "react";
-import {AlertCircle, Building2, CheckCircle, FileText, X, XCircle} from "lucide-react";
-import {type CompanyWithFiles, RequestStatus} from "../types/company.types.ts";
+import {AlertCircle, Building2, CheckCircle, FileText, Image, X, XCircle} from "lucide-react";
+import {type CompanyResponse, RequestStatus} from "../types/company.types.ts";
+import {companyService} from "../../../api/services/companyService.ts";
 
 interface CompanyReviewModelProps {
-    company: CompanyWithFiles;
-    onClose: any;
-    onSuccess: any;
+    company: CompanyResponse;
+    onClose: () => void;
+    onSuccess: () => void;
 }
 
 const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClose, onSuccess }) => {
@@ -33,7 +34,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
 
         setLoading(true);
         try {
-            // TODO: Send request
+            await companyService.updateStatus(company.id, { status: selectedStatus, rejectionReason: rejectionReason });
             onSuccess();
         } catch (err) {
             setError('Failed to submit review. Please try again.');
@@ -77,20 +78,20 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">City</p>
-                                <p className="font-semibold text-gray-800">{company.city.name}</p>
+                                <p className="font-semibold text-gray-800">{company.city}</p>
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">Country</p>
-                                <p className="font-semibold text-gray-800">{company.country.name}</p>
+                                <p className="font-semibold text-gray-800">{company.country}</p>
                             </div>
-                            {/*<div>*/}
-                            {/*    <p className="text-sm text-gray-600">Customer</p>*/}
-                            {/*    <p className="font-semibold text-gray-800">{company.customer.name}</p>*/}
-                            {/*</div>*/}
-                            {/*<div>*/}
-                            {/*    <p className="text-sm text-gray-600">Email</p>*/}
-                            {/*    <p className="font-semibold text-gray-800">{company.customer.email}</p>*/}
-                            {/*</div>*/}
+                            <div>
+                                <p className="text-sm text-gray-600">Customer</p>
+                                <p className="font-semibold text-gray-800">{company.owner.name}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Email</p>
+                                <p className="font-semibold text-gray-800">{company.owner.email}</p>
+                            </div>
                             <div className="col-span-2">
                                 <p className="text-sm text-gray-600">Location</p>
                                 <p className="font-semibold text-gray-800">
@@ -100,10 +101,9 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                         </div>
                     </section>
 
-                    {/* Company Images */}
                     <section>
                         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <img className="w-5 h-5 text-indigo-600" />
+                            <Image className="w-5 h-5 text-indigo-600" />
                             Company Images ({images.length})
                         </h3>
 
@@ -115,7 +115,6 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                             />
                         </div>
 
-                        {/* Image Thumbnails */}
                         <div className="grid grid-cols-4 gap-3">
                             {images.map((image, index) => (
                                 <button
