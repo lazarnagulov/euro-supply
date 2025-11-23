@@ -29,6 +29,7 @@ export const vehicleService = {
     },
 
     createVehicle: async (data: Vehicle, images: File[]) => {
+        console.log(data);
         const vehicleResponse = await apiClient.post<VehicleResponse>(
             '/api/v1/vehicles',
             data
@@ -46,8 +47,13 @@ export const vehicleService = {
         return vehicleResponse.data;
     },
 
-    // updateVehicle: async (id: number, data: Vehicle, images?: File[]) => {
-    // },
+    updateVehicle: async (id: number, data: Vehicle) => {
+        const vehicleResponse = await apiClient.put<VehicleResponse>(
+            `/api/v1/vehicles/${id}`,
+            data
+        );
+        return vehicleResponse.data
+    },
 
     deleteVehicle: async (id: number) => {
         await apiClient.delete(`/api/v1/vehicles/${id}`);

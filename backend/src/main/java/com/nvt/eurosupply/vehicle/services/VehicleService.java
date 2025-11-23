@@ -5,6 +5,7 @@ import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
+import com.nvt.eurosupply.vehicle.dtos.UpdateVehicleRequestDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
 import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
 import com.nvt.eurosupply.vehicle.models.Vehicle;
@@ -13,11 +14,14 @@ import com.nvt.eurosupply.vehicle.models.VehicleModel;
 import com.nvt.eurosupply.vehicle.repositories.VehicleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -66,5 +70,26 @@ public class VehicleService {
 
     public void deleteVehicle(Long id) {
         repository.delete(find(id));
+    }
+
+    public VehicleResponseDto updateVehicle(Long id, UpdateVehicleRequestDto request) {
+        Vehicle vehicle = find(id);
+
+        if(!Objects.equals(vehicle.getBrand().getId(), request.getBrandId())) {
+            VehicleBrand brand = brandService.findBrand(request.getBrandId());
+            vehicle.setBrand(brand);
+        }
+
+        if(!Objects.equals(vehicle.getModel().getId(), request.getModelId())) {
+            VehicleModel model = brandService.findModel(request.getModelId());
+            vehicle.setModel(model);
+        }
+
+        vehicle.setMaxLoadKg(request.getMaxLoadKg());
+        vehicle.setRegistrationNumber(request.getRegistrationNumber());
+        vehicle.setUpdatedAt(Instant.now());
+
+        // TODO: Update images once they are served with enginx
+        return mapper.toResponse(repository.save(vehicle));
     }
 }

@@ -69,8 +69,11 @@ public class VehicleController {
             @ApiResponse(responseCode = "400", description = "Invalid update data")
     })
     @PutMapping ("/{id}")
-    public ResponseEntity<VehicleResponseDto> updateVehicle(@PathVariable Long id) {
-        return null;
+    public ResponseEntity<VehicleResponseDto> updateVehicle(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateVehicleRequestDto request
+    ) {
+        return ResponseEntity.ok(service.updateVehicle(id, request));
     }
 
     @Operation(

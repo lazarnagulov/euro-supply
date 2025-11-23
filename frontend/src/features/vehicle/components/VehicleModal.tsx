@@ -19,14 +19,15 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
         handleSubmit,
         watch,
         setValue,
+        reset,
         formState: { errors },
     } = useForm({
         resolver: zodResolver(vehicleSchema),
         defaultValues: {
-            registrationPlate: vehicle?.registrationNumber || '',
-            maxLoadKg: vehicle?.maxLoadKg || '',
-            brandId: vehicle?.brand.id || '',
-            modelId: vehicle?.model.id || '',
+            registrationNumber: '',
+            maxLoadKg: '',
+            brandId: '',
+            modelId: '',
         },
         mode: 'onChange',
     });
@@ -42,8 +43,22 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
     const brandId = watch('brandId');
 
     useEffect(() => {
-        loadBrands();
-    }, []);
+        const initializeForm = async () => {
+            await loadBrands();
+
+            if (vehicle && mode === 'edit') {
+                await loadModels(vehicle.brand.id);
+                reset({
+                    registrationNumber: vehicle.registrationNumber,
+                    maxLoadKg: vehicle.maxLoadKg,
+                    brandId: vehicle.brand.id,
+                    modelId: vehicle.model.id,
+                });
+            }
+        };
+
+        initializeForm();
+    }, [vehicle, mode, reset]);
 
     useEffect(() => {
         if (brandId) {
@@ -109,7 +124,7 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
             if (mode === 'create') {
                 await vehicleService.createVehicle(data, images);
             } else {
-                // await vehicleService.updateVehicle(vehicle.id, data, images);
+                await vehicleService.updateVehicle(vehicle!.id, data);
             }
             setSubmitStatus('success');
             setTimeout(() => onSuccess(), 1000);
@@ -122,8 +137,8 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-gray-100 hover:scrollbar-thumb-indigo-500">
+                <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl z-10">
                     <div className="flex justify-between items-center">
                         <div>
                             <h2 className="text-2xl font-bold">
@@ -164,14 +179,14 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                             </label>
                             <input
                                 type="text"
-                                {...register('registrationPlate')}
+                                {...register('registrationNumber')}
                                 placeholder="e.g., BG-123-AB"
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                                    errors.registrationPlate ? 'border-red-500' : 'border-gray-300'
+                                    errors.registrationNumber ? 'border-red-500' : 'border-gray-300'
                                 }`}
                             />
-                            {errors.registrationPlate && (
-                                <p className="mt-1 text-sm text-red-600">{errors.registrationPlate.message}</p>
+                            {errors.registrationNumber && (
+                                <p className="mt-1 text-sm text-red-600">{errors.registrationNumber.message}</p>
                             )}
                         </div>
 
@@ -305,7 +320,7 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                     </div>
                 </div>
 
-                <div className="sticky bottom-0 bg-gray-50 p-6 border-t border-gray-200 rounded-b-2xl flex justify-end gap-4">
+                <div className="sticky bottom-0 bg-gray-50 p-6 border-t border-gray-200 rounded-b-2xl flex justify-end gap-4 z-10">
                     <button
                         onClick={onClose}
                         disabled={loading}

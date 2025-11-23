@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -35,4 +36,13 @@ public class Vehicle {
 
     @OneToMany
     private List<StoredFile> images;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+    private Instant updatedAt;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = Instant.now();
+    }
 }

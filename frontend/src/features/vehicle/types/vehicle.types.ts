@@ -1,5 +1,5 @@
 export interface Vehicle {
-    registrationPlate: string;
+    registrationNumber: string;
     maxLoadKg: number;
     brandId: number;
     modelId: number;

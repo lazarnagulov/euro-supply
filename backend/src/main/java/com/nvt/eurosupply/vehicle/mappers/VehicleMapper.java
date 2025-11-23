@@ -23,7 +23,7 @@ public class VehicleMapper {
     public Vehicle fromCreateRequest(CreateVehicleRequestDto request) {
         return Vehicle.builder()
                 .maxLoadKg(request.getMaxLoadKg())
-                .registrationNumber(request.getRegistrationPlate())
+                .registrationNumber(request.getRegistrationNumber())
                 .build();
     }
 

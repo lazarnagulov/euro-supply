@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UpdateVehicleRequestDto {
-    private String registrationPlate;
+    private String registrationNumber;
     private Double maxLoadKg;
     private Long brandId;
     private Long modelId;

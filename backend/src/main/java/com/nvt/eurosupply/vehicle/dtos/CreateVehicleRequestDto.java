@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateVehicleRequestDto {
 
-    @NotBlank(message = "Registration Plate is required")
-    private String registrationPlate;
+    @NotBlank(message = "Registration Number is required")
+    private String registrationNumber;
 
     @NotNull(message = "Max Load in kg is required")
     private Double maxLoadKg;

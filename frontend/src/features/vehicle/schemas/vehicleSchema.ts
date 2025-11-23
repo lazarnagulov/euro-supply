@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const vehicleSchema = z.object({
-    registrationPlate: z
+    registrationNumber: z
         .string()
         .min(1, 'Registration plate is required')
         .max(20, 'Registration plate must not exceed 20 characters')
