@@ -32,7 +32,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             <MapContainer
                 center={center}
                 zoom={zoom}
-                style={{ height, width: '100%' }}
+                style={{ height, width: '100%', zIndex: 1 }}
                 scrollWheelZoom={true}>
                 <TileLayer
                     url={MAP_DEFAULTS.tileLayerUrl}
