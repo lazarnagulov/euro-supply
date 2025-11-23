@@ -103,6 +103,6 @@ public class CompanyService {
     }
 
     public PagedResponse<CompanyResponseDto> getPendingCompanies(Pageable pageable) {
-        return null;
+        return mapper.toPagedResponse(repository.findByStatus(RequestStatus.PENDING, pageable));
     }
 }

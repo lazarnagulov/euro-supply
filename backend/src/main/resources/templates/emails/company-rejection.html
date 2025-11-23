@@ -177,7 +177,6 @@
 </head>
 <body>
 <div class="email-container">
-  <!-- Header -->
   <div class="header">
     <div class="header-icon">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2">
@@ -190,9 +189,8 @@
     <p>Action required on your company registration</p>
   </div>
 
-  <!-- Content -->
   <div class="content">
-    <span class="warning-badge">✕ Additional Review Required</span>
+    <span class="warning-badge">✕ Rejected</span>
 
     <p class="greeting">Dear <strong th:text="${customerName}">Customer</strong>,</p>
 
@@ -201,7 +199,6 @@
       we've identified some areas that need attention before we can approve your registration.
     </p>
 
-    <!-- Company Details -->
     <div class="info-card">
       <h2>Submitted Company Details</h2>
       <div class="info-row">
@@ -222,7 +219,6 @@
       </div>
     </div>
 
-    <!-- Rejection Reason -->
     <div class="reason-box">
       <h3>📋 Reason for Review</h3>
       <p th:text="${rejectionReason}">
@@ -231,7 +227,6 @@
       </p>
     </div>
 
-    <!-- Next Steps -->
     <div class="help-box">
       <h3>💡 Next Steps</h3>
       <p>
@@ -242,7 +237,7 @@
 
     <div style="text-align: center;">
       <a href="#" th:href="${resubmitUrl}" class="cta-button">
-        Submit New Registration →
+        <p>Submit New Registration → </p>
       </a>
     </div>
 
@@ -252,7 +247,6 @@
     </p>
   </div>
 
-  <!-- Footer -->
   <div class="footer">
     <p>
       <strong>EuroSupply</strong><br>

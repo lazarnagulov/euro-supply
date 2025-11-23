@@ -1,10 +1,10 @@
 import apiClient from '../client';
 import type {
-    Company,
-    CompanyWithFiles,
+    Company, CompanyResponse,
     RegisterCompanyRequest,
     ReviewCompanyRequest
 } from "../../features/company/types/company.types.ts";
+import type {PagedResponse} from "../../types/api.types.ts";
 
 export const companyService = {
 
@@ -26,19 +26,14 @@ export const companyService = {
         );
     },
 
-    getCompany: async (id: number): Promise<CompanyWithFiles> => {
-        const response = await apiClient.get<CompanyWithFiles>(`/api/v1/companies/${id}`);
+    getPendingCompanies: async (page: number, size: number) => {
+        const response = await apiClient.get<PagedResponse<CompanyResponse>>(
+            '/api/v1/companies/pending',
+            { params: { page, size } }
+        );
         return response.data;
     },
 
-    getCompanies: async (params?: {
-        page?: number;
-        pageSize?: number;
-        status?: string;
-    }): Promise<Company[]> => {
-        const response = await apiClient.get<Company[]>('/api/v1/companies', { params });
-        return response.data;
-    },
 
     updateStatus: async (
         id: number,
