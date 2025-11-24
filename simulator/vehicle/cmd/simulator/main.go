@@ -3,16 +3,17 @@ package main
 import (
 	"eurosupply/delivery-vehicle-simulator/internal/config"
 	"eurosupply/delivery-vehicle-simulator/internal/domain"
-	"flag"
 	"fmt"
+	"github.com/spf13/pflag"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
-	configPath := flag.String("config", "", "path to configuration file (YAML/JSON)")
-	flag.Parse()
+	config.RegisterFlags()
+	configPath := pflag.String("config", "", "Optional path to configuration file (YAML/JSON)")
+	pflag.Parse()
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {

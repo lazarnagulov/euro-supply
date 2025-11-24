@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/spf13/pflag"
 	"time"
 
 	"github.com/spf13/viper"
@@ -54,12 +55,14 @@ func Load(configPath string) (*Config, error) {
 	if configPath != "" {
 		v.SetConfigFile(configPath)
 		if err := v.ReadInConfig(); err != nil {
-			return nil, fmt.Errorf("failed to read config file: %w", err)
+			return nil, fmt.Errorf("failed to read config file '%s': %w", configPath, err)
 		}
 	}
 
 	v.SetEnvPrefix("VEHICLE")
 	v.AutomaticEnv()
+
+	bindFlags(v)
 
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {
@@ -93,4 +96,10 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("logging.level", "info")
 	v.SetDefault("logging.format", "console")
 	v.SetDefault("logging.output_path", "stdout")
+}
+
+func bindFlags(v *viper.Viper) {
+	if err := v.BindPFlags(pflag.CommandLine); err != nil {
+		panic(fmt.Errorf("failed to bind flags: %w", err))
+	}
 }
