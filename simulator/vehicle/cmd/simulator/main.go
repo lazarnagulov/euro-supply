@@ -30,6 +30,8 @@ func main() {
 		log.Fatal("failed to start simulator")
 	}
 
+	fmt.Printf("Simulator started with vehicle: %v\n", vehicle.RegistrationNumber)
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 

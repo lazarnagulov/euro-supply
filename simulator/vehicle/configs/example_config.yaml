@@ -1,0 +1,27 @@
+vehicle:
+  id: "VEH002"
+  registration_number: "NS-456-CD"
+  brand: "Volvo"
+  model: "FH16 750"
+  max_load_kg: 20000
+  initial_latitude: 44.8176   # Novi Sad
+  initial_longitude: 20.4567
+
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672/"
+  heartbeat_exchange: "vehicle.heartbeat"
+  location_exchange: "vehicle.location"
+  connection_timeout: "10s"
+  reconnect_delay: "5s"
+  max_reconnect_attempts: 10
+
+simulator:
+  heartbeat_interval: "30s"
+  reporting_interval: "10m"
+  min_speed: 5
+  max_speed: 85
+
+logging:
+  level: "info"
+  format: "console"
+  output_path: "stdout"

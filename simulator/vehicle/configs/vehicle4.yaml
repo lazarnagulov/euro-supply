@@ -1,0 +1,27 @@
+vehicle:
+  id: "VEH004"
+  registration_number: "NS-012-GH"
+  brand: "MAN"
+  model: "TGX 18.500"
+  max_load_kg: 18500
+  initial_latitude: 43.3209   # Niš
+  initial_longitude: 21.8958
+
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672/"
+  heartbeat_exchange: "vehicle.heartbeat"
+  location_exchange: "vehicle.location"
+  connection_timeout: "10s"
+  reconnect_delay: "5s"
+  max_reconnect_attempts: 10
+
+simulator:
+  heartbeat_interval: "30s"
+  reporting_interval: "10m"
+  min_speed: 0
+  max_speed: 90
+
+logging:
+  level: "info"
+  format: "console"
+  output_path: "stdout"
