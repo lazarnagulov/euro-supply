@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	config2 "eurosupply/simulator/internal/vehicle/config"
+	"eurosupply/simulator/internal/vehicle/config"
 	"eurosupply/simulator/internal/vehicle/domain"
 	"eurosupply/simulator/internal/vehicle/simulator"
 	"eurosupply/simulator/shared/messaging"
@@ -15,11 +15,11 @@ import (
 )
 
 func main() {
-	config2.RegisterFlags()
+	config.RegisterFlags()
 	configPath := pflag.String("config", "", "Optional path to configuration file (YAML/JSON)")
 	pflag.Parse()
 
-	cfg, err := config2.Load(*configPath)
+	cfg, err := config.Load(*configPath)
 	if err != nil {
 		fmt.Printf("Failed to load configuration: %v\n", err)
 		os.Exit(1)
