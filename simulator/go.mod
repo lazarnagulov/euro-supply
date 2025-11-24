@@ -1,4 +1,4 @@
-module eurosupply/delivery-vehicle-simulator
+module eurosupply/simulator
 
 go 1.24.0
 

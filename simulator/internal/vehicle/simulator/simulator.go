@@ -2,9 +2,9 @@ package simulator
 
 import (
 	"context"
-	"eurosupply/delivery-vehicle-simulator/internal/config"
-	"eurosupply/delivery-vehicle-simulator/internal/domain"
-	"eurosupply/delivery-vehicle-simulator/internal/messaging"
+	"eurosupply/simulator/internal/vehicle/config"
+	"eurosupply/simulator/internal/vehicle/domain"
+	"eurosupply/simulator/shared/messaging"
 	"fmt"
 	"sync"
 	"time"

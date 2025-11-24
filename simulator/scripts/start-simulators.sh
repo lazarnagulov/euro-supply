@@ -11,7 +11,7 @@ mkdir -p "$LOG_DIR"
 
 if [ ! -f "./vehicle-simulator" ]; then
     echo "Building simulator..."
-    go build -o vehicle-simulator ./cmd/simulator/main.go
+    go build -o vehicle-simulator ./cmd/vehicle-simulator/main.go
 fi
 
 start_vehicle() {

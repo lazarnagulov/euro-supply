@@ -3,7 +3,7 @@ package messaging
 import (
 	"context"
 	"encoding/json"
-	"eurosupply/delivery-vehicle-simulator/internal/domain"
+	"eurosupply/simulator/internal/vehicle/domain"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"time"

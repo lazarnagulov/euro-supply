@@ -2,7 +2,7 @@ package messaging
 
 import (
 	"context"
-	"eurosupply/delivery-vehicle-simulator/internal/domain"
+	"eurosupply/simulator/internal/vehicle/domain"
 )
 
 type Publisher interface {

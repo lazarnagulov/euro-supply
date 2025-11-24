@@ -3,7 +3,7 @@ package simulator
 // Reference: http://www.movable-type.co.uk/scripts/latlong.html
 
 import (
-	"eurosupply/delivery-vehicle-simulator/internal/domain"
+	"eurosupply/simulator/internal/vehicle/domain"
 	"math"
 	"math/rand"
 	"time"

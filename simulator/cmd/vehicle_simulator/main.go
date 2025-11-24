@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"eurosupply/delivery-vehicle-simulator/internal/config"
-	"eurosupply/delivery-vehicle-simulator/internal/domain"
-	"eurosupply/delivery-vehicle-simulator/internal/messaging"
-	"eurosupply/delivery-vehicle-simulator/internal/simulator"
+	config2 "eurosupply/simulator/internal/vehicle/config"
+	"eurosupply/simulator/internal/vehicle/domain"
+	"eurosupply/simulator/internal/vehicle/simulator"
+	"eurosupply/simulator/shared/messaging"
 	"fmt"
 	"github.com/spf13/pflag"
 	"log"
@@ -15,11 +15,11 @@ import (
 )
 
 func main() {
-	config.RegisterFlags()
+	config2.RegisterFlags()
 	configPath := pflag.String("config", "", "Optional path to configuration file (YAML/JSON)")
 	pflag.Parse()
 
-	cfg, err := config.Load(*configPath)
+	cfg, err := config2.Load(*configPath)
 	if err != nil {
 		fmt.Printf("Failed to load configuration: %v\n", err)
 		os.Exit(1)

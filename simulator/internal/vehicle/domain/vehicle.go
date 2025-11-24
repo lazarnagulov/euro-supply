@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"eurosupply/delivery-vehicle-simulator/internal/config"
+	"eurosupply/simulator/internal/vehicle/config"
 	"time"
 )
 
