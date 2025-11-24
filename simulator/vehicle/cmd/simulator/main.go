@@ -3,8 +3,10 @@ package main
 import (
 	"eurosupply/delivery-vehicle-simulator/internal/config"
 	"eurosupply/delivery-vehicle-simulator/internal/domain"
+	"eurosupply/delivery-vehicle-simulator/internal/simulator"
 	"fmt"
 	"github.com/spf13/pflag"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,10 +25,15 @@ func main() {
 
 	vehicle := domain.NewVehicle(cfg)
 
-	fmt.Println(vehicle)
+	sim := simulator.New(*vehicle, cfg.Simulator)
+	if err = sim.Start(); err != nil {
+		log.Fatal("failed to start simulator")
+	}
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	<-sigChan
+	sim.Stop()
+	sim.WaitForShutdown()
 }
