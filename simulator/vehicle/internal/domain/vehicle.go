@@ -45,14 +45,14 @@ func NewHeartbeatMessage(vehicleID string) HeartbeatMessage {
 	}
 }
 
-func NewLocationMessage(vehicleID string, lat, lon, distance float64) LocationMessage {
+func NewLocationMessage(vehicleID string, location Location, distance float64) LocationMessage {
 	return LocationMessage{
 		VehicleID:        vehicleID,
-		Latitude:         lat,
-		Longitude:        lon,
-		DistanceTraveled: distance,
 		Timestamp:        time.Now(),
 		Type:             "location",
+		Latitude:         location.Latitude,
+		Longitude:        location.Longitude,
+		DistanceTraveled: distance,
 	}
 }
 

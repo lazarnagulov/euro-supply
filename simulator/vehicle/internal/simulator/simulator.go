@@ -4,7 +4,8 @@ import (
 	"context"
 	"eurosupply/delivery-vehicle-simulator/internal/config"
 	"eurosupply/delivery-vehicle-simulator/internal/domain"
-	"log"
+	"eurosupply/delivery-vehicle-simulator/internal/messaging"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -18,15 +19,17 @@ type Simulator struct {
 	ctx              context.Context
 	cancel           context.CancelFunc
 	wg               sync.WaitGroup
+	publisher        messaging.Publisher
 	shutdownComplete chan struct{}
 }
 
-func New(vehicle domain.Vehicle, cfg config.SimulatorConfig) *Simulator {
+func New(vehicle domain.Vehicle, publisher messaging.Publisher, cfg config.SimulatorConfig) *Simulator {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &Simulator{
 		vehicle:          vehicle,
 		config:           cfg,
+		publisher:        publisher,
 		movement:         NewMovementSimulator(cfg.MinSpeed, cfg.MaxSpeed),
 		ctx:              ctx,
 		cancel:           cancel,
@@ -72,9 +75,41 @@ func (s *Simulator) heartbeatLoop() {
 			return
 
 		case <-s.heartbeatTicker.C:
-			log.Print("Sending heartbeat")
+			if err := s.sendHeartbeat(); err != nil {
+				fmt.Println("failed to send heartbeat")
+			}
 		}
 	}
+}
+
+func (s *Simulator) sendHeartbeat() error {
+	msg := domain.NewHeartbeatMessage(s.vehicle.ID)
+
+	ctx, cancel := context.WithTimeout(s.ctx, 5*time.Second)
+	defer cancel()
+
+	if err := s.publisher.PublishHeartbeat(ctx, msg); err != nil {
+		return fmt.Errorf("failed to publish heartbeat: %w", err)
+	}
+
+	fmt.Printf("heartbeat sent %v\n", msg)
+	return nil
+}
+
+func (s *Simulator) sendLocation() error {
+	intervalMinutes := s.config.ReportingInterval.Minutes()
+	newLocation, distance := s.movement.SimulateMovement(s.vehicle.Location, intervalMinutes)
+	msg := domain.NewLocationMessage(s.vehicle.ID, newLocation, distance)
+
+	ctx, cancel := context.WithTimeout(s.ctx, 5*time.Second)
+	defer cancel()
+
+	if err := s.publisher.PublishLocation(ctx, msg); err != nil {
+		return fmt.Errorf("failed to publish heartbeat: %w", err)
+	}
+
+	fmt.Printf("location sent %v\n", msg)
+	return nil
 }
 
 func (s *Simulator) locationLoop() {
@@ -85,9 +120,9 @@ func (s *Simulator) locationLoop() {
 			return
 
 		case <-s.locationTicker.C:
-			intervalMinutes := s.config.ReportingInterval.Minutes()
-			newLocation, distance := s.movement.SimulateMovement(s.vehicle.Location, intervalMinutes)
-			log.Printf("Sending location:  %v dist: %fd", newLocation, distance)
+			if err := s.sendLocation(); err != nil {
+				fmt.Println("failed to send location")
+			}
 		}
 	}
 }
