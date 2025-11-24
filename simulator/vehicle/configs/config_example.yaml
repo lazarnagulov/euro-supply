@@ -1,0 +1,27 @@
+vehicle:
+  id: "VEH001"
+  license_plate: "BG-123-AB"
+  brand: "Mercedes-Benz"
+  model: "Actros 1851"
+  weight_limit: 18000
+  initial_latitude: 45.2671   # Novi Sad
+  initial_longitude: 19.8335
+
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672/"
+  heartbeat_exchange: "vehicle.heartbeat"
+  location_exchange: "vehicle.location"
+  connection_timeout: "10s"
+  reconnect_delay: "5s"
+  max_reconnect_attempts: 10
+
+simulator:
+  heartbeat_interval: "30s"
+  reporting_interval: "10m"
+  min_speed: 0      # km/h
+  max_speed: 90     # km/h
+
+logging:
+  level: "info"      # debug, info, warn, error
+  format: "console"  # console or json
+  output_path: "stdout"
