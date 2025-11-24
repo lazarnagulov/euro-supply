@@ -6,7 +6,7 @@ import (
 )
 
 type Vehicle struct {
-	ID                 string
+	ID                 int64
 	RegistrationNumber string
 	Brand              string
 	Model              string
@@ -21,14 +21,14 @@ type Location struct {
 }
 
 type HeartbeatMessage struct {
-	VehicleID string    `json:"vehicle_id"`
+	VehicleID int64     `json:"vehicle_id"`
 	Timestamp time.Time `json:"timestamp"`
 	Status    string    `json:"status"`
 	Type      string    `json:"type"`
 }
 
 type LocationMessage struct {
-	VehicleID        string    `json:"vehicle_id"`
+	VehicleID        int64     `json:"vehicle_id"`
 	Latitude         float64   `json:"latitude"`
 	Longitude        float64   `json:"longitude"`
 	DistanceTraveled float64   `json:"distance_traveled"`
@@ -36,7 +36,7 @@ type LocationMessage struct {
 	Type             string    `json:"type"`
 }
 
-func NewHeartbeatMessage(vehicleID string) HeartbeatMessage {
+func NewHeartbeatMessage(vehicleID int64) HeartbeatMessage {
 	return HeartbeatMessage{
 		VehicleID: vehicleID,
 		Timestamp: time.Now(),
@@ -45,7 +45,7 @@ func NewHeartbeatMessage(vehicleID string) HeartbeatMessage {
 	}
 }
 
-func NewLocationMessage(vehicleID string, location Location, distance float64) LocationMessage {
+func NewLocationMessage(vehicleID int64, location Location, distance float64) LocationMessage {
 	return LocationMessage{
 		VehicleID:        vehicleID,
 		Timestamp:        time.Now(),

@@ -1,5 +1,5 @@
 vehicle:
-  id: "VEH002"
+  id: 2
   registration_number: "NS-456-CD"
   brand: "Volvo"
   model: "FH16 750"

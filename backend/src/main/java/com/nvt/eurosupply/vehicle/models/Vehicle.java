@@ -34,6 +34,10 @@ public class Vehicle {
     @ManyToOne(optional = false)
     private VehicleModel model;
 
+    private Boolean isOnline = false;
+
+    private Instant lastHeartbeat;
+
     @OneToMany
     private List<StoredFile> images;
 

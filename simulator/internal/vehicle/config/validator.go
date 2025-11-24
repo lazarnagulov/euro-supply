@@ -13,7 +13,7 @@ func Validate(cfg *Config) error {
 		return fmt.Errorf("configuration validation failed: %w", err)
 	}
 
-	if cfg.Vehicle.ID == "" {
+	if cfg.Vehicle.ID < 1 {
 		return fmt.Errorf("vehicle.id is required")
 	}
 

@@ -1,5 +1,5 @@
 vehicle:
-  id: "VEH002"
+  id: 5
   registration_number: "NS-456-CD"
   brand: "Volvo"
   model: "FH16 750"
@@ -16,8 +16,8 @@ rabbitmq:
   max_reconnect_attempts: 10
 
 simulator:
-  heartbeat_interval: "30s"
-  reporting_interval: "10m"
+  heartbeat_interval: "3s"
+  reporting_interval: "10s"
   min_speed: 5
   max_speed: 85
 

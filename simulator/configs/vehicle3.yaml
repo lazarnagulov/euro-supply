@@ -1,5 +1,5 @@
 vehicle:
-  id: "VEH003"
+  id: 3
   registration_number: "BG-789-EF"
   brand: "Scania"
   model: "R450"

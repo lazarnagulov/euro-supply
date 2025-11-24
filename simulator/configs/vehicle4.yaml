@@ -1,5 +1,5 @@
 vehicle:
-  id: "VEH004"
+  id: 4
   registration_number: "NS-012-GH"
   brand: "MAN"
   model: "TGX 18.500"

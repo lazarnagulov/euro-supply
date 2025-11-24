@@ -22,7 +22,7 @@ func (p *RabbitMqPublisher) PublishHeartbeat(ctx context.Context, msg domain.Hea
 		return fmt.Errorf("failed to marshal heartbeat: %w", err)
 	}
 
-	routingKey := fmt.Sprintf("vehicle.%s.heartbeat", msg.VehicleID)
+	routingKey := fmt.Sprintf("vehicle.%d.heartbeat", msg.VehicleID)
 	p.client.mu.RLock()
 	defer p.client.mu.RUnlock()
 
@@ -57,7 +57,7 @@ func (p *RabbitMqPublisher) PublishLocation(ctx context.Context, msg domain.Loca
 		return fmt.Errorf("failed to marshal location: %w", err)
 	}
 
-	routingKey := fmt.Sprintf("vehicle.%s.location", msg.VehicleID)
+	routingKey := fmt.Sprintf("vehicle.%d.location", msg.VehicleID)
 	p.client.mu.RLock()
 	defer p.client.mu.RUnlock()
 

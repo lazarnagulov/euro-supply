@@ -16,7 +16,7 @@ type Config struct {
 }
 
 type VehicleConfig struct {
-	ID                 string  `mapstructure:"id" validate:"required"`
+	ID                 int64   `mapstructure:"id" validate:"required"`
 	RegistrationNumber string  `mapstructure:"registration_number" validate:"required"`
 	Brand              string  `mapstructure:"brand"`
 	Model              string  `mapstructure:"model"`
