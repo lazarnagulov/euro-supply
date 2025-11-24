@@ -1,9 +1,9 @@
 vehicle:
   id: "VEH001"
-  license_plate: "BG-123-AB"
+  registration_number: "BG-123-AB"
   brand: "Mercedes-Benz"
   model: "Actros 1851"
-  weight_limit: 18000
+  max_load_kg: 18000
   initial_latitude: 45.2671   # Novi Sad
   initial_longitude: 19.8335
 

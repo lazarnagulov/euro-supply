@@ -1,13 +1,16 @@
 package domain
 
-import "time"
+import (
+	"eurosupply/delivery-vehicle-simulator/internal/config"
+	"time"
+)
 
 type Vehicle struct {
 	ID                 string
 	RegistrationNumber string
 	Brand              string
 	Model              string
-	WeightLimit        float64
+	MaxWeightKg        float64
 	Location           Location
 }
 
@@ -50,5 +53,20 @@ func NewLocationMessage(vehicleID string, lat, lon, distance float64) LocationMe
 		DistanceTraveled: distance,
 		Timestamp:        time.Now(),
 		Type:             "location",
+	}
+}
+
+func NewVehicle(cfg *config.Config) *Vehicle {
+	return &Vehicle{
+		ID:                 cfg.Vehicle.ID,
+		RegistrationNumber: cfg.Vehicle.RegistrationNumber,
+		Brand:              cfg.Vehicle.Brand,
+		Model:              cfg.Vehicle.Model,
+		MaxWeightKg:        cfg.Vehicle.MaxLoadKg,
+		Location: Location{
+			Latitude:  cfg.Vehicle.InitialLat,
+			Longitude: cfg.Vehicle.InitialLon,
+			UpdatedAt: time.Now(),
+		},
 	}
 }
