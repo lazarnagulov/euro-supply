@@ -98,6 +98,7 @@ func (s *Simulator) sendHeartbeat() error {
 func (s *Simulator) sendLocation() error {
 	intervalMinutes := s.config.ReportingInterval.Minutes()
 	newLocation, distance := s.movement.SimulateMovement(s.vehicle.Location, intervalMinutes)
+	s.vehicle.Location = newLocation
 	msg := domain.NewLocationMessage(s.vehicle.ID, newLocation, distance)
 
 	ctx, cancel := context.WithTimeout(s.ctx, 5*time.Second)
