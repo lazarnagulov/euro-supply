@@ -5,15 +5,12 @@ import (
 	"eurosupply/simulator/internal/vehicle/config"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"sync"
-	"time"
 )
 
 type RabbitMQClient struct {
 	config    config.RabbitMQConfig
 	conn      *amqp.Connection
 	channel   *amqp.Channel
-	mu        sync.RWMutex
 	connected bool
 	closed    bool
 }
@@ -25,10 +22,7 @@ func NewRabbitMQClient(cfg config.RabbitMQConfig) *RabbitMQClient {
 }
 
 func (r *RabbitMQClient) Connect(ctx context.Context) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	if r.connected {
+	if r.IsConnected() {
 		return nil
 	}
 
@@ -62,7 +56,6 @@ func (r *RabbitMQClient) Connect(ctx context.Context) error {
 	r.channel = channel
 	r.connected = true
 
-	go r.monitorConnection()
 	return nil
 }
 
@@ -97,44 +90,7 @@ func (r *RabbitMQClient) declareExchanges(channel *amqp.Channel) error {
 	return nil
 }
 
-func (r *RabbitMQClient) monitorConnection() {
-	notifyClose := make(chan *amqp.Error)
-	r.conn.NotifyClose(notifyClose)
-
-	err := <-notifyClose
-	if err != nil {
-		r.mu.Lock()
-		r.connected = false
-		r.mu.Unlock()
-
-		if !r.closed {
-			r.reconnect()
-		}
-	}
-}
-
-func (r *RabbitMQClient) reconnect() {
-	attempt := 0
-	maxAttempts := r.config.MaxReconnectAttempt
-
-	for attempt < maxAttempts && !r.closed {
-		attempt++
-		time.Sleep(r.config.ReconnectDelay)
-
-		ctx, cancel := context.WithTimeout(context.Background(), r.config.ConnectionTimeout)
-		err := r.Connect(ctx)
-		cancel()
-
-		if err == nil {
-			return
-		}
-	}
-}
-
 func (r *RabbitMQClient) Close() error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	r.closed = true
 
 	if r.channel != nil {

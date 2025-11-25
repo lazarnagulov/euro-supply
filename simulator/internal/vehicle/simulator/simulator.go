@@ -92,7 +92,6 @@ func (s *Simulator) sendHeartbeat() error {
 		return fmt.Errorf("failed to publish heartbeat: %w", err)
 	}
 
-	fmt.Printf("heartbeat sent %v\n", msg)
 	return nil
 }
 
@@ -108,7 +107,6 @@ func (s *Simulator) sendLocation() error {
 		return fmt.Errorf("failed to publish heartbeat: %w", err)
 	}
 
-	fmt.Printf("location sent %v\n", msg)
 	return nil
 }
 

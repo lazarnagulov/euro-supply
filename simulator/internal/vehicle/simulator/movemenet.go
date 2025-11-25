@@ -10,8 +10,8 @@ import (
 )
 
 type MovementSimulator struct {
-	minSpeed float64 // km/h
-	maxSpeed float64 // km/h
+	minSpeed float64
+	maxSpeed float64
 	rng      *rand.Rand
 }
 
@@ -41,7 +41,7 @@ func (m *MovementSimulator) SimulateMovement(currentLoc domain.Location, interva
 }
 
 func CalculateDistance(lat1, lon1, lat2, lon2 float64) float64 {
-	const earthRadius = 6371.0 // km
+	const earthRadius = 6371.0
 
 	lat1Rad := lat1 * math.Pi / 180.0
 	lat2Rad := lat2 * math.Pi / 180.0

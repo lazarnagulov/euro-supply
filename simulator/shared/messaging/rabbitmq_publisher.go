@@ -23,8 +23,6 @@ func (p *RabbitMqPublisher) PublishHeartbeat(ctx context.Context, msg domain.Hea
 	}
 
 	routingKey := fmt.Sprintf("vehicle.%d.heartbeat", msg.VehicleID)
-	p.client.mu.RLock()
-	defer p.client.mu.RUnlock()
 
 	err = p.client.channel.PublishWithContext(
 		ctx,
@@ -44,6 +42,7 @@ func (p *RabbitMqPublisher) PublishHeartbeat(ctx context.Context, msg domain.Hea
 		return fmt.Errorf("failed to publish heartbeat: %w", err)
 	}
 
+	fmt.Printf("[%v] %d Published: %v\n", msg.Timestamp, msg.VehicleID, msg.Status)
 	return nil
 }
 
@@ -58,8 +57,6 @@ func (p *RabbitMqPublisher) PublishLocation(ctx context.Context, msg domain.Loca
 	}
 
 	routingKey := fmt.Sprintf("vehicle.%d.location", msg.VehicleID)
-	p.client.mu.RLock()
-	defer p.client.mu.RUnlock()
 
 	err = p.client.channel.PublishWithContext(
 		ctx,
@@ -79,6 +76,7 @@ func (p *RabbitMqPublisher) PublishLocation(ctx context.Context, msg domain.Loca
 		return fmt.Errorf("failed to publish heartbeat: %w", err)
 	}
 
+	fmt.Printf("[%v] %d Published: (Lat: %f Lon: %f Distance: %f)\n", msg.Timestamp, msg.VehicleID, msg.Latitude, msg.Longitude, msg.DistanceTraveled)
 	return nil
 }
 
