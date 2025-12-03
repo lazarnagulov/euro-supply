@@ -40,6 +40,9 @@ public class Vehicle {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
     private Instant updatedAt;
+    
+    @Version
+    private Long version;
 
     @PrePersist
     public void onCreate() {
