@@ -66,6 +66,7 @@ public class VehicleController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Vehicle updated successfully"),
             @ApiResponse(responseCode = "404", description = "Vehicle not found"),
+            @ApiResponse(responseCode = "409", description = "The resource was modified by another user"),
             @ApiResponse(responseCode = "400", description = "Invalid update data")
     })
     @PutMapping ("/{id}")
