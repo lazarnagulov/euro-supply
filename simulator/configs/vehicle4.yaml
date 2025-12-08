@@ -1,8 +1,8 @@
 vehicle:
   id: 4
   registration_number: "NS-012-GH"
-  brand: "MAN"
-  model: "TGX 18.500"
+  brand: "Ford"
+  model: "Mustang"
   max_load_kg: 18500
   initial_latitude: 43.3209   # Niš
   initial_longitude: 21.8958
@@ -16,8 +16,8 @@ rabbitmq:
   max_reconnect_attempts: 10
 
 simulator:
-  heartbeat_interval: "30s"
-  reporting_interval: "10m"
+  heartbeat_interval: "3s"
+  reporting_interval: "10s"
   min_speed: 0
   max_speed: 90
 

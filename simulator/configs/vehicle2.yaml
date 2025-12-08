@@ -2,7 +2,7 @@ vehicle:
   id: 2
   registration_number: "NS-456-CD"
   brand: "Volvo"
-  model: "FH16 750"
+  model: "S60"
   max_load_kg: 20000
   initial_latitude: 44.7866   # Novi Sad
   initial_longitude: 20.4489
@@ -16,8 +16,8 @@ rabbitmq:
   max_reconnect_attempts: 10
 
 simulator:
-  heartbeat_interval: "30s"
-  reporting_interval: "10m"
+  heartbeat_interval: "3s"
+  reporting_interval: "10s"
   min_speed: 0
   max_speed: 90
 

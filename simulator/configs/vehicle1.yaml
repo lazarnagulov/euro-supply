@@ -2,7 +2,7 @@ vehicle:
   id: 1
   registration_number: "BG-123-AB"
   brand: "Mercedes-Benz"
-  model: "Actros 1851"
+  model: "E-class"
   max_load_kg: 18000
   initial_latitude: 45.2671   # Novi Sad
   initial_longitude: 19.8335
@@ -16,8 +16,8 @@ rabbitmq:
   max_reconnect_attempts: 10
 
 simulator:
-  heartbeat_interval: "30s"
-  reporting_interval: "10m"
+  heartbeat_interval: "3s"
+  reporting_interval: "10s"
   min_speed: 0      # km/h
   max_speed: 90     # km/h
 
