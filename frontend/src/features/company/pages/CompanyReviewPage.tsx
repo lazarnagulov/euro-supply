@@ -4,7 +4,7 @@ import CompanyReviewModal from "../components/CompanyReviewModal.tsx";
 import CompanyCard from "../components/CompanyCard.tsx";
 import type {CompanyResponse} from "../types/company.types.ts";
 import {companyService} from "../../../api/services/companyService.ts";
-import Pagination from "../../../components/pagination/Pagination.tsx";
+import Pagination from "../../../components/common/Pagination.tsx";
 
 const CompanyReviewPage: React.FC = () => {
     const [companies, setCompanies] = useState<CompanyResponse[]>([]);

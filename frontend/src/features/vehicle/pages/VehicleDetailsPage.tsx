@@ -4,6 +4,7 @@ import {
     MapPin,
     Calendar,
     Car,
+    ChartBar
 } from "lucide-react";
 import {
     LineChart,
@@ -23,14 +24,7 @@ import type {
     VehicleResponse,
 } from "../types/vehicle.types";
 import {vehicleService} from "../../../api/services/vehicleService.ts";
-
-const PREDEFINED_PERIODS: { label: string; value: DistanceAggregation }[] = [
-    { label: "Last 7 days", value: "7d" },
-    { label: "Last month", value: "30d" },
-    { label: "Last 3 months", value: "90d" },
-    { label: "Last 6 months", value: "180d" },
-    { label: "Last year", value: "365d" },
-];
+import {PeriodSelector} from "../../../components/common/PeriodSelector.tsx";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
@@ -38,11 +32,19 @@ const VehicleDetailsPage: React.FC = () => {
 
     const [vehicle, setVehicle] = useState<VehicleResponse | null>(null);
     const [distanceData, _setDistanceData] = useState<DistancePoint[]>([]);
-    const [selectedPeriod, setSelectedPeriod] = useState<DistanceAggregation | null>("7d");
+    const [availabilityData, _setAvailablityData] = useState<any>([]);
     const [loading, setLoading] = useState(true);
-    const [useCustomRange, setUseCustomRange] = useState(false);
-    const [customFrom, setCustomFrom] = useState("");
-    const [customTo, setCustomTo] = useState("");
+
+    const [selectedTraveledPeriod, setSelectedTraveledPeriod] = useState<DistanceAggregation | null>("7d");
+    const [useCustomTraveledRange, setUseCustomTraveledRange] = useState(false);
+    const [customTraveledFrom, setCustomTraveledFrom] = useState("");
+    const [customTraveledTo, setCustomTraveledTo] = useState("");
+
+    const [selectedAvailablityPeriod, setSelectedAvailablityPeriod] = useState<DistanceAggregation | null>("7d");
+    const [useCustomAvailablityRange, setUseCustomAvailablityRange] = useState(false);
+    const [customAvailablityFrom, setCustomAvailablityFrom] = useState("");
+    const [customAvailablityTo, setCustomAvailablityTo] = useState("");
+
 
     useEffect(() => {
         if (!vehicleId) return;
@@ -64,12 +66,26 @@ const VehicleDetailsPage: React.FC = () => {
         loadDetails();
     }, [vehicleId]);
 
-    const loadPeriod = async (period: DistanceAggregation) => {
+    const loadTraveledPeriod = async (period: DistanceAggregation) => {
         if (!vehicleId) return;
         try {
             setLoading(true);
-            setUseCustomRange(false);
-            setSelectedPeriod(period);
+            setUseCustomTraveledRange(false);
+            setSelectedTraveledPeriod(period);
+
+            // const distance = await vehicleService.getDistance(vehicleId, period);
+            // setDistanceData(distance);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadAvailabilityPeriod = async (period: DistanceAggregation) => {
+        if (!vehicleId) return;
+        try {
+            setLoading(true);
+            setUseCustomAvailablityRange(false);
+            setSelectedAvailablityPeriod(period);
 
             // const distance = await vehicleService.getDistance(vehicleId, period);
             // setDistanceData(distance);
@@ -79,15 +95,14 @@ const VehicleDetailsPage: React.FC = () => {
     };
 
     const applyCustomRange = async () => {
-        if (!customFrom || !customTo || !vehicleId) return;
+        if (!customTraveledFrom || !customTraveledTo || !vehicleId) return;
 
-        const from = new Date(customFrom);
-        const to = new Date(customTo);
+        const from = new Date(customTraveledFrom);
+        const to = new Date(customTraveledTo);
 
         const diffDays = (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24);
 
         if (diffDays > 365) {
-            alert("Date range cannot exceed 1 year.");
             return;
         }
 
@@ -260,63 +275,22 @@ const VehicleDetailsPage: React.FC = () => {
                     <Calendar size={18}/> Total distance travelled
                 </h2>
 
-                <div className="flex flex-wrap gap-3">
-                    {PREDEFINED_PERIODS.map((p) => (
-                        <button
-                            key={p.value}
-                            onClick={() => loadPeriod(p.value)}
-                            className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                                selectedPeriod === p.value
-                                    ? "bg-blue-600 text-white border-2 border-blue-700"
-                                    : "bg-gray-100 text-black hover:bg-gray-200"
-                            }`}
-                        >
-                            {p.label}
-                        </button>
-                    ))}
+                <PeriodSelector
+                    selectedPeriod={selectedTraveledPeriod}
+                    onSelectPeriod={loadTraveledPeriod}
 
-                    <button
-                        className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                            useCustomRange
-                                ? "bg-blue-600 text-white border-2 border-blue-700"
-                                : "bg-gray-100 text-black hover:bg-gray-200"
-                        }`}
-                        onClick={() => {setUseCustomRange(!useCustomRange); setSelectedPeriod(null) }}
-                    >
-                        Custom range
-                    </button>
-                </div>
+                    useCustomRange={useCustomTraveledRange}
+                    onToggleCustomRange={() => {
+                        setUseCustomTraveledRange(!useCustomTraveledRange);
+                        setSelectedTraveledPeriod(null);
+                    }}
 
-                {useCustomRange && (
-                    <div className="flex items-end gap-4 mt-4">
-                        <div className="flex flex-col">
-                            <label className="text-sm">From</label>
-                            <input
-                                type="date"
-                                className="border rounded-xl px-3 py-2"
-                                value={customFrom}
-                                onChange={(e) => setCustomFrom(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="flex flex-col">
-                            <label className="text-sm">To</label>
-                            <input
-                                type="date"
-                                className="border rounded-xl px-3 py-2"
-                                value={customTo}
-                                onChange={(e) => setCustomTo(e.target.value)}
-                            />
-                        </div>
-
-                        <button
-                            className="px-4 py-2 bg-blue-600 text-white rounded-xl"
-                            onClick={applyCustomRange}
-                        >
-                            Apply
-                        </button>
-                    </div>
-                )}
+                    customFrom={customTraveledFrom}
+                    customTo={customTraveledTo}
+                    onCustomFromChange={setCustomTraveledFrom}
+                    onCustomToChange={setCustomTraveledTo}
+                    onApplyCustomRange={applyCustomRange}
+                />
             </div>
 
             <div className="bg-white rounded-2xl shadow p-6 space-y-4">
@@ -325,6 +299,45 @@ const VehicleDetailsPage: React.FC = () => {
                 <div className="w-full h-72">
                     <ResponsiveContainer>
                         <LineChart data={distanceData}>
+                            <CartesianGrid strokeDasharray="3 3"/>
+                            <XAxis dataKey="label"/>
+                            <YAxis/>
+                            <Tooltip/>
+                            <Line type="monotone" dataKey="distance" stroke="#2563eb" strokeWidth={3}/>
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow p-6 space-y-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <ChartBar  size={18}/> Availability
+                </h2>
+
+                <PeriodSelector
+                    selectedPeriod={selectedAvailablityPeriod}
+                    onSelectPeriod={loadAvailabilityPeriod}
+
+                    useCustomRange={useCustomAvailablityRange}
+                    onToggleCustomRange={() => {
+                        setUseCustomAvailablityRange(!useCustomAvailablityRange);
+                        setSelectedAvailablityPeriod(null);
+                    }}
+
+                    customFrom={customAvailablityFrom}
+                    customTo={customAvailablityTo}
+                    onCustomFromChange={setCustomAvailablityFrom}
+                    onCustomToChange={setCustomAvailablityTo}
+                    onApplyCustomRange={applyCustomRange}
+                />
+            </div>
+
+            <div className="bg-white rounded-2xl shadow p-6 space-y-4">
+                <h3 className="font-semibold">Availability Chart</h3>
+
+                <div className="w-full h-72">
+                    <ResponsiveContainer>
+                        <LineChart data={availabilityData}>
                             <CartesianGrid strokeDasharray="3 3"/>
                             <XAxis dataKey="label"/>
                             <YAxis/>
