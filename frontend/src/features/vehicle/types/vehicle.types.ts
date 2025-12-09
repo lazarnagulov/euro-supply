@@ -1,3 +1,5 @@
+import type {MapLocation} from "../../../types/location.types.ts";
+
 export interface Vehicle {
     registrationNumber: string;
     maxLoadKg: number;
@@ -22,6 +24,7 @@ export interface VehicleResponse {
     brand: VehicleBrand;
     model: VehicleModel;
     imageUrls: string[];
+    lastLocation?: MapLocation;
 }
 
 export interface VehicleSearchParams {
@@ -32,3 +35,9 @@ export interface VehicleSearchParams {
     maxLoad?: number;
 }
 
+export type DistanceAggregation = "7d" | "30d" | "90d" | "180d" | "365d";
+
+export interface DistancePoint {
+    label: string;       // e.g. "2025-02-10" OR "Week 3" OR "Feb 2025"
+    distance: number;    // meters or km
+}

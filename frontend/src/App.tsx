@@ -4,6 +4,7 @@ import {CompanyRegistrationPage} from "./features/company/pages/CompanyRegistrat
 import CompanyReviewPage from "./features/company/pages/CompanyReviewPage.tsx";
 import NavigationHeader from "./components/layout/NavigationHeader.tsx";
 import VehicleManagementPage from "./features/vehicle/pages/VehicleManagementPage.tsx";
+import VehicleDetailsPage from "./features/vehicle/pages/VehicleDetailsPage.tsx";
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
               <Route path="/company-registration" element={<CompanyRegistrationPage/>}/>
               <Route path="/company-review" element={<CompanyReviewPage/>}/>
               <Route path="/vehicle-management" element={<VehicleManagementPage/>}/>
+              <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
           </Routes>
       </>
   )

@@ -68,7 +68,7 @@ public class FileService {
             return storedFileRepository.save(stored);
 
         } catch (Exception e) {
-            throw new FileUploadException("Failed to upload file");
+            throw new FileUploadException("Failed to upload file: " + e.getMessage());
         }
     }
 
