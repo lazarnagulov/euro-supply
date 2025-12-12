@@ -25,14 +25,15 @@ import type {
 } from "../types/vehicle.types";
 import {vehicleService} from "../../../api/services/vehicleService.ts";
 import {PeriodSelector} from "../../../components/common/PeriodSelector.tsx";
+import {calculateStartDate} from "../../../utils/dateUtils.ts";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
     const navigate = useNavigate();
 
     const [vehicle, setVehicle] = useState<VehicleResponse | null>(null);
-    const [distanceData, _setDistanceData] = useState<DistancePoint[]>([]);
-    const [availabilityData, _setAvailablityData] = useState<any>([]);
+    const [distanceData, setDistanceData] = useState<DistancePoint[]>([]);
+    const [availabilityData, _setAvailabilityData] = useState<any>([]);
     const [loading, setLoading] = useState(true);
 
     const [selectedTraveledPeriod, setSelectedTraveledPeriod] = useState<DistanceAggregation | null>("7d");
@@ -40,10 +41,10 @@ const VehicleDetailsPage: React.FC = () => {
     const [customTraveledFrom, setCustomTraveledFrom] = useState("");
     const [customTraveledTo, setCustomTraveledTo] = useState("");
 
-    const [selectedAvailablityPeriod, setSelectedAvailablityPeriod] = useState<DistanceAggregation | null>("7d");
-    const [useCustomAvailablityRange, setUseCustomAvailablityRange] = useState(false);
-    const [customAvailablityFrom, setCustomAvailablityFrom] = useState("");
-    const [customAvailablityTo, setCustomAvailablityTo] = useState("");
+    const [selectedAvailabilityPeriod, setSelectedAvailabilityPeriod] = useState<DistanceAggregation | null>("7d");
+    const [useCustomAvailabilityRange, setUseCustomAvailabilityRange] = useState(false);
+    const [customAvailabilityFrom, setCustomAvailabilityFrom] = useState("");
+    const [customAvailabilityTo, setCustomAvailabilityTo] = useState("");
 
 
     useEffect(() => {
@@ -51,11 +52,23 @@ const VehicleDetailsPage: React.FC = () => {
 
         const loadDetails = async () => {
             setLoading(true);
+            const start = calculateStartDate(selectedTraveledPeriod ?? "7d");
+            const end = new Date().toISOString();
             try {
                 const vehicleData = await vehicleService.getVehicle(+vehicleId);
                 setVehicle(vehicleData);
-                // const distanceDefault = await vehicleService.getDistance(vehicleId, "7d");
-                // setDistanceData(distanceDefault);
+                const distances = await vehicleService.getDistances(+vehicleId, { start, end });
+                const transformedData: DistancePoint[] = distances.map((item: any) => ({
+                    time: new Date(item.time).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    distance: item.distanceTraveled
+                }));
+
+                setDistanceData(transformedData);
             } catch (err) {
                 console.error("Failed to load vehicle details:", err);
             } finally {
@@ -68,13 +81,25 @@ const VehicleDetailsPage: React.FC = () => {
 
     const loadTraveledPeriod = async (period: DistanceAggregation) => {
         if (!vehicleId) return;
+
         try {
             setLoading(true);
             setUseCustomTraveledRange(false);
             setSelectedTraveledPeriod(period);
+            const start = calculateStartDate(period);
+            const end = new Date().toISOString();
+            const distances = await vehicleService.getDistances(+vehicleId, { start, end });
+            const transformedData: DistancePoint[] = distances.map((item: any) => ({
+                time: new Date(item.time).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                distance: item.distanceTraveled
+            }));
 
-            // const distance = await vehicleService.getDistance(vehicleId, period);
-            // setDistanceData(distance);
+            setDistanceData(transformedData);
         } finally {
             setLoading(false);
         }
@@ -84,8 +109,8 @@ const VehicleDetailsPage: React.FC = () => {
         if (!vehicleId) return;
         try {
             setLoading(true);
-            setUseCustomAvailablityRange(false);
-            setSelectedAvailablityPeriod(period);
+            setUseCustomAvailabilityRange(false);
+            setSelectedAvailabilityPeriod(period);
 
             // const distance = await vehicleService.getDistance(vehicleId, period);
             // setDistanceData(distance);
@@ -108,8 +133,22 @@ const VehicleDetailsPage: React.FC = () => {
 
         try {
             setLoading(true);
-            // const data = await vehicleService.getDistanceCustomRange(vehicleId, from, to);
-            // setDistanceData(data);
+
+            const distances = await vehicleService.getDistances(+vehicleId, {
+                start: from.toISOString(),
+                end: to.toISOString(),
+            });
+            const transformedData: DistancePoint[] = distances.map((item: any) => ({
+                time: new Date(item.time).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                distance: item.distanceTraveled
+            }));
+
+            setDistanceData(transformedData);
         } finally {
             setLoading(false);
         }
@@ -300,7 +339,7 @@ const VehicleDetailsPage: React.FC = () => {
                     <ResponsiveContainer>
                         <LineChart data={distanceData}>
                             <CartesianGrid strokeDasharray="3 3"/>
-                            <XAxis dataKey="label"/>
+                            <XAxis dataKey="time"/>
                             <YAxis/>
                             <Tooltip/>
                             <Line type="monotone" dataKey="distance" stroke="#2563eb" strokeWidth={3}/>
@@ -315,19 +354,19 @@ const VehicleDetailsPage: React.FC = () => {
                 </h2>
 
                 <PeriodSelector
-                    selectedPeriod={selectedAvailablityPeriod}
+                    selectedPeriod={selectedAvailabilityPeriod}
                     onSelectPeriod={loadAvailabilityPeriod}
 
-                    useCustomRange={useCustomAvailablityRange}
+                    useCustomRange={useCustomAvailabilityRange}
                     onToggleCustomRange={() => {
-                        setUseCustomAvailablityRange(!useCustomAvailablityRange);
-                        setSelectedAvailablityPeriod(null);
+                        setUseCustomAvailabilityRange(!useCustomAvailabilityRange);
+                        setSelectedAvailabilityPeriod(null);
                     }}
 
-                    customFrom={customAvailablityFrom}
-                    customTo={customAvailablityTo}
-                    onCustomFromChange={setCustomAvailablityFrom}
-                    onCustomToChange={setCustomAvailablityTo}
+                    customFrom={customAvailabilityFrom}
+                    customTo={customAvailabilityTo}
+                    onCustomFromChange={setCustomAvailabilityFrom}
+                    onCustomToChange={setCustomAvailabilityTo}
                     onApplyCustomRange={applyCustomRange}
                 />
             </div>

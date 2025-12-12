@@ -1,4 +1,5 @@
 import type {
+    DistancePoint, DistanceRequest,
     Vehicle,
     VehicleBrand,
     VehicleModel,
@@ -10,7 +11,6 @@ import apiClient from "../client.ts";
 export const vehicleService = {
     getVehicles: async (page: number, size: number, params: VehicleSearchParams) => {
         const isSearch = params && Object.keys(params).length !== 0;
-        console.log(isSearch);
         const response = await apiClient.get(
             isSearch ? '/api/v1/vehicles/search' : '/api/v1/vehicles',
             { params: { page, size, ...params } }
@@ -36,6 +36,14 @@ export const vehicleService = {
             `/api/v1/vehicles/brands/${brandId}/models`
         );
         return response.data;
+    },
+
+    getDistances: async (id: number, request: DistanceRequest) => {
+        const vehicleResponse = await apiClient.get<DistancePoint[]>(
+            `/api/v1/vehicles/${id}/distances`,
+            { params: request }
+        );
+        return vehicleResponse.data;
     },
 
     createVehicle: async (data: Vehicle, images: File[]) => {
