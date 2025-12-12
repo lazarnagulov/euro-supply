@@ -13,7 +13,6 @@ interface PeriodSelectorProps {
     selectedPeriod: DistanceAggregation | null;
     onSelectPeriod: (p: DistanceAggregation) => void;
 
-    // Custom range
     useCustomRange: boolean;
     onToggleCustomRange: () => void;
 
@@ -25,18 +24,18 @@ interface PeriodSelectorProps {
 }
 
 export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
-    selectedPeriod,
-    onSelectPeriod,
+                                                                  selectedPeriod,
+                                                                  onSelectPeriod,
 
-    useCustomRange,
-    onToggleCustomRange,
+                                                                  useCustomRange,
+                                                                  onToggleCustomRange,
 
-    customFrom,
-    customTo,
-    onCustomFromChange,
-    onCustomToChange,
-    onApplyCustomRange
-}) => {
+                                                                  customFrom,
+                                                                  customTo,
+                                                                  onCustomFromChange,
+                                                                  onCustomToChange,
+                                                                  onApplyCustomRange
+                                                              }) => {
     return (
         <div className="space-y-4">
             <div className="flex flex-wrap gap-3">
@@ -66,36 +65,39 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
                 </button>
             </div>
 
-            {useCustomRange && (
-                <div className="flex items-end gap-4 mt-2">
+            <div className={`transition-all duration-300 overflow-hidden ${
+                useCustomRange ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+                <div className="flex items-end gap-4">
                     <div className="flex flex-col">
-                        <label className="text-sm">From</label>
+                        <label className="text-sm mb-1 text-gray-700">From</label>
                         <input
                             type="date"
-                            className="border rounded-xl px-3 py-2"
+                            className="border border-gray-300 rounded-xl px-3 py-2"
                             value={customFrom}
                             onChange={(e) => onCustomFromChange(e.target.value)}
                         />
                     </div>
 
                     <div className="flex flex-col">
-                        <label className="text-sm">To</label>
+                        <label className="text-sm mb-1 text-gray-700">To</label>
                         <input
                             type="date"
-                            className="border rounded-xl px-3 py-2"
+                            className="border border-gray-300 rounded-xl px-3 py-2"
                             value={customTo}
                             onChange={(e) => onCustomToChange(e.target.value)}
                         />
                     </div>
 
                     <button
-                        className="px-4 py-2 bg-blue-600 text-white rounded-xl"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={onApplyCustomRange}
+                        disabled={!customFrom || !customTo}
                     >
                         Apply
                     </button>
                 </div>
-            )}
+            </div>
         </div>
     );
 };
