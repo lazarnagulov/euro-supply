@@ -8,6 +8,7 @@ import com.nvt.eurosupply.realtime.dtos.VehicleDistanceDto;
 import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
 import com.nvt.eurosupply.realtime.messages.VehicleHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
+import com.nvt.eurosupply.vehicle.services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +21,18 @@ public class VehicleRealTimeService {
 
     private final InfluxQueryService service;
     private final WriteApiBlocking writeApi;
+    private final VehicleService vehicleService;
 
     @Autowired
-    public VehicleRealTimeService(InfluxDBClient client, InfluxQueryService service) {
+    public VehicleRealTimeService(InfluxDBClient client, InfluxQueryService service, VehicleService vehicleService) {
         writeApi = client.getWriteApiBlocking();
         this.service = service;
+        this.vehicleService = vehicleService;
     }
 
     public List<VehicleDistanceDto> getDistances(Long id, VehicleDistanceRequestDto request) {
+        vehicleService.find(id);
+
         Instant start = request.getStart();
         Instant end = request.getEnd();
         String window = calculateWindowDuration(start, end);
