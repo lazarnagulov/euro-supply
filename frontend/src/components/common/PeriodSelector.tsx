@@ -1,7 +1,7 @@
 import React from "react";
-import type {DistanceAggregation} from "../../features/vehicle/types/vehicle.types.ts";
+import type {PeriodAggregation} from "../../features/vehicle/types/vehicle.types.ts";
 
-const PREDEFINED_PERIODS: { label: string; value: DistanceAggregation }[] = [
+const PREDEFINED_PERIODS: { label: string; value: PeriodAggregation }[] = [
     { label: "Last 7 days", value: "7d" },
     { label: "Last month", value: "30d" },
     { label: "Last 3 months", value: "90d" },
@@ -10,8 +10,8 @@ const PREDEFINED_PERIODS: { label: string; value: DistanceAggregation }[] = [
 ];
 
 interface PeriodSelectorProps {
-    selectedPeriod: DistanceAggregation | null;
-    onSelectPeriod: (p: DistanceAggregation) => void;
+    selectedPeriod: PeriodAggregation | null;
+    onSelectPeriod: (p: PeriodAggregation) => void;
 
     useCustomRange: boolean;
     onToggleCustomRange: () => void;
@@ -24,18 +24,18 @@ interface PeriodSelectorProps {
 }
 
 export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
-                                                                  selectedPeriod,
-                                                                  onSelectPeriod,
+    selectedPeriod,
+    onSelectPeriod,
 
-                                                                  useCustomRange,
-                                                                  onToggleCustomRange,
+    useCustomRange,
+    onToggleCustomRange,
 
-                                                                  customFrom,
-                                                                  customTo,
-                                                                  onCustomFromChange,
-                                                                  onCustomToChange,
-                                                                  onApplyCustomRange
-                                                              }) => {
+    customFrom,
+    customTo,
+    onCustomFromChange,
+    onCustomToChange,
+    onApplyCustomRange
+}) => {
     return (
         <div className="space-y-4">
             <div className="flex flex-wrap gap-3">

@@ -18,8 +18,8 @@ export const calculateStartDate = (period: "7d" | "30d" | "90d" | "180d" | "365d
             start = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
             break;
         default:
-            start = new Date(new Date().setDate(new Date().getDate() - 7)); // Default to 7 days if unknown
+            start = new Date(new Date().setDate(new Date().getDate() - 7));
     }
 
-    return start.toISOString(); // Return ISO string for compatibility
+    return start.toISOString();
 };

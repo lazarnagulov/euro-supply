@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
     ArrowLeft,
     MapPin,
     Calendar,
     Car,
-    ChartBar, AlertTriangle
+    ChartBar,
 } from "lucide-react";
 import {
     LineChart,
@@ -16,158 +16,60 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { useNavigate, useParams } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 import { InteractiveMap } from "../../../components/map/InteractiveMap";
-import type {
-    DistancePoint,
-    DistanceAggregation,
-    VehicleResponse,
-} from "../types/vehicle.types";
-import { vehicleService } from "../../../api/services/vehicleService.ts";
-import { PeriodSelector } from "../../../components/common/PeriodSelector.tsx";
-import { calculateStartDate } from "../../../utils/dateUtils.ts";
-import { transformDistanceData } from "../../../utils/dataTransformers.ts";
-import toast, {Toaster} from "react-hot-toast";
+import { PeriodSelector } from "../../../components/common/PeriodSelector";
+import { useVehicleData } from "../hooks/useVehicleData";
+import { useDistanceData } from "../hooks/useDistanceData";
+import { usePeriodSelector } from "../../../hooks/common/usePeriodSelector.tsx";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
     const navigate = useNavigate();
 
-    const [vehicle, setVehicle] = useState<VehicleResponse | null>(null);
-    const [distanceData, setDistanceData] = useState<DistancePoint[]>([]);
-    const [availabilityData, _setAvailabilityData] = useState<any>([]);
-    const [initialLoading, setInitialLoading] = useState(true);
-    const [distanceLoading, setDistanceLoading] = useState(false);
+    const { vehicle, loading: vehicleLoading } = useVehicleData(vehicleId);
 
-    const [selectedTraveledPeriod, setSelectedTraveledPeriod] = useState<DistanceAggregation | null>("7d");
-    const [useCustomTraveledRange, setUseCustomTraveledRange] = useState(false);
-    const [customTraveledFrom, setCustomTraveledFrom] = useState("");
-    const [customTraveledTo, setCustomTraveledTo] = useState("");
+    const traveledPeriod = usePeriodSelector("7d");
+    const {
+        distanceData,
+        loading: distanceLoading,
+        loadPeriod: loadTraveledPeriod,
+        loadCustomRange: loadTraveledCustomRange,
+    } = useDistanceData(vehicleId);
 
-    const [selectedAvailabilityPeriod, setSelectedAvailabilityPeriod] = useState<DistanceAggregation | null>("7d");
-    const [useCustomAvailabilityRange, setUseCustomAvailabilityRange] = useState(false);
-    const [customAvailabilityFrom, setCustomAvailabilityFrom] = useState("");
-    const [customAvailabilityTo, setCustomAvailabilityTo] = useState("");
+    const availabilityPeriod = usePeriodSelector("7d");
+    const availabilityData: any[] = []; // TODO: Implement availability data
 
-    useEffect(() => {
-        if (!vehicleId) return;
-
-        const loadDetails = async () => {
-            setInitialLoading(true);
-            const start = calculateStartDate(selectedTraveledPeriod ?? "7d");
-            const end = new Date().toISOString();
-            try {
-                const vehicleData = await vehicleService.getVehicle(+vehicleId);
-                setVehicle(vehicleData);
-                const distances = await vehicleService.getDistances(+vehicleId, { start, end });
-                setDistanceData(transformDistanceData(distances));
-            } catch (err) {
-                console.error("Failed to load vehicle details:", err);
-                toast.error("Failed to load vehicle details. Please try again.");
-            } finally {
-                setInitialLoading(false);
-            }
-        };
-
-        loadDetails();
-    }, [vehicleId]);
-
-    const loadTraveledPeriod = async (period: DistanceAggregation) => {
-        if (!vehicleId) return;
-
-        try {
-            setDistanceLoading(true);
-            setUseCustomTraveledRange(false);
-            setSelectedTraveledPeriod(period);
-            const start = calculateStartDate(period);
-            const end = new Date().toISOString();
-            const distances = await vehicleService.getDistances(+vehicleId, { start, end });
-            setDistanceData(transformDistanceData(distances));
-            toast.success("Distance data updated successfully");
-        } catch (err) {
-            console.error("Failed to load distance data:", err);
-            toast.error("Failed to load distance data. Please try again.");
-        } finally {
-            setDistanceLoading(false);
+    const handleTraveledPeriodSelect = async (period: string) => {
+        traveledPeriod.setSelectedPeriod(period as any);
+        if (traveledPeriod.useCustomRange) {
+            traveledPeriod.toggleCustomRange();
         }
+        await loadTraveledPeriod(period as any);
     };
 
-    const loadAvailabilityPeriod = async (period: DistanceAggregation) => {
-        if (!vehicleId) return;
-        try {
-            setUseCustomAvailabilityRange(false);
-            setSelectedAvailabilityPeriod(period);
-            // TODO: Implement availability loading
-        } catch (err) {
-            console.error("Failed to load availability data:", err);
-            toast.error("Failed to load availability data. Please try again.");
-        }
+    const handleTraveledCustomRange = async () => {
+        const range = traveledPeriod.validateDateRange();
+        if (!range) return;
+        await loadTraveledCustomRange(range.from, range.to, range.diffDays);
     };
 
-    const applyCustomTraveledRange = async () => {
-        if (!customTraveledFrom || !customTraveledTo || !vehicleId) return;
-
-        const from = new Date(customTraveledFrom);
-        const to = new Date(customTraveledTo);
-
-        const diffDays = (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24);
-
-        if (diffDays > 365) {
-            toast.error("Date range cannot exceed 365 days", {
-                duration: 5000,
-                icon: <AlertTriangle size={24} color="red" />,
-            });
-            return;
+    const handleAvailabilityPeriodSelect = async (period: string) => {
+        availabilityPeriod.setSelectedPeriod(period as any);
+        if (availabilityPeriod.useCustomRange) {
+            availabilityPeriod.toggleCustomRange();
         }
-
-        if (diffDays < 0) {
-            toast.error("End date must be after start date");
-            return;
-        }
-
-        try {
-            setDistanceLoading(true);
-            const distances = await vehicleService.getDistances(+vehicleId, {
-                start: from.toISOString(),
-                end: to.toISOString(),
-            });
-            setDistanceData(transformDistanceData(distances));
-            toast.success(`Loaded data for ${Math.round(diffDays)} days`);
-        } catch (err) {
-            console.error("Failed to load custom range data:", err);
-            toast.error("Failed to load custom range data. Please try again.");
-        } finally {
-            setDistanceLoading(false);
-        }
+        // TODO: Implement availability loading
     };
 
-    const applyCustomAvailabilityRange = async () => {
-        if (!customAvailabilityFrom || !customAvailabilityTo || !vehicleId) return;
-
-        const from = new Date(customAvailabilityFrom);
-        const to = new Date(customAvailabilityTo);
-
-        const diffDays = (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24);
-
-        if (diffDays > 365) {
-            toast.error("Date range cannot exceed 365 days");
-            return;
-        }
-
-        if (diffDays < 0) {
-            toast.error("End date must be after start date");
-            return;
-        }
-
-        try {
-            // TODO: Implement availability custom range loading
-        } catch (err) {
-            console.error("Failed to load custom availability range:", err);
-            toast.error("Failed to load custom availability data.");
-        }
+    const handleAvailabilityCustomRange = async () => {
+        const range = availabilityPeriod.validateDateRange();
+        if (!range) return;
+        // TODO: Implement availability custom range loading
     };
 
-    if (initialLoading) {
+    if (vehicleLoading) {
         return (
             <div className="bg-white rounded-xl shadow p-12 text-center">
                 <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -182,16 +84,13 @@ const VehicleDetailsPage: React.FC = () => {
                 <div className="p-6 bg-red-100 text-red-600 rounded-full shadow-inner mb-4">
                     <Car size={48} />
                 </div>
-
                 <h2 className="text-2xl font-bold text-red-700 mb-2">
                     Vehicle not found
                 </h2>
-
                 <p className="text-gray-600 max-w-md mb-6">
                     The requested vehicle could not be located. It may have been removed,
                     or the ID is incorrect.
                 </p>
-
                 <button
                     onClick={() => navigate(-1)}
                     className="px-5 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition flex items-center gap-2"
@@ -210,22 +109,22 @@ const VehicleDetailsPage: React.FC = () => {
                 toastOptions={{
                     duration: 4000,
                     style: {
-                        background: '#fff',
-                        color: '#363636',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                        background: "#fff",
+                        color: "#363636",
+                        borderRadius: "12px",
+                        padding: "16px",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                     },
                     success: {
                         iconTheme: {
-                            primary: '#10b981',
-                            secondary: '#fff',
+                            primary: "#10b981",
+                            secondary: "#fff",
                         },
                     },
                     error: {
                         iconTheme: {
-                            primary: '#ef4444',
-                            secondary: '#fff',
+                            primary: "#ef4444",
+                            secondary: "#fff",
                         },
                     },
                 }}
@@ -248,9 +147,7 @@ const VehicleDetailsPage: React.FC = () => {
                     <p className="text-gray-600">
                         {vehicle.brand.name} {vehicle.model.name}
                     </p>
-                    <p className="text-gray-600">
-                        Max load: {vehicle.maxLoadKg} kg
-                    </p>
+                    <p className="text-gray-600">Max load: {vehicle.maxLoadKg} kg</p>
                 </div>
             </div>
 
@@ -264,7 +161,9 @@ const VehicleDetailsPage: React.FC = () => {
                         <div className="p-4 bg-gray-100 rounded-full mb-2">
                             <Car size={32} className="text-gray-500" />
                         </div>
-                        <p className="text-gray-500">No images available for this vehicle.</p>
+                        <p className="text-gray-500">
+                            No images available for this vehicle.
+                        </p>
                     </div>
                 )}
 
@@ -282,7 +181,6 @@ const VehicleDetailsPage: React.FC = () => {
                                         alt={`Vehicle ${index + 1}`}
                                         loading="lazy"
                                     />
-
                                     <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-medium text-sm">
                                         View
                                     </div>
@@ -306,13 +204,20 @@ const VehicleDetailsPage: React.FC = () => {
                 {vehicle.lastLocation ? (
                     <>
                         <InteractiveMap
-                            center={[vehicle.lastLocation.latitude, vehicle.lastLocation.longitude]}
-                            selectedPosition={[vehicle.lastLocation.latitude, vehicle.lastLocation.longitude]}
+                            center={[
+                                vehicle.lastLocation.latitude,
+                                vehicle.lastLocation.longitude,
+                            ]}
+                            selectedPosition={[
+                                vehicle.lastLocation.latitude,
+                                vehicle.lastLocation.longitude,
+                            ]}
                             readOnly={true}
                             height="400px"
                         />
                         <p className="text-sm text-gray-600">
-                            {vehicle.lastLocation.latitude.toFixed(5)}, {vehicle.lastLocation.longitude.toFixed(5)} —{" "}
+                            {vehicle.lastLocation.latitude.toFixed(5)},{" "}
+                            {vehicle.lastLocation.longitude.toFixed(5)} —{" "}
                             {new Date(vehicle.lastLocation.timestamp).toLocaleString()}
                         </p>
                     </>
@@ -322,7 +227,8 @@ const VehicleDetailsPage: React.FC = () => {
                             Location Unavailable
                         </h3>
                         <p className="text-gray-600">
-                            Unable to retrieve the last known location. Please try again later.
+                            Unable to retrieve the last known location. Please try again
+                            later.
                         </p>
                     </div>
                 )}
@@ -334,18 +240,15 @@ const VehicleDetailsPage: React.FC = () => {
                 </h2>
 
                 <PeriodSelector
-                    selectedPeriod={selectedTraveledPeriod}
-                    onSelectPeriod={loadTraveledPeriod}
-                    useCustomRange={useCustomTraveledRange}
-                    onToggleCustomRange={() => {
-                        setUseCustomTraveledRange(!useCustomTraveledRange);
-                        setSelectedTraveledPeriod(null);
-                    }}
-                    customFrom={customTraveledFrom}
-                    customTo={customTraveledTo}
-                    onCustomFromChange={setCustomTraveledFrom}
-                    onCustomToChange={setCustomTraveledTo}
-                    onApplyCustomRange={applyCustomTraveledRange}
+                    selectedPeriod={traveledPeriod.selectedPeriod}
+                    onSelectPeriod={handleTraveledPeriodSelect}
+                    useCustomRange={traveledPeriod.useCustomRange}
+                    onToggleCustomRange={traveledPeriod.toggleCustomRange}
+                    customFrom={traveledPeriod.customFrom}
+                    customTo={traveledPeriod.customTo}
+                    onCustomFromChange={traveledPeriod.setCustomFrom}
+                    onCustomToChange={traveledPeriod.setCustomTo}
+                    onApplyCustomRange={handleTraveledCustomRange}
                 />
 
                 <div className="relative">
@@ -388,18 +291,15 @@ const VehicleDetailsPage: React.FC = () => {
                 </h2>
 
                 <PeriodSelector
-                    selectedPeriod={selectedAvailabilityPeriod}
-                    onSelectPeriod={loadAvailabilityPeriod}
-                    useCustomRange={useCustomAvailabilityRange}
-                    onToggleCustomRange={() => {
-                        setUseCustomAvailabilityRange(!useCustomAvailabilityRange);
-                        setSelectedAvailabilityPeriod(null);
-                    }}
-                    customFrom={customAvailabilityFrom}
-                    customTo={customAvailabilityTo}
-                    onCustomFromChange={setCustomAvailabilityFrom}
-                    onCustomToChange={setCustomAvailabilityTo}
-                    onApplyCustomRange={applyCustomAvailabilityRange}
+                    selectedPeriod={availabilityPeriod.selectedPeriod}
+                    onSelectPeriod={handleAvailabilityPeriodSelect}
+                    useCustomRange={availabilityPeriod.useCustomRange}
+                    onToggleCustomRange={availabilityPeriod.toggleCustomRange}
+                    customFrom={availabilityPeriod.customFrom}
+                    customTo={availabilityPeriod.customTo}
+                    onCustomFromChange={availabilityPeriod.setCustomFrom}
+                    onCustomToChange={availabilityPeriod.setCustomTo}
+                    onApplyCustomRange={handleAvailabilityCustomRange}
                 />
 
                 <div>
@@ -411,7 +311,12 @@ const VehicleDetailsPage: React.FC = () => {
                                 <XAxis dataKey="label" />
                                 <YAxis />
                                 <Tooltip />
-                                <Line type="monotone" dataKey="distance" stroke="#2563eb" strokeWidth={3} />
+                                <Line
+                                    type="monotone"
+                                    dataKey="distance"
+                                    stroke="#2563eb"
+                                    strokeWidth={3}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>

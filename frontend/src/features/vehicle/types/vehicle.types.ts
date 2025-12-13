@@ -40,8 +40,6 @@ export interface DistanceRequest {
     end?: string;
 }
 
-export type DistanceAggregation = "7d" | "30d" | "90d" | "180d" | "365d";
-
 export interface DistancePoint {
     time: string;
     distance: number;

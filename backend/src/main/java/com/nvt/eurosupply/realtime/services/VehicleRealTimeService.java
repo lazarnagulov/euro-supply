@@ -87,11 +87,18 @@ public class VehicleRealTimeService {
     private String calculateWindowDuration(Instant start, Instant stop) {
         Duration d = Duration.between(start, stop);
 
-        if (d.toHours() <= 1) return "1m";
-        if (d.toHours() <= 24) return "15m";
-        if (d.toDays() <= 7) return "1h";
-        if (d.toDays() <= 31) return "1d";
+        long hours = d.toHours();
+        long days = d.toDays();
 
-        return "7d";
+        if (hours < 1) return "1m";
+        if (hours <= 6) return "5m";
+        if (hours <= 24) return "15m";
+        if (days <= 7) return "1h";
+        if (days <= 30) return "6h";
+        if (days <= 90) return "1d";
+        if (days <= 365) return "1w";
+
+        return "1mo";
     }
+
 }
