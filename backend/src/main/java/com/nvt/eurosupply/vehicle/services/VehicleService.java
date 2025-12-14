@@ -15,8 +15,8 @@ import com.nvt.eurosupply.vehicle.models.VehicleModel;
 import com.nvt.eurosupply.vehicle.repositories.VehicleRepository;
 import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -38,6 +38,7 @@ public class VehicleService {
 
     private static final String FOLDER_NAME = "vehicle";
 
+    @Transactional
     public VehicleResponseDto createVehicle(CreateVehicleRequestDto request) {
         Vehicle vehicle = mapper.fromCreateRequest(request);
         VehicleBrand brand = brandService.findBrand(request.getBrandId());

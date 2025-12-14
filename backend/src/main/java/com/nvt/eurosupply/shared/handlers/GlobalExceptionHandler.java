@@ -4,6 +4,7 @@ import com.nvt.eurosupply.shared.exceptions.FileUploadException;
 import com.nvt.eurosupply.shared.models.ExceptionResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -98,6 +99,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ExceptionResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+
+        String message = "Data integrity violation";
+
+        if (ex.getMostSpecificCause().getMessage().contains("registration_number")) {
+            message = "Vehicle with this registration number already exists";
+        }
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error("Conflict")
+                .message(message)
+                .path(request.getRequestURI())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }
 

@@ -25,9 +25,9 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
         resolver: zodResolver(vehicleSchema),
         defaultValues: {
             registrationNumber: '',
-            maxLoadKg: '',
-            brandId: '',
-            modelId: '',
+            maxLoadKg: 0,
+            brandId: 0,
+            modelId: 0,
         },
         mode: 'onChange',
     });
@@ -39,6 +39,7 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
     const [imageError, setImageError] = useState('');
     const [loading, setLoading] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const brandId = watch('brandId');
 
@@ -128,8 +129,9 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
             }
             setSubmitStatus('success');
             onSuccess();
-        } catch (error) {
+        } catch (error: any) {
             setSubmitStatus('error');
+            setSubmitError(error?.message);
         } finally {
             setLoading(false);
         }
@@ -168,7 +170,12 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                     {submitStatus === 'error' && (
                         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
                             <AlertCircle className="w-5 h-5 text-red-600" />
+                            {!submitError && (
                             <p className="text-red-800">Failed to {mode === 'create' ? 'create' : 'update'} vehicle. Please try again.</p>
+                            )}
+                            {submitError && (
+                                <p className="text-red-800">Failed to {mode === 'create' ? 'create' : 'update'} vehicle. { submitError }</p>
+                            )}
                         </div>
                     )}
 
