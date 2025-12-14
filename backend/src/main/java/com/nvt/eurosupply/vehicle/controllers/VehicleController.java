@@ -35,7 +35,6 @@ public class VehicleController {
             @ApiResponse(responseCode = "201", description = "Vehicle created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "404", description = "Model or Brand not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
     public ResponseEntity<VehicleResponseDto> createVehicle(@Valid @RequestBody CreateVehicleRequestDto request) {
