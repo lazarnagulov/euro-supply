@@ -35,6 +35,6 @@ public class VehicleBrandService {
     }
 
     public VehicleModel findModel(Long id) {
-        return modelRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Brand not found"));
+        return modelRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Model not found"));
     }
 }
