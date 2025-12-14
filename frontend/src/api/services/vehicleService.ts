@@ -10,7 +10,6 @@ import apiClient from "../client.ts";
 export const vehicleService = {
     getVehicles: async (page: number, size: number, params: VehicleSearchParams) => {
         const isSearch = params && Object.keys(params).length !== 0;
-        console.log(isSearch);
         const response = await apiClient.get(
             isSearch ? '/api/v1/vehicles/search' : '/api/v1/vehicles',
             { params: { page, size, ...params } }

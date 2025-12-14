@@ -127,7 +127,7 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                 await vehicleService.updateVehicle(vehicle!.id, data);
             }
             setSubmitStatus('success');
-            setTimeout(() => onSuccess(), 1000);
+            onSuccess();
         } catch (error) {
             setSubmitStatus('error');
         } finally {
