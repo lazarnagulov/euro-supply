@@ -43,8 +43,8 @@ public class SuperAdminInitConfig {
 
             User admin = User.builder()
                     .username("admin")
-                    .password(passwordEncoder.encode(rawPassword))
                     .email("admin@eurosupply.com")
+                    .password(passwordEncoder.encode(rawPassword))
                     .role(Role.ADMIN)
                     .mustChangePassword(true)
                     .build();

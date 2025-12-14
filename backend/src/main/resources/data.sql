@@ -145,3 +145,72 @@ INSERT INTO countries_cities (country_id, cities_id) VALUES
     (45,1133),(45,1134),(45,1135),
     (46,1136),(46,1137),(46,1138),
     (47,1139),(47,1140),(47,1141);
+
+
+INSERT INTO vehicle_brands (id, name) VALUES
+    (1, 'Toyota'),
+    (2, 'Honda'),
+    (3, 'Ford'),
+    (4, 'Chevrolet'),
+    (5, 'BMW'),
+    (6, 'Mercedes-Benz'),
+    (7, 'Audi'),
+    (8, 'Volkswagen'),
+    (9, 'Hyundai'),
+    (10, 'Kia'),
+    (11, 'Nissan'),
+    (12, 'Mazda'),
+    (13, 'Subaru'),
+    (14, 'Renault'),
+    (15, 'Peugeot'),
+    (16, 'Volvo'),
+    (17, 'Jaguar'),
+    (18, 'Land Rover'),
+    (19, 'Fiat'),
+    (20, 'Skoda');
+
+
+INSERT INTO vehicle_models (id, name) VALUES
+    (1, 'Corolla'), (2, 'Camry'), (3, 'RAV4'),
+    (4, 'Civic'), (5, 'Accord'), (6, 'CR-V'),
+    (7, 'F-150'), (8, 'Mustang'), (9, 'Explorer'),
+    (10, 'Silverado'), (11, 'Malibu'), (12, 'Equinox'),
+    (13, '3 Series'), (14, '5 Series'), (15, 'X5'),
+    (16, 'C-Class'), (17, 'E-Class'), (18, 'GLC'),
+    (19, 'A4'), (20, 'A6'), (21, 'Q5'),
+    (22, 'Golf'), (23, 'Passat'), (24, 'Tiguan'),
+    (25, 'Elantra'), (26, 'Sonata'), (27, 'Tucson'),
+    (28, 'Sportage'), (29, 'Sorento'), (30, 'Optima'),
+    (31, 'Altima'), (32, 'Sentra'), (33, 'Rogue'),
+    (34, 'Mazda3'), (35, 'CX-5'), (36, 'Mazda6'),
+    (37, 'Impreza'), (38, 'Forester'), (39, 'Outback'),
+    (40, 'Clio'), (41, 'Megane'), (42, 'Captur'),
+    (43, '208'), (44, '308'), (45, '3008'),
+    (46, 'XC40'), (47, 'XC60'), (48, 'S60'),
+    (49, 'XE'), (50, 'XF'), (51, 'F-Pace'),
+    (52, 'Range Rover'), (53, 'Discovery'), (54, 'Defender'),
+    (55, 'Panda'), (56, '500'), (57, 'Tipo'),
+    (58, 'Octavia'), (59, 'Superb'), (60, 'Kodiaq');
+
+INSERT INTO vehicle_brands_models (vehicle_brand_id, models_id) VALUES
+    (1, 1), (1, 2), (1, 3),
+    (2, 4), (2, 5), (2, 6),
+    (3, 7), (3, 8), (3, 9),
+    (4, 10), (4, 11), (4, 12),
+    (5, 13), (5, 14), (5, 15),
+    (6, 16), (6, 17), (6, 18),
+    (7, 19), (7, 20), (7, 21),
+    (8, 22), (8, 23), (8, 24),
+    (9, 25), (9, 26), (9, 27),
+    (10, 28), (10, 29), (10, 30),
+    (11, 31), (11, 32), (11, 33),
+    (12, 34), (12, 35), (12, 36),
+    (13, 37), (13, 38), (13, 39),
+    (14, 40), (14, 41), (14, 42),
+    (15, 43), (15, 44), (15, 45),
+    (16, 46), (16, 47), (16, 48),
+    (17, 49), (17, 50), (17, 51),
+    (18, 52), (18, 53), (18, 54),
+    (19, 55), (19, 56), (19, 57),
+    (20, 58), (20, 59), (20, 60);
+
