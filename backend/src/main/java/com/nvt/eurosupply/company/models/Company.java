@@ -6,15 +6,13 @@ import com.nvt.eurosupply.shared.models.Country;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.user.models.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -41,7 +39,7 @@ public class Company {
     private Double latitude;
     private Double longitude;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.MERGE)
     private List<StoredFile> files;
 
     @Enumerated(EnumType.STRING)

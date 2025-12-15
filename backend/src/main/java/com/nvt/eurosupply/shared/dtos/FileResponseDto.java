@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class FileResponseDto {
     private Long id;
     private String filename;
-    private String storedName;
     private String contentType;
     private FileType type;
     private String url;

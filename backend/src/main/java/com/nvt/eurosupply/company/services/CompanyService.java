@@ -9,6 +9,8 @@ import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.repositories.CompanyRepository;
 import com.nvt.eurosupply.email.services.CompanyEmailService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.enums.FileFolder;
+import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
 import com.nvt.eurosupply.shared.models.PagedResponse;
@@ -19,6 +21,7 @@ import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.user.models.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +30,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CompanyService {
 
     private final CityService cityService;
@@ -37,8 +41,7 @@ public class CompanyService {
     private final CompanyRepository repository;
 
     private final CompanyMapper mapper;
-
-    private static final String FOLDER_NAME = "company";
+    private final FileMapper fileMapper;
 
     public CompanyResponseDto registerCompany(RegisterCompanyRequestDto request) {
         Company company = mapper.fromRequest(request);
@@ -59,8 +62,9 @@ public class CompanyService {
         CompanyResponseDto response = mapper.toResponse(company);
         response.setFiles(company.getFiles()
                 .stream()
-                .map(file -> fileService.toResponse(FOLDER_NAME, id, file))
+                .map(file -> fileMapper.toResponse(FileFolder.COMPANY, id, file))
                 .toList());
+
         return response;
     }
 
@@ -76,12 +80,12 @@ public class CompanyService {
 
     public List<FileResponseDto> uploadFiles(Long id, List<MultipartFile> files) {
         Company company = find(id);
-        List<StoredFile> stored = fileService.uploadFiles(FOLDER_NAME, id, files);
-        company.setFiles(stored);
+        List<StoredFile> stored = fileService.uploadFiles(FileFolder.COMPANY, id, files);
+        company.getFiles().addAll(stored);
         repository.save(company);
 
         return stored.stream()
-                .map(file -> fileService.toResponse(FOLDER_NAME, id, file))
+                .map(file -> fileMapper.toResponse(FileFolder.COMPANY, id, file))
                 .toList();
     }
 

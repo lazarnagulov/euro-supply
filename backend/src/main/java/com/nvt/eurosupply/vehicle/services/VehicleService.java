@@ -1,6 +1,8 @@
 package com.nvt.eurosupply.vehicle.services;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.enums.FileFolder;
+import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.models.Location;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
@@ -36,8 +38,7 @@ public class VehicleService {
     private final FileService fileService;
 
     private final VehicleMapper mapper;
-
-    private static final String FOLDER_NAME = "vehicle";
+    private final FileMapper fileMapper;;
 
     @Transactional
     public VehicleResponseDto createVehicle(CreateVehicleRequestDto request) {
@@ -51,12 +52,12 @@ public class VehicleService {
 
     public List<FileResponseDto> uploadImages(Long id, List<MultipartFile> images) {
         Vehicle vehicle = find(id);
-        List<StoredFile> stored = fileService.uploadFiles(FOLDER_NAME, id, images);
+        List<StoredFile> stored = fileService.uploadFiles(FileFolder.VEHICLE, id, images);
         vehicle.setImages(stored);
         repository.save(vehicle);
 
         return stored.stream()
-                .map(file -> fileService.toResponse(FOLDER_NAME, id, file))
+                .map(file -> fileMapper.toResponse(FileFolder.VEHICLE, id, file))
                 .toList();
     }
 
