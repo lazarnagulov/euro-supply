@@ -2,7 +2,7 @@ import axios, {type AxiosInstance, AxiosError, type InternalAxiosRequestConfig }
 import type {ApiError} from "../types/api.types.ts";
 
 const apiClient: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+    baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
     headers: {
         'Content-Type': 'application/json',
     },
