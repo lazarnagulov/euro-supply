@@ -243,9 +243,9 @@ INSERT INTO vehicles (
 
 INSERT INTO files (path, filename, content_type, type, created_at) VALUES
     ( '/files/vehicle/1/', 'vehicle_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:42:07.714908+01'),
-    ( '/uploads/vehicle/2/', 'vehicle_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:44:19.99891+01'),
-    ( '/uploads/vehicle/3/', 'vehicle_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:45:28.130303+01'),
-    ( '/uploads/vehicle/4/', 'vehicle_4.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
+    ( '/files/vehicle/2/', 'vehicle_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:44:19.99891+01'),
+    ( '/files/vehicle/3/', 'vehicle_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:45:28.130303+01'),
+    ( '/files/vehicle/4/', 'vehicle_4.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
 
 
 INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
