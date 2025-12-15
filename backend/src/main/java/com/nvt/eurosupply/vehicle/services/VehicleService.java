@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.vehicle.services;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.models.Location;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
@@ -94,6 +95,12 @@ public class VehicleService {
 
         // TODO: Update images once they are served with enginx
         return mapper.toResponse(repository.save(vehicle));
+    }
+
+    public void updateLocation(Long id, Location location) {
+        Vehicle vehicle = find(id);
+        vehicle.setLastLocation(location);
+        repository.save(vehicle);
     }
 
     public PagedResponse<VehicleResponseDto> searchVehicles(VehicleSearchRequestDto request, Pageable pageable) {
