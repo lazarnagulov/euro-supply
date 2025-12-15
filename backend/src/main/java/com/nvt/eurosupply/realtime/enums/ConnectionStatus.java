@@ -1,5 +1,5 @@
 package com.nvt.eurosupply.realtime.enums;
 
-public enum OfflineStatus {
+public enum ConnectionStatus {
     OFFLINE, ONLINE;
 }
