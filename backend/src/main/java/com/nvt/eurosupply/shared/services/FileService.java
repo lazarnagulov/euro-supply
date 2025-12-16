@@ -59,8 +59,8 @@ public class FileService {
             FileType type = detectType(file.getContentType());
 
             StoredFile stored = StoredFile.builder()
-                    .path(storedName)
-                    .filename(safeOriginalName)
+                    .path(filePath.toString())
+                    .filename(storedName)
                     .contentType(file.getContentType())
                     .type(type)
                     .createdAt(Instant.now())

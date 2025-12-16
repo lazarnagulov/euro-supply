@@ -284,9 +284,9 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                             <div className="mt-4">
                                 <p className="text-sm font-medium text-gray-700 mb-2">Current Images</p>
                                 <div className="grid grid-cols-4 gap-3">
-                                    {existingImages.map((url, index) => (
+                                    {existingImages.map((fileResponse, index) => (
                                         <div key={index} className="relative group">
-                                            <img src={url} alt={`Existing ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                                            <img src={fileResponse.url} alt={`Existing ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
                                             <button
                                                 type="button"
                                                 onClick={() => removeExistingImage(index)}

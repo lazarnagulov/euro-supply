@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -33,18 +34,24 @@ public class CompanyMapper {
     }
 
     public CompanyResponseDto toResponse(Company company) {
-        CompanyResponseDto response = modelMapper.map(company, CompanyResponseDto.class);
-        List<FileResponseDto> fileResponse = null;
-        if (company.getFiles() != null) {
-             fileResponse = company.getFiles().stream()
-                    .map(f -> fileMapper.toResponse(FileFolder.COMPANY, company.getId(), f))
-                    .toList();
-        }
+        CompanyResponseDto response =
+                modelMapper.map(company, CompanyResponseDto.class);
+
+        response.setFiles(
+                Optional.ofNullable(company.getFiles())
+                        .orElseGet(List::of)
+                        .stream()
+                        .map(f -> fileMapper.toResponse(
+                                FileFolder.COMPANY, company.getId(), f))
+                        .toList()
+        );
+
         response.setCity(company.getCity().getName());
         response.setCountry(company.getCountry().getName());
-        response.setFiles(fileResponse);
+
         return response;
     }
+
 
     public PagedResponse<CompanyResponseDto> toPagedResponse(Page<Company> page) {
         return new PagedResponse<>(
