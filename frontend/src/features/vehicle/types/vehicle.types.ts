@@ -1,3 +1,5 @@
+import type {FileResponse} from "../../../types/file.types.ts";
+
 export interface Vehicle {
     registrationNumber: string;
     maxLoadKg: number;
@@ -21,7 +23,7 @@ export interface VehicleResponse {
     maxLoadKg: number;
     brand: VehicleBrand;
     model: VehicleModel;
-    imageUrls: string[];
+    imageUrls: FileResponse[];
 }
 
 export interface VehicleSearchParams {
