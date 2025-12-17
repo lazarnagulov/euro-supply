@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     ArrowLeft,
     MapPin,
@@ -23,10 +23,12 @@ import { PeriodSelector } from "../../../components/common/PeriodSelector";
 import { useVehicleData } from "../hooks/useVehicleData";
 import { useDistanceData } from "../hooks/useDistanceData";
 import { usePeriodSelector } from "../../../hooks/common/usePeriodSelector.tsx";
+import {ImageModal} from "../../../components/modal/ImageModal.tsx";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
     const navigate = useNavigate();
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
     const { vehicle, loading: vehicleLoading } = useVehicleData(vehicleId);
 
@@ -67,6 +69,26 @@ const VehicleDetailsPage: React.FC = () => {
         const range = availabilityPeriod.validateDateRange();
         if (!range) return;
         // TODO: Implement availability custom range loading
+    };
+
+    const openImageModal = (index: number) => {
+        setSelectedImageIndex(index);
+    };
+
+    const closeImageModal = () => {
+        setSelectedImageIndex(null);
+    };
+
+    const goToPreviousImage = () => {
+        if (selectedImageIndex !== null && vehicle?.imageUrls) {
+            setSelectedImageIndex((selectedImageIndex - 1 + vehicle.imageUrls.length) % vehicle.imageUrls.length);
+        }
+    };
+
+    const goToNextImage = () => {
+        if (selectedImageIndex !== null && vehicle?.imageUrls) {
+            setSelectedImageIndex((selectedImageIndex + 1) % vehicle.imageUrls.length);
+        }
     };
 
     if (vehicleLoading) {
@@ -174,6 +196,7 @@ const VehicleDetailsPage: React.FC = () => {
                                 <div
                                     key={`vehicle_${index}`}
                                     className="relative group cursor-pointer rounded-xl overflow-hidden shadow-sm border"
+                                    onClick={() => openImageModal(index)}
                                 >
                                     <img
                                         src={fileResponse.url}
@@ -321,6 +344,15 @@ const VehicleDetailsPage: React.FC = () => {
                         </ResponsiveContainer>
                     </div>
                 </div>
+            </div>
+            <div className="p-0 space-y-0">
+                <ImageModal
+                    images={vehicle?.imageUrls || []}
+                    selectedIndex={selectedImageIndex}
+                    onClose={closeImageModal}
+                    onPrevious={goToPreviousImage}
+                    onNext={goToNextImage}
+                />
             </div>
         </div>
     );
