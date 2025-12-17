@@ -4,8 +4,10 @@ import com.nvt.eurosupply.shared.exceptions.FileUploadException;
 import com.nvt.eurosupply.shared.models.ExceptionResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +31,22 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ExceptionResponse> handleOptimisticLockingFailure(
+            ObjectOptimisticLockingFailureException ex,
+            HttpServletRequest request) {
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error("Conflict")
+                .message("The resource was modified by another user. Please refresh and try again.")
+                .path(request.getRequestURI())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -81,6 +99,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ExceptionResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+
+        String message = "Data integrity violation";
+
+        if (ex.getMostSpecificCause().getMessage().contains("registration_number")) {
+            message = "Vehicle with this registration number already exists";
+        }
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error("Conflict")
+                .message(message)
+                .path(request.getRequestURI())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }
 

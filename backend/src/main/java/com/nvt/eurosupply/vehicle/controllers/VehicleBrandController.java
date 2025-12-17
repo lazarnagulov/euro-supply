@@ -28,7 +28,6 @@ public class VehicleBrandController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list of brands"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
     public ResponseEntity<List<VehicleBrandDto>> getBrands() {
@@ -42,7 +41,6 @@ public class VehicleBrandController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Models retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Brand not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}/models")
     public ResponseEntity<List<VehicleModelDto>> getVehicleBrandModels(@PathVariable Long id) {

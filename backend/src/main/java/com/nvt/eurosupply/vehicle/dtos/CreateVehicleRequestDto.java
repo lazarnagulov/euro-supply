@@ -19,9 +19,9 @@ public class CreateVehicleRequestDto {
     @NotNull(message = "Max Load in kg is required")
     private Double maxLoadKg;
 
-    @NotNull(message = "Brand Id in kg is required")
+    @NotNull(message = "Brand is required")
     private Long brandId;
 
-    @NotNull(message = "Model Id in kg is required")
+    @NotNull(message = "Model is required")
     private Long modelId;
 }

@@ -9,7 +9,7 @@ import type {PagedResponse} from "../../types/api.types.ts";
 export const companyService = {
 
     registerCompany: async (data: RegisterCompanyRequest): Promise<Company> => {
-        const response = await apiClient.post<Company>('/api/v1/companies', data);
+        const response = await apiClient.post<Company>('/companies', data);
         return response.data;
     },
 
@@ -18,7 +18,7 @@ export const companyService = {
         files.forEach(file => formData.append('files', file));
 
         await apiClient.post(
-            `/api/v1/companies/${companyId}/files`,
+            `/companies/${companyId}/files`,
             formData,
             {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -28,7 +28,7 @@ export const companyService = {
 
     getPendingCompanies: async (page: number, size: number) => {
         const response = await apiClient.get<PagedResponse<CompanyResponse>>(
-            '/api/v1/companies/pending',
+            '/companies/pending',
             { params: { page, size } }
         );
         return response.data;
@@ -40,7 +40,7 @@ export const companyService = {
         data: ReviewCompanyRequest
     ): Promise<Company> => {
         const response = await apiClient.patch<Company>(
-            `/api/v1/companies/${id}`,
+            `/companies/${id}`,
             data
         );
         return response.data;

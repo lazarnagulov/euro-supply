@@ -17,7 +17,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onDelete }) 
             <div className="relative h-48 bg-gray-200">
                 {vehicle.imageUrls?.[0] ? (
                     <img
-                        src={vehicle.imageUrls[0]}
+                        src={vehicle.imageUrls[0].url}
                         alt={vehicle.registrationNumber}
                         className="w-full h-full object-cover"
                     />

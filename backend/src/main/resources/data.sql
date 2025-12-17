@@ -217,35 +217,36 @@ INSERT INTO vehicle_brands_models (vehicle_brand_id, models_id) VALUES
 
 INSERT INTO vehicles (
     is_online, latitude, longitude, max_load_kg,
-    brand_id, created_at, id, last_heartbeat,
-    model_id, updated_at, registration_number
+    brand_id, created_at, last_heartbeat,
+    model_id, updated_at, registration_number, version
 ) VALUES
       (
           NULL, NULL, NULL, 20000,
-          16, '2025-12-08 16:42:07.714908+01', 2, NULL,
-          48, NULL, 'BG-123-AB'
+          16, '2025-12-08 16:42:07.714908+01', NULL,
+          48, NULL, 'BG-123-AB', 0
       ),
       (
           NULL, NULL, NULL, 19000,
-          14, '2025-12-08 16:44:19.99891+01', 3, NULL,
-          41, NULL, 'NS-456-CD'
+          14, '2025-12-08 16:44:19.99891+01', NULL,
+          41, NULL, 'NS-456-CD', 0
       ),
       (
           NULL, NULL, NULL, 18500,
-          3, '2025-12-08 16:45:28.130303+01', 4, NULL,
-          8, NULL, 'BG-789-EF'
+          3, '2025-12-08 16:45:28.130303+01', NULL,
+          8, NULL, 'BG-789-EF', 0
       ),
       (
           NULL, NULL, NULL, 18000,
-          6, '2025-12-08 16:39:02.306783+01', 1, NULL,
-          17, NULL, 'NS-012-GH'
+          6, '2025-12-08 16:39:02.306783+01', NULL,
+          17, NULL, 'NS-012-GH', 0
       );
 
+
 INSERT INTO files (path, filename, content_type, type, created_at) VALUES
-    ( '/files/vehicle/1/', 'vehicle_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:42:07.714908+01'),
-    ( '/files/vehicle/2/', 'vehicle_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:44:19.99891+01'),
-    ( '/files/vehicle/3/', 'vehicle_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:45:28.130303+01'),
-    ( '/files/vehicle/4/', 'vehicle_4.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
+    ('files/vehicle/1/', 'vehicle_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:42:07.714908+01'),
+    ('files/vehicle/2/', 'vehicle_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:44:19.99891+01'),
+    ('files/vehicle/3/', 'vehicle_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:45:28.130303+01'),
+    ('files/vehicle/4/', 'vehicle_4.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
 
 
 INSERT INTO vehicles_images (images_id, vehicle_id) VALUES

@@ -96,6 +96,7 @@ const VehicleManagementPage = () => {
                                 <p className="text-gray-600">Manage delivery vehicles</p>
                             </div>
                         </div>
+                        {vehicles.length !== 0 && (
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
@@ -112,6 +113,7 @@ const VehicleManagementPage = () => {
                                 Add Vehicle
                             </button>
                         </div>
+                        )}
                     </div>
                 </div>
 

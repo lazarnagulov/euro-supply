@@ -170,13 +170,13 @@ const VehicleDetailsPage: React.FC = () => {
                 {vehicle.imageUrls && vehicle.imageUrls.length > 0 && (
                     <>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            {vehicle.imageUrls.slice(0, 6).map((url, index) => (
+                            {vehicle.imageUrls.slice(0, 6).map((fileResponse, index) => (
                                 <div
                                     key={`vehicle_${index}`}
                                     className="relative group cursor-pointer rounded-xl overflow-hidden shadow-sm border"
                                 >
                                     <img
-                                        src={url}
+                                        src={fileResponse.url}
                                         className="w-full h-40 object-cover group-hover:scale-105 transition-transform"
                                         alt={`Vehicle ${index + 1}`}
                                         loading="lazy"

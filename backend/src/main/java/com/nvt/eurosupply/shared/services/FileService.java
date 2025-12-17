@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.shared.services;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.exceptions.FileUploadException;
 import com.nvt.eurosupply.shared.enums.FileType;
 import com.nvt.eurosupply.shared.models.StoredFile;
@@ -27,13 +28,13 @@ public class FileService {
 
     private final StoredFileRepository storedFileRepository;
 
-    public List<StoredFile> uploadFiles(String folder, Long entityId, List<MultipartFile> files) {
+    public List<StoredFile> uploadFiles(FileFolder folder, Long entityId, List<MultipartFile> files) {
         return files.stream()
                 .map(file -> saveFile(folder, entityId, file))
                 .collect(Collectors.toList());
     }
 
-    public StoredFile saveFile(String folder, Long entityId, MultipartFile file) {
+    public StoredFile saveFile(FileFolder folder, Long entityId, MultipartFile file) {
         try {
             String safeOriginalName = StringUtils.cleanPath(
                     Objects.requireNonNull(file.getOriginalFilename())
@@ -41,7 +42,7 @@ public class FileService {
 
             String storedName = Instant.now().toEpochMilli() + "_" + safeOriginalName;
 
-            String relativeDir = folder + "/" + entityId;
+            String relativeDir = folder.getPath() + "/" + entityId;
             Path uploadDir = Paths.get(fileStoragePath)
                     .resolve(relativeDir)
                     .normalize()
@@ -58,8 +59,8 @@ public class FileService {
             FileType type = detectType(file.getContentType());
 
             StoredFile stored = StoredFile.builder()
-                    .path(storedName)
-                    .filename(safeOriginalName)
+                    .path(filePath.toString())
+                    .filename(storedName)
                     .contentType(file.getContentType())
                     .type(type)
                     .createdAt(Instant.now())
@@ -70,21 +71,6 @@ public class FileService {
         } catch (Exception e) {
             throw new FileUploadException("Failed to upload file: " + e.getMessage());
         }
-    }
-
-    public String generatePublicUrl(String folder, Long entityId, String storedName) {
-        return "/static/" + folder + "/" + entityId + "/" + storedName;
-    }
-
-    public FileResponseDto toResponse(String folder, Long entityId, StoredFile file) {
-        return FileResponseDto.builder()
-                .id(file.getId())
-                .filename(file.getFilename())
-                .storedName(file.getPath())
-                .contentType(file.getContentType())
-                .type(file.getType())
-                .url(generatePublicUrl(folder, entityId, file.getPath()))
-                .build();
     }
 
     private FileType detectType(String contentType) {

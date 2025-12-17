@@ -1,5 +1,5 @@
 import React from "react";
-import type {PeriodAggregation} from "../../features/vehicle/types/vehicle.types.ts";
+import type {PeriodAggregation} from "../../types/time.types.ts";
 
 const PREDEFINED_PERIODS: { label: string; value: PeriodAggregation }[] = [
     { label: "Last 7 days", value: "7d" },

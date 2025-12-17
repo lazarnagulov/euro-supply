@@ -12,7 +12,7 @@ export const vehicleService = {
     getVehicles: async (page: number, size: number, params: VehicleSearchParams) => {
         const isSearch = params && Object.keys(params).length !== 0;
         const response = await apiClient.get(
-            isSearch ? '/api/v1/vehicles/search' : '/api/v1/vehicles',
+            isSearch ? '/vehicles/search' : '/vehicles',
             { params: { page, size, ...params } }
         );
 
@@ -21,19 +21,19 @@ export const vehicleService = {
 
     getVehicle: async (id: number) => {
         const response = await  apiClient.get(
-            `/api/v1/vehicles/${id}`
+            `/vehicles/${id}`
         );
         return response.data;
     },
 
     getBrands: async () => {
-        const response = await apiClient.get<VehicleBrand[]>('/api/v1/vehicles/brands');
+        const response = await apiClient.get<VehicleBrand[]>('/vehicles/brands');
         return response.data;
     },
 
     getModelsByBrand: async (brandId: number) => {
         const response = await apiClient.get<VehicleModel[]>(
-            `/api/v1/vehicles/brands/${brandId}/models`
+            `/vehicles/brands/${brandId}/models`
         );
         return response.data;
     },
@@ -48,7 +48,7 @@ export const vehicleService = {
 
     createVehicle: async (data: Vehicle, images: File[]) => {
         const vehicleResponse = await apiClient.post<VehicleResponse>(
-            '/api/v1/vehicles',
+            '/vehicles',
             data
         );
 
@@ -56,7 +56,7 @@ export const vehicleService = {
         images.forEach(img => formData.append('images', img));
 
         await apiClient.post(
-            `/api/v1/vehicles/${vehicleResponse.data.id}/images`,
+            `/vehicles/${vehicleResponse.data.id}/images`,
             formData,
             { headers: { 'Content-Type': 'multipart/form-data' } }
         );
@@ -66,13 +66,13 @@ export const vehicleService = {
 
     updateVehicle: async (id: number, data: Vehicle) => {
         const vehicleResponse = await apiClient.put<VehicleResponse>(
-            `/api/v1/vehicles/${id}`,
+            `/vehicles/${id}`,
             data
         );
         return vehicleResponse.data
     },
 
     deleteVehicle: async (id: number) => {
-        await apiClient.delete(`/api/v1/vehicles/${id}`);
+        await apiClient.delete(`/vehicles/${id}`);
     }
 };

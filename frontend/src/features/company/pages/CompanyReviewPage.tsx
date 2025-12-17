@@ -23,7 +23,6 @@ const CompanyReviewPage: React.FC = () => {
         setLoading(true);
         try {
             const data = await companyService.getPendingCompanies(currentPage, pageSize);
-            console.log(data);
             setCompanies(data.content);
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);

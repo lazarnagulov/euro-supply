@@ -25,9 +25,9 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
         resolver: zodResolver(vehicleSchema),
         defaultValues: {
             registrationNumber: '',
-            maxLoadKg: '',
-            brandId: '',
-            modelId: '',
+            maxLoadKg: 0,
+            brandId: 0,
+            modelId: 0,
         },
         mode: 'onChange',
     });
@@ -39,6 +39,7 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
     const [imageError, setImageError] = useState('');
     const [loading, setLoading] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const brandId = watch('brandId');
 
@@ -127,9 +128,10 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                 await vehicleService.updateVehicle(vehicle!.id, data);
             }
             setSubmitStatus('success');
-            setTimeout(() => onSuccess(), 1000);
-        } catch (error) {
+            onSuccess();
+        } catch (error: any) {
             setSubmitStatus('error');
+            setSubmitError(error?.message);
         } finally {
             setLoading(false);
         }
@@ -168,7 +170,12 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                     {submitStatus === 'error' && (
                         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
                             <AlertCircle className="w-5 h-5 text-red-600" />
+                            {!submitError && (
                             <p className="text-red-800">Failed to {mode === 'create' ? 'create' : 'update'} vehicle. Please try again.</p>
+                            )}
+                            {submitError && (
+                                <p className="text-red-800">Failed to {mode === 'create' ? 'create' : 'update'} vehicle. { submitError }</p>
+                            )}
                         </div>
                     )}
 
@@ -277,9 +284,9 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                             <div className="mt-4">
                                 <p className="text-sm font-medium text-gray-700 mb-2">Current Images</p>
                                 <div className="grid grid-cols-4 gap-3">
-                                    {existingImages.map((url, index) => (
+                                    {existingImages.map((fileResponse, index) => (
                                         <div key={index} className="relative group">
-                                            <img src={url} alt={`Existing ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                                            <img src={fileResponse.url} alt={`Existing ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
                                             <button
                                                 type="button"
                                                 onClick={() => removeExistingImage(index)}

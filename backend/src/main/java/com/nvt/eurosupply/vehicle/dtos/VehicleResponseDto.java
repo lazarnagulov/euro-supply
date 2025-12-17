@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.vehicle.dtos;
 
+import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.Location;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,6 @@ public class VehicleResponseDto {
     private Double maxLoadKg;
     private VehicleBrandDto brand;
     private VehicleModelDto model;
-    private List<String> imageUrls;
     private Location lastLocation;
+    private List<FileResponseDto> imageUrls;
 }
