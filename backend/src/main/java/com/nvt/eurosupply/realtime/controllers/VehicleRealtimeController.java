@@ -75,7 +75,6 @@ public class VehicleRealtimeController {
                     description = "Invalid request parameters (missing start/end date or invalid date range)"
             ),
             @ApiResponse(responseCode = "404", description = "Vehicle not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error or database connection issue")
     })
     @GetMapping("/{id}/distances")
     public ResponseEntity<List<VehicleDistanceDto>> getLocations(
