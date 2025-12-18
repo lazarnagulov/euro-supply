@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -38,7 +39,10 @@ public class VehicleController {
     })
     @PostMapping
     public ResponseEntity<VehicleResponseDto> createVehicle(@Valid @RequestBody CreateVehicleRequestDto request) {
-        return new ResponseEntity<>(service.createVehicle(request), HttpStatus.CREATED);
+        VehicleResponseDto response = service.createVehicle(request);
+        return ResponseEntity
+                .created(URI.create("/api/v1/vehicles/" + response.getId()))
+                .body(response);
     }
 
     @Operation(
