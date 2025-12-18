@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {vehicleService} from "../../../api/services/vehicleService.ts";
 import type {VehicleResponse, VehicleSearchParams} from "../types/vehicle.types.ts";
-import Pagination from "../../../components/pagination/Pagination.tsx";
+import Pagination from "../../../components/common/Pagination.tsx";
 import VehicleCard from "../components/VehicleCard.tsx";
 import {Filter, Plus, Truck} from "lucide-react";
 import VehicleModal from "../components/VehicleModal.tsx";
@@ -19,7 +19,7 @@ const VehicleManagementPage = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [modalMode, setModalMode] = useState('create');
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
     const [selectedVehicle, setSelectedVehicle] = useState<VehicleResponse | null>(null);
     const pageSize = 10;
 
