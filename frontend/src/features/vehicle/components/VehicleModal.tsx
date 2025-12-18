@@ -1,16 +1,16 @@
-import type {Vehicle, VehicleBrand, VehicleModel, VehicleResponse} from "../types/vehicle.types.ts";
-import React, {useEffect, useState} from "react";
-import {useForm} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {vehicleImagesSchema, vehicleSchema} from "../schemas/vehicleSchema.ts";
-import {vehicleService} from "../../../api/services/vehicleService.ts";
-import {AlertCircle, CheckCircle, Upload, X} from "lucide-react";
+import type { Vehicle, VehicleBrand, VehicleModel, VehicleResponse } from "../types/vehicle.types.ts";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { vehicleImagesSchema, vehicleSchema } from "../schemas/vehicleSchema.ts";
+import { vehicleService } from "../../../api/services/vehicleService.ts";
+import { AlertCircle, CheckCircle, Upload, X } from "lucide-react";
 
 interface VehicleModalProps {
-    onSuccess: () => void,
-    mode: string,
-    vehicle: VehicleResponse | null,
-    onClose: () => void
+    onSuccess: () => void;
+    mode: string;
+    vehicle: VehicleResponse | null;
+    onClose: () => void;
 }
 
 const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onSuccess }) => {
@@ -24,30 +24,30 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
     } = useForm({
         resolver: zodResolver(vehicleSchema),
         defaultValues: {
-            registrationNumber: '',
+            registrationNumber: "",
             maxLoadKg: 0,
             brandId: 0,
             modelId: 0,
         },
-        mode: 'onChange',
+        mode: "onChange",
     });
 
     const [images, setImages] = useState<File[]>([]);
     const [existingImages, setExistingImages] = useState(vehicle?.imageUrls || []);
     const [brands, setBrands] = useState<VehicleBrand[]>([]);
     const [models, setModels] = useState<VehicleModel[]>([]);
-    const [imageError, setImageError] = useState('');
+    const [imageError, setImageError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+    const [submitStatus, setSubmitStatus] = useState<"success" | "error" | "partial-success" | null>(null);
     const [submitError, setSubmitError] = useState<string | null>(null);
 
-    const brandId = watch('brandId');
+    const brandId = watch("brandId");
 
     useEffect(() => {
         const initializeForm = async () => {
             await loadBrands();
 
-            if (vehicle && mode === 'edit') {
+            if (vehicle && mode === "edit") {
                 await loadModels(vehicle.brand.id);
                 reset({
                     registrationNumber: vehicle.registrationNumber,
@@ -66,7 +66,7 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
             loadModels(+brandId);
         } else {
             setModels([]);
-            setValue('modelId', 0);
+            setValue("modelId", 0);
         }
     }, [brandId, setValue]);
 
@@ -82,55 +82,83 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
-        const imageFiles = files.filter(f => f.type.startsWith('image/'));
+        const imageFiles = files.filter((f) => f.type.startsWith("image/"));
 
         if (imageFiles.length !== files.length) {
-            setImageError('Only image files are allowed');
+            setImageError("Only image files are allowed");
         } else {
-            setImageError('');
+            setImageError("");
         }
 
-        setImages(prev => [...prev, ...imageFiles]);
+        setImages((prev) => [...prev, ...imageFiles]);
     };
 
     const removeImage = (index: number) => {
-        setImages(prev => prev.filter((_, i) => i !== index));
-        setImageError('');
+        setImages((prev) => prev.filter((_, i) => i !== index));
+        setImageError("");
     };
 
     const removeExistingImage = (index: number) => {
-        setExistingImages(prev => prev.filter((_, i) => i !== index));
+        setExistingImages((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const retryImageUpload = async (vehicleId: number) => {
+        if (images.length === 0) return;
+        setLoading(true);
+        setSubmitStatus(null);
+        setImageError("");
+
+        try {
+            const formData = new FormData();
+            images.forEach((img) => formData.append("images", img));
+
+            await vehicleService.uploadVehicleImages(vehicleId, formData);
+            setSubmitStatus("success");
+            onSuccess();
+        } catch (error: any) {
+            setSubmitStatus("partial-success");
+            setSubmitError(error?.message || "Image upload failed again");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const onSubmit = async (data: Vehicle) => {
-        if (mode === 'create' && images.length === 0) {
-            setImageError('At least one vehicle image is required');
+        if (mode === "create" && images.length === 0) {
+            setImageError("At least one vehicle image is required");
             return;
         }
 
         if (images.length > 0) {
             const imageValidation = vehicleImagesSchema.safeParse({ images });
             if (!imageValidation.success) {
-                const firstError = imageValidation.error;
-                setImageError(firstError.message);
+                setImageError(imageValidation.error.message);
                 return;
             }
         }
 
         setLoading(true);
         setSubmitStatus(null);
-        setImageError('');
+        setImageError("");
 
         try {
-            if (mode === 'create') {
-                await vehicleService.createVehicle(data, images);
+            if (mode === "create") {
+                const result = await vehicleService.createVehicle(data, images);
+
+                if (!result.imagesUploaded) {
+                    setSubmitStatus("partial-success");
+                    setSubmitError("Image upload failed. You can retry now or later.");
+                } else {
+                    setSubmitStatus("success");
+                    onSuccess();
+                }
             } else {
                 await vehicleService.updateVehicle(vehicle!.id, data);
+                setSubmitStatus("success");
+                onSuccess();
             }
-            setSubmitStatus('success');
-            onSuccess();
         } catch (error: any) {
-            setSubmitStatus('error');
+            setSubmitStatus("error");
             setSubmitError(error?.message);
         } finally {
             setLoading(false);
@@ -140,42 +168,62 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-gray-100 hover:scrollbar-thumb-indigo-500">
+
                 <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-2xl z-10">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h2 className="text-2xl font-bold">
-                                {mode === 'create' ? 'Add New Vehicle' : 'Edit Vehicle'}
-                            </h2>
+                            <h2 className="text-2xl font-bold">{mode === "create" ? "Add New Vehicle" : "Edit Vehicle"}</h2>
                             <p className="text-indigo-100">
-                                {mode === 'create' ? 'Register a new delivery vehicle' : 'Update vehicle information'}
+                                {mode === "create" ? "Register a new delivery vehicle" : "Update vehicle information"}
                             </p>
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                        >
+                        <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
                             <X className="w-6 h-6" />
                         </button>
                     </div>
                 </div>
 
                 <div className="p-6 space-y-6">
-                    {submitStatus === 'success' && (
+
+                    {submitStatus === "success" && (
                         <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
                             <CheckCircle className="w-5 h-5 text-green-600" />
-                            <p className="text-green-800">Vehicle {mode === 'create' ? 'created' : 'updated'} successfully!</p>
+                            <p className="text-green-800">Vehicle {mode === "create" ? "created" : "updated"} successfully!</p>
                         </div>
                     )}
 
-                    {submitStatus === 'error' && (
+                    {submitStatus === "partial-success" && (
+                        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex flex-col gap-2">
+                            <div className="flex items-center gap-3">
+                                <AlertCircle className="w-5 h-5 text-yellow-600" />
+                                <p className="text-yellow-800">Vehicle created but image upload failed.</p>
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                                <button
+                                    onClick={() => retryImageUpload(vehicle!.id)}
+                                    disabled={loading}
+                                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50"
+                                >
+                                    Retry Upload
+                                </button>
+                                <button
+                                    onClick={onSuccess}
+                                    disabled={loading}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                                >
+                                    Continue
+                                </button>
+                            </div>
+                            {submitError && <p className="text-yellow-700 text-sm">{submitError}</p>}
+                        </div>
+                    )}
+
+                    {submitStatus === "error" && (
                         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
                             <AlertCircle className="w-5 h-5 text-red-600" />
-                            {!submitError && (
-                            <p className="text-red-800">Failed to {mode === 'create' ? 'create' : 'update'} vehicle. Please try again.</p>
-                            )}
-                            {submitError && (
-                                <p className="text-red-800">Failed to {mode === 'create' ? 'create' : 'update'} vehicle. { submitError }</p>
-                            )}
+                            <p className="text-red-800">
+                                Failed to {mode === "create" ? "create" : "update"} vehicle. {submitError || "Please try again."}
+                            </p>
                         </div>
                     )}
 
@@ -186,10 +234,10 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                             </label>
                             <input
                                 type="text"
-                                {...register('registrationNumber')}
+                                {...register("registrationNumber")}
                                 placeholder="e.g., BG-123-AB"
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                                    errors.registrationNumber ? 'border-red-500' : 'border-gray-300'
+                                    errors.registrationNumber ? "border-red-500" : "border-gray-300"
                                 }`}
                             />
                             {errors.registrationNumber && (
@@ -203,10 +251,10 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                             </label>
                             <input
                                 type="number"
-                                {...register('maxLoadKg', { valueAsNumber: true })}
+                                {...register("maxLoadKg", { valueAsNumber: true })}
                                 placeholder="e.g., 2500"
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                                    errors.maxLoadKg ? 'border-red-500' : 'border-gray-300'
+                                    errors.maxLoadKg ? "border-red-500" : "border-gray-300"
                                 }`}
                             />
                             {errors.maxLoadKg && (
@@ -219,19 +267,19 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                                 Brand *
                             </label>
                             <select
-                                {...register('brandId', { valueAsNumber: true })}
+                                {...register("brandId", { valueAsNumber: true })}
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                                    errors.brandId ? 'border-red-500' : 'border-gray-300'
+                                    errors.brandId ? "border-red-500" : "border-gray-300"
                                 }`}
                             >
                                 <option value="">Select brand</option>
-                                {brands.map(brand => (
-                                    <option key={brand.id} value={brand.id}>{brand.name}</option>
+                                {brands.map((brand) => (
+                                    <option key={brand.id} value={brand.id}>
+                                        {brand.name}
+                                    </option>
                                 ))}
                             </select>
-                            {errors.brandId && (
-                                <p className="mt-1 text-sm text-red-600">{errors.brandId.message}</p>
-                            )}
+                            {errors.brandId && <p className="mt-1 text-sm text-red-600">{errors.brandId.message}</p>}
                         </div>
 
                         <div>
@@ -239,31 +287,33 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                                 Model *
                             </label>
                             <select
-                                {...register('modelId', { valueAsNumber: true })}
+                                {...register("modelId", { valueAsNumber: true })}
                                 disabled={!brandId}
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100 ${
-                                    errors.modelId ? 'border-red-500' : 'border-gray-300'
+                                    errors.modelId ? "border-red-500" : "border-gray-300"
                                 }`}
                             >
                                 <option value="">Select model</option>
-                                {models.map(model => (
-                                    <option key={model.id} value={model.id}>{model.name}</option>
+                                {models.map((model) => (
+                                    <option key={model.id} value={model.id}>
+                                        {model.name}
+                                    </option>
                                 ))}
                             </select>
-                            {errors.modelId && (
-                                <p className="mt-1 text-sm text-red-600">{errors.modelId.message}</p>
-                            )}
+                            {errors.modelId && <p className="mt-1 text-sm text-red-600">{errors.modelId.message}</p>}
                         </div>
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Vehicle Images {mode === 'create' && '*'}
+                            Vehicle Images {mode === "create" && "*"}
                         </label>
 
-                        <div className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                            imageError ? 'border-red-500' : 'border-gray-300'
-                        }`}>
+                        <div
+                            className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                                imageError ? "border-red-500" : "border-gray-300"
+                            }`}
+                        >
                             <input
                                 type="file"
                                 multiple
@@ -286,7 +336,11 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                                 <div className="grid grid-cols-4 gap-3">
                                     {existingImages.map((fileResponse, index) => (
                                         <div key={index} className="relative group">
-                                            <img src={fileResponse.url} alt={`Existing ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                                            <img
+                                                src={fileResponse.url}
+                                                alt={`Existing ${index + 1}`}
+                                                className="w-full h-24 object-cover rounded-lg"
+                                            />
                                             <button
                                                 type="button"
                                                 onClick={() => removeExistingImage(index)}
@@ -343,10 +397,12 @@ const VehicleModal: React.FC<VehicleModalProps> = ({ mode, vehicle, onClose, onS
                         {loading ? (
                             <>
                                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                {mode === 'create' ? 'Creating...' : 'Updating...'}
+                                {mode === "create" ? "Creating..." : "Updating..."}
                             </>
+                        ) : mode === "create" ? (
+                            "Create Vehicle"
                         ) : (
-                            mode === 'create' ? 'Create Vehicle' : 'Update Vehicle'
+                            "Update Vehicle"
                         )}
                     </button>
                 </div>

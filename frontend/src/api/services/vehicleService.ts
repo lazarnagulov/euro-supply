@@ -31,21 +31,31 @@ export const vehicleService = {
     },
 
     createVehicle: async (data: Vehicle, images: File[]) => {
-        const vehicleResponse = await apiClient.post<VehicleResponse>(
-            '/vehicles',
-            data
-        );
+        const vehicleResponse = await apiClient.post<VehicleResponse>('/vehicles', data);
 
-        const formData = new FormData();
-        images.forEach(img => formData.append('images', img));
+        if (images.length === 0) {
+            return { vehicle: vehicleResponse.data, imagesUploaded: true };
+        }
 
+        try {
+            const formData = new FormData();
+            images.forEach(img => formData.append('images', img));
+
+            await apiClient.post(`/vehicles/${vehicleResponse.data.id}/images`, formData);
+
+            return { vehicle: vehicleResponse.data, imagesUploaded: true };
+        } catch (err) {
+            return { vehicle: vehicleResponse.data, imagesUploaded: false };
+        }
+    },
+
+    uploadVehicleImages: async (vehicleId: number, formData: FormData) => {
         await apiClient.post(
-            `/vehicles/${vehicleResponse.data.id}/images`,
+            `/vehicles/${vehicleId}/images`,
             formData,
             { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-
-        return vehicleResponse.data;
+        return true;
     },
 
     updateVehicle: async (id: number, data: Vehicle) => {
