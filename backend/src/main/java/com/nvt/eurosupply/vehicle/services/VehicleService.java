@@ -114,4 +114,5 @@ public class VehicleService {
         Specification<Vehicle> specification = VehicleSpecification.search(request);
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
     }
+
 }

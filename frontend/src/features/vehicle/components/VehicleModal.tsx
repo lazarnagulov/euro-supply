@@ -6,11 +6,11 @@ import { vehicleService } from "../../../api/services/vehicleService.ts";
 import { StatusAlert } from "../../../components/common/StatusAlert.tsx";
 import { ImageUpload } from "../../../components/file/ImageUpload.tsx";
 import { useVehicleBrandData } from "../hooks/useVehicleBrandData.tsx";
-import { useImageManagement } from "../../../hooks/file/useImageManagement.tsx";
 import { ModalHeader } from "./VehicleModalHeader.tsx";
 import { FormField } from "../../../components/common/FormField.tsx";
 import { ModalFooter } from "./VehicleModalFooter.tsx";
 import type {Vehicle, VehicleResponse} from "../types/vehicle.types.ts";
+import {useVehicleImages} from "../hooks/useVehicleImage.tsx";
 
 export type SubmitStatus = "success" | "error" | "partial-success" | null;
 
@@ -48,15 +48,13 @@ const VehicleModal: React.FC<VehicleModalProps> = ({
     const { brands, models, setModels, loadBrands, loadModels } = useVehicleBrandData();
     const {
         images,
-        setImages,
         existingImages,
         imageError,
-        setImageError,
         handleImageUpload,
         removeImage,
         removeExistingImage,
-        validateImages,
-    } = useImageManagement(vehicle);
+        validateForCreate,
+    } = useVehicleImages(vehicle);
 
     const [loading, setLoading] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<SubmitStatus>(null);
@@ -97,7 +95,6 @@ const VehicleModal: React.FC<VehicleModalProps> = ({
 
         setLoading(true);
         setSubmitStatus(null);
-        setImageError("");
 
         try {
             const formData = new FormData();
@@ -105,7 +102,6 @@ const VehicleModal: React.FC<VehicleModalProps> = ({
 
             await vehicleService.uploadVehicleImages(createdVehicleId, formData);
             setSubmitStatus("success");
-            setImages([]);
             onSuccess();
         } catch (error: any) {
             setSubmitStatus("partial-success");
@@ -116,16 +112,16 @@ const VehicleModal: React.FC<VehicleModalProps> = ({
     };
 
     const onSubmit = async (data: Vehicle) => {
-        if (!validateImages(mode)) return;
+        if (mode === "create" && !validateForCreate()) return;
 
         setLoading(true);
         setSubmitStatus(null);
-        setImageError("");
+        setSubmitError(null);
 
         try {
             if (mode === "create") {
                 const result = await vehicleService.createVehicle(data, images);
-                setCreatedVehicleId(result.vehicle.id || vehicle?.id || null);
+                setCreatedVehicleId(result.vehicle.id ?? null);
 
                 if (!result.imagesUploaded) {
                     setSubmitStatus("partial-success");
@@ -141,11 +137,12 @@ const VehicleModal: React.FC<VehicleModalProps> = ({
             }
         } catch (error: any) {
             setSubmitStatus("error");
-            setSubmitError(error?.message);
+            setSubmitError(error?.message || "Something went wrong");
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

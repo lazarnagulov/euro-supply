@@ -68,5 +68,9 @@ export const vehicleService = {
 
     deleteVehicle: async (id: number) => {
         await apiClient.delete(`/vehicles/${id}`);
+    },
+
+    deleteVehicleImage: async (id: number, imageId: number) => {
+        await apiClient.delete(`/vehicles/${id}/images/${imageId}`);
     }
 };

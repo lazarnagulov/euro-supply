@@ -1,46 +1,61 @@
 import React, { useState } from "react";
-import type { VehicleResponse } from "../../features/vehicle/types/vehicle.types.ts";
-import { vehicleImagesSchema } from "../../features/vehicle/schemas/vehicleSchema.ts";
+import type {ZodType} from "zod";
 
-export const useImageManagement = (vehicle: VehicleResponse | null) => {
+export interface UseImageManagementOptions<TExisting = string> {
+    initialExistingImages?: TExisting[];
+    maxImages?: number;
+    schema?: ZodType<{ images: File[] }>;
+    allowedTypes?: string[];
+}
+
+export const useImageManagement = <TExisting = string>({
+    initialExistingImages = [],
+    maxImages,
+    schema,
+    allowedTypes = ["image/"],
+}: UseImageManagementOptions<TExisting>) => {
     const [images, setImages] = useState<File[]>([]);
-    const [existingImages, setExistingImages] = useState(vehicle?.imageUrls || []);
+    const [existingImages, setExistingImages] =
+        useState<TExisting[]>(initialExistingImages);
     const [imageError, setImageError] = useState("");
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
-        const imageFiles = files.filter((f) => f.type.startsWith("image/"));
 
-        if (imageFiles.length !== files.length) {
+        const validFiles = files.filter(file =>
+            allowedTypes.some(type => file.type.startsWith(type))
+        );
+
+        if (validFiles.length !== files.length) {
             setImageError("Only image files are allowed");
-        } else {
-            setImageError("");
+            return;
         }
 
-        setImages((prev) => [...prev, ...imageFiles]);
+        if (maxImages && images.length + validFiles.length > maxImages) {
+            setImageError(`Maximum ${maxImages} images allowed`);
+            return;
+        }
+
+        setImages(prev => [...prev, ...validFiles]);
+        setImageError("");
     };
 
     const removeImage = (index: number) => {
-        setImages((prev) => prev.filter((_, i) => i !== index));
+        setImages(prev => prev.filter((_, i) => i !== index));
         setImageError("");
     };
 
     const removeExistingImage = (index: number) => {
-        setExistingImages((prev) => prev.filter((_, i) => i !== index));
+        setExistingImages(prev => prev.filter((_, i) => i !== index));
     };
 
-    const validateImages = (mode: string) => {
-        if (mode === "create" && images.length === 0) {
-            setImageError("At least one vehicle image is required");
-            return false;
-        }
+    const validateImages = () => {
+        if (!schema) return true;
 
-        if (images.length > 0) {
-            const imageValidation = vehicleImagesSchema.safeParse({ images });
-            if (!imageValidation.success) {
-                setImageError(imageValidation.error.message);
-                return false;
-            }
+        const result = schema.safeParse({ images });
+        if (!result.success) {
+            setImageError(result.error.message);
+            return false;
         }
 
         return true;
@@ -48,10 +63,13 @@ export const useImageManagement = (vehicle: VehicleResponse | null) => {
 
     return {
         images,
-        setImages,
         existingImages,
         imageError,
+
+        setImages,
+        setExistingImages,
         setImageError,
+
         handleImageUpload,
         removeImage,
         removeExistingImage,

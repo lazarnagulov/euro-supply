@@ -147,4 +147,13 @@ public class VehicleController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{vehicleId}/images/{imageId}")
+    public ResponseEntity<Void> deleteImage(
+            @PathVariable Long vehicleId,
+            @PathVariable Long imageId
+    ) {
+        // TODO: Add service call when vehicle details is merged
+        return ResponseEntity.noContent().build();
+    }
+
 }
