@@ -1,77 +1,89 @@
 import React from "react";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react";
 
-export type SubmitStatus = "success" | "error" | "partial-success" | null;
+export type AlertType = "success" | "error" | "warning" | "info";
 
 export interface StatusAlertProps {
-    status: SubmitStatus;
-    mode: "create" | "edit";
-    error: string | null;
-    onRetry: () => void;
-    onContinue: () => void;
-    loading: boolean;
+    type: AlertType;
+    message: string;
+    onAction?: () => void;
+    actionLabel?: string;
+    onSecondaryAction?: () => void;
+    secondaryActionLabel?: string;
 }
 
+const alertConfig = {
+    success: {
+        bgColor: "bg-green-50",
+        borderColor: "border-green-200",
+        textColor: "text-green-800",
+        icon: CheckCircle,
+        iconColor: "text-green-600"
+    },
+    error: {
+        bgColor: "bg-red-50",
+        borderColor: "border-red-200",
+        textColor: "text-red-800",
+        icon: AlertCircle,
+        iconColor: "text-red-600"
+    },
+    warning: {
+        bgColor: "bg-yellow-50",
+        borderColor: "border-yellow-200",
+        textColor: "text-yellow-800",
+        icon: AlertTriangle,
+        iconColor: "text-yellow-600"
+    },
+    info: {
+        bgColor: "bg-blue-50",
+        borderColor: "border-blue-200",
+        textColor: "text-blue-800",
+        icon: Info,
+        iconColor: "text-blue-600"
+    }
+};
+
 export const StatusAlert: React.FC<StatusAlertProps> = ({
-    status,
-    mode,
-    error,
-    onRetry,
-    onContinue,
-    loading
+    type,
+    message,
+    onAction,
+    actionLabel,
+    onSecondaryAction,
+    secondaryActionLabel
 }) => {
-    if (!status) return null;
+    const config = alertConfig[type];
+    const Icon = config.icon;
 
-    if (status === "success") {
-        return (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <p className="text-green-800">
-                    Vehicle {mode === "create" ? "created" : "updated"} successfully!
-                </p>
+    return (
+        <div className={`p-4 ${config.bgColor} border ${config.borderColor} rounded-lg flex flex-col gap-2`}>
+            <div className="flex items-center gap-3">
+                <Icon className={`w-5 h-5 ${config.iconColor}`} />
+                <p className={config.textColor}>{message}</p>
             </div>
-        );
-    }
-
-    if (status === "partial-success") {
-        return (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex flex-col gap-2">
-                <div className="flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 text-yellow-600" />
-                    <p className="text-yellow-800">Vehicle created but image upload failed.</p>
-                </div>
+            {(onAction || onSecondaryAction) && (
                 <div className="flex gap-2 mt-2">
-                    <button
-                        onClick={onRetry}
-                        disabled={loading}
-                        className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50"
-                    >
-                        Retry Upload
-                    </button>
-                    <button
-                        onClick={onContinue}
-                        disabled={loading}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                    >
-                        Continue
-                    </button>
+                    {onAction && actionLabel && (
+                        <button
+                            onClick={onAction}
+                            className={`px-4 py-2 rounded-lg transition-colors ${
+                                type === "warning"
+                                    ? "bg-yellow-600 text-white hover:bg-yellow-700"
+                                    : "bg-indigo-600 text-white hover:bg-indigo-700"
+                            }`}
+                        >
+                            {actionLabel}
+                        </button>
+                    )}
+                    {onSecondaryAction && secondaryActionLabel && (
+                        <button
+                            onClick={onSecondaryAction}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                            {secondaryActionLabel}
+                        </button>
+                    )}
                 </div>
-                {error && <p className="text-yellow-700 text-sm">{error}</p>}
-            </div>
-        );
-    }
-
-    if (status === "error") {
-        return (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600" />
-                <p className="text-red-800">
-                    Failed to {mode === "create" ? "create" : "update"} vehicle.
-                    {error ? ` ${error}` : " Please try again."}
-                </p>
-            </div>
-        );
-    }
-
-    return null;
+            )}
+        </div>
+    );
 };

@@ -1,16 +1,18 @@
-import type {Vehicle, VehicleResponse} from "../types/vehicle.types.ts";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { vehicleSchema } from "../schemas/vehicleSchema.ts";
 import { vehicleService } from "../../../api/services/vehicleService.ts";
-import {StatusAlert, type SubmitStatus} from "../../../components/common/StatusAlert.tsx";
-import { ImageUpload } from "../../../components/image/ImageUpload.tsx";
-import {useVehicleBrandData} from "../hooks/useVehicleBrandData.tsx";
-import {useImageManagement} from "../../../hooks/image/useImageManagement.tsx";
-import {ModalHeader} from "./VehicleModalHeader.tsx";
-import {FormField} from "../../../components/common/FormField.tsx";
-import {ModalFooter} from "./VehicleModalFooter.tsx";
+import { StatusAlert } from "../../../components/common/StatusAlert.tsx";
+import { ImageUpload } from "../../../components/file/ImageUpload.tsx";
+import { useVehicleBrandData } from "../hooks/useVehicleBrandData.tsx";
+import { useImageManagement } from "../../../hooks/file/useImageManagement.tsx";
+import { ModalHeader } from "./VehicleModalHeader.tsx";
+import { FormField } from "../../../components/common/FormField.tsx";
+import { ModalFooter } from "./VehicleModalFooter.tsx";
+import type {Vehicle, VehicleResponse} from "../types/vehicle.types.ts";
+
+export type SubmitStatus = "success" | "error" | "partial-success" | null;
 
 export interface VehicleModalProps {
     onSuccess: () => void;
@@ -148,7 +150,6 @@ const VehicleModal: React.FC<VehicleModalProps> = ({
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-gray-100 hover:scrollbar-thumb-indigo-500">
-
                 <ModalHeader mode={mode} onClose={onClose} />
 
                 <div className="p-6 space-y-6">
@@ -226,15 +227,17 @@ const VehicleModal: React.FC<VehicleModalProps> = ({
                         onRemoveImage={removeImage}
                         onRemoveExistingImage={removeExistingImage}
                     />
-
+                    {submitStatus && (
                     <StatusAlert
-                        status={submitStatus}
-                        mode={mode}
-                        error={submitError}
-                        onRetry={retryImageUpload}
-                        onContinue={onSuccess}
-                        loading={loading}
-                    />
+                        type={submitStatus === "success" ? "success" : submitStatus === "error" ? "error" : submitStatus === "partial-success" ? "warning" : "info"}
+                        message={submitStatus === "success"
+                            ? "Vehicle saved successfully!"
+                            : submitError || "Something went wrong!"}
+                        onAction={retryImageUpload}
+                        actionLabel={ submitStatus == "partial-success" ?  "Retry Upload" : undefined}
+                        secondaryActionLabel={ submitStatus == "partial-success" ? "Continue" : undefined }
+                        onSecondaryAction = { onSuccess }
+                    />)}
                 </div>
 
                 <ModalFooter
