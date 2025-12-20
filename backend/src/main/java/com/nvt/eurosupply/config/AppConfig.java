@@ -1,7 +1,8 @@
 package com.nvt.eurosupply.config;
 
-import ch.qos.logback.classic.pattern.MessageConverter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

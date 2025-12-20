@@ -9,6 +9,7 @@ import com.nvt.eurosupply.vehicle.repositories.VehicleBrandRepository;
 import com.nvt.eurosupply.vehicle.repositories.VehicleModelRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,10 +23,12 @@ public class VehicleBrandService {
 
     private final VehicleMapper mapper;
 
+    @Cacheable(value = "vehicleBrands")
     public List<VehicleBrandDto> getBrands() {
         return repository.findAll().stream().map(mapper::toResponse).toList();
     }
 
+    @Cacheable(value = "vehicleModels", key = "#id")
     public List<VehicleModelDto> getBrandModels(Long id) {
         return findBrand(id).getModels().stream().map(mapper::toResponse).toList();
     }
