@@ -55,5 +55,6 @@ public class Vehicle {
     @PrePersist
     public void onCreate() {
         this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 }

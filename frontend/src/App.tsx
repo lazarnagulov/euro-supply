@@ -1,23 +1,27 @@
-import './App.css'
-import {Route, Routes} from "react-router-dom";
-import {CompanyRegistrationPage} from "./features/company/pages/CompanyRegistrationPage.tsx";
+import "./App.css";
+import { Route, Routes } from "react-router-dom";
+import { CompanyRegistrationPage } from "./features/company/pages/CompanyRegistrationPage.tsx";
 import CompanyReviewPage from "./features/company/pages/CompanyReviewPage.tsx";
 import NavigationHeader from "./components/layout/NavigationHeader.tsx";
 import VehicleManagementPage from "./features/vehicle/pages/VehicleManagementPage.tsx";
+import { ProductCreatePage } from "./features/product/pages/CreateProductPage.tsx";
 
 function App() {
-
   return (
-      <>
-          <NavigationHeader />
-          <Routes>
-              <Route path="/" element={<p> Home Page </p>} />
-              <Route path="/company-registration" element={<CompanyRegistrationPage/>}/>
-              <Route path="/company-review" element={<CompanyReviewPage/>}/>
-              <Route path="/vehicle-management" element={<VehicleManagementPage/>}/>
-          </Routes>
-      </>
-  )
+    <>
+      <NavigationHeader />
+      <Routes>
+        <Route path="/" element={<p> Home Page </p>} />
+        <Route
+          path="/company-registration"
+          element={<CompanyRegistrationPage />}
+        />
+        <Route path="/company-review" element={<CompanyReviewPage />} />
+        <Route path="/vehicle-management" element={<VehicleManagementPage />} />
+        <Route path="/create-product" element={<ProductCreatePage />} />
+      </Routes>
+    </>
+  );
 }
 
-export default App
+export default App;
