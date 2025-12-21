@@ -2,7 +2,9 @@ package com.nvt.eurosupply.product.services;
 
 import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
 import com.nvt.eurosupply.product.dtos.ProductResponseDto;
+import com.nvt.eurosupply.product.dtos.UpdateProductRequestDto;
 import com.nvt.eurosupply.product.mappers.ProductMapper;
+import com.nvt.eurosupply.product.models.Category;
 import com.nvt.eurosupply.product.models.Product;
 import com.nvt.eurosupply.product.repositories.ProductRepository;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
@@ -17,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.Instant;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +56,24 @@ public class ProductService {
 
     public PagedResponse<ProductResponseDto> getProducts(Pageable pageable) {
         return mapper.toPagedResponse(repository.findAll(pageable));
+    }
+
+    public ProductResponseDto updateProduct(Long id, UpdateProductRequestDto request) {
+        Product product = find(id);
+
+        if (!Objects.equals(product.getCategory().getId(), request.getCategoryId())) {
+            Category category = categoryService.find(request.getCategoryId());
+            product.setCategory(category);
+        }
+
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setWeight(request.getWeight());
+        product.setOnSale(request.getOnSale());
+        product.setUpdatedAt(Instant.now());
+
+        return mapper.toResponse(repository.save(product));
     }
 
     public void deleteProduct(Long id) {

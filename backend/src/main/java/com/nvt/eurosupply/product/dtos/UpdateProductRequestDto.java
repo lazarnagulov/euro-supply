@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateProductRequestDto {
+public class UpdateProductRequestDto {
     @NotBlank(message = "Product name is required")
     private String name;
 

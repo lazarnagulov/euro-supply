@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, CheckCircle, Upload, X } from "lucide-react";
 
-import type {
-  CreateProductRequest,
-  ProductWithImage,
-} from "../types/product.types";
+import type { ProductRequest, ProductWithImage } from "../types/product.types";
 import type { Category } from "../types/category.types";
-
 import { productSchema } from "../schemas/productSchema";
 import { productService } from "../../../api/services/productService";
 import { categoryService } from "../../../api/services/categoryService";
@@ -30,8 +26,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
-  } = useForm<CreateProductRequest>({
+  } = useForm<ProductRequest>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
@@ -40,38 +37,52 @@ const ProductModal: React.FC<ProductModalProps> = ({
       weight: 0,
       onSale: false,
       categoryId: 0,
+      category: undefined,
     },
     mode: "onChange",
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [image, setImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isImageChanged, setIsImageChanged] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(
+    null
+  );
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   /* -------------------- INIT -------------------- */
   useEffect(() => {
     const init = async () => {
-      const data = await categoryService.getCategories();
-      setCategories(data);
+      try {
+        const data = await categoryService.getCategories();
+        setCategories(data);
 
-      if (product && mode === "edit") {
-        reset({
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          weight: product.weight,
-          onSale: product.onSale,
-          categoryId: product.categoryId,
-        });
+        if (product && mode === "edit") {
+          reset({
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            weight: product.weight,
+            onSale: product.onSale,
+            categoryId: product.category?.id || product.categoryId || 0,
+            category: product.category,
+          });
+
+          if (product.imageUrl) {
+            setPreviewUrl(product.imageUrl.url || null);
+          }
+          setIsImageChanged(false);
+        }
+      } catch (error) {
+        console.error("Failed to initialize form:", error);
       }
     };
-
     init();
-  }, [product, mode, reset]);
+  }, [product?.id, mode, reset]);
 
   /* -------------------- IMAGE -------------------- */
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,20 +93,25 @@ const ProductModal: React.FC<ProductModalProps> = ({
       setImageError("Only image files are allowed");
       return;
     }
-
     if (file.size > 10 * 1024 * 1024) {
       setImageError("Image must be less than 10MB");
       return;
     }
 
     setImage(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setIsImageChanged(true);
     setImageError(null);
   };
 
-  const removeImage = () => setImage(null);
+  const removeImage = () => {
+    setImage(null);
+    setPreviewUrl(null);
+    setIsImageChanged(true);
+  };
 
   /* -------------------- SUBMIT -------------------- */
-  const onSubmit = async (data: CreateProductRequest) => {
+  const onSubmit = async (data: ProductRequest) => {
     if (mode === "create" && !image) {
       setImageError("Product image is required");
       return;
@@ -106,21 +122,33 @@ const ProductModal: React.FC<ProductModalProps> = ({
     setSubmitError(null);
 
     try {
-      let saved: ProductWithImage;
-
       if (mode === "create") {
-        saved = await productService.createProduct(data);
-        if (image) await productService.uploadImage(saved.id, image);
+        const saved = await productService.createProduct(data);
+
+        if (image) {
+          await productService.uploadImage(saved.id, image);
+        }
+      } else if (mode === "edit" && product) {
+        const saved = await productService.updateProduct(product.id, data);
+        console.log("Product updated:", saved);
+
+        if (isImageChanged && image) {
+          console.log("Uploading new image for product...");
+          await productService.uploadImage(product.id, image);
+        }
       } else {
-        saved = await productService.updateProduct(product!.id, data);
-        if (image) await productService.uploadImage(product!.id, image);
+        console.error("Invalid mode or missing product:", { mode, product });
+        throw new Error("Invalid operation");
       }
 
       setSubmitStatus("success");
-      onSuccess();
+      setTimeout(() => {
+        onSuccess();
+      }, 500);
     } catch (err: any) {
+      console.error("Submit error:", err);
       setSubmitStatus("error");
-      setSubmitError(err?.message);
+      setSubmitError(err?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -163,7 +191,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
               </p>
             </div>
           )}
-
           {submitStatus === "error" && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-red-600" />
@@ -174,131 +201,197 @@ const ProductModal: React.FC<ProductModalProps> = ({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* NAME */}
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Name *
-              </label>
-              <input
-                {...register("name")}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
-                  errors.name ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-            </div>
-
-            {/* PRICE */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Price *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                {...register("price", { valueAsNumber: true })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
-                  errors.price ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-            </div>
-
-            {/* WEIGHT */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Weight (kg) *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                {...register("weight", { valueAsNumber: true })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
-                  errors.weight ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-            </div>
-
-            {/* CATEGORY */}
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
-              </label>
-              <select
-                {...register("categoryId", { valueAsNumber: true })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
-                  errors.categoryId ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                <option value={0}>Select category</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* DESCRIPTION */}
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
-              </label>
-              <textarea
-                {...register("description")}
-                rows={4}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
-                  errors.description ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-            </div>
-
-            {/* IMAGE */}
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Image {mode === "create" && "*"}
-              </label>
-
-              <div
-                className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                  imageError ? "border-red-500" : "border-gray-300"
-                }`}
-              >
+          <form
+            id="product-form"
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              {/* NAME */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Name *
+                </label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  id="product-image"
+                  {...register("name")}
+                  placeholder="e.g., Premium Coffee Beans"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                    errors.name ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
-                <label htmlFor="product-image" className="cursor-pointer">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-sm text-gray-600">
-                    Click to upload product image
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.name.message}
                   </p>
+                )}
+              </div>
+
+              {/* PRICE */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  {...register("price", { valueAsNumber: true })}
+                  placeholder="e.g., 29.99"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                    errors.price ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.price && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.price.message}
+                  </p>
+                )}
+              </div>
+
+              {/* WEIGHT */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Weight (kg) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  {...register("weight", { valueAsNumber: true })}
+                  placeholder="e.g., 0.5"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                    errors.weight ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.weight && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.weight.message}
+                  </p>
+                )}
+              </div>
+              {/* CATEGORY */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <Controller
+                  name="categoryId"
+                  control={control}
+                  render={({ field }) => {
+                    return (
+                      <select
+                        {...field}
+                        value={field.value || 0}
+                        onChange={(e) => {
+                          const newValue = Number(e.target.value);
+                          field.onChange(newValue);
+                        }}
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                          errors.categoryId
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        <option value={0}>Select category</option>
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    );
+                  }}
+                />
+                {errors.categoryId && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.categoryId.message}
+                  </p>
+                )}
+              </div>
+
+              {/* ON SALE CHECKBOX */}
+              <div className="col-span-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    {...register("onSale")}
+                    className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Product is on sale
+                  </span>
                 </label>
               </div>
 
-              {image && (
-                <div className="mt-4 relative w-40">
-                  <img
-                    src={URL.createObjectURL(image)}
-                    className="w-full h-24 object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
+              {/* DESCRIPTION */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  {...register("description")}
+                  rows={4}
+                  placeholder="Describe your product..."
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                    errors.description ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.description && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
 
-              {imageError && (
-                <p className="mt-2 text-sm text-red-600">{imageError}</p>
-              )}
+              {/* IMAGE */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Image {mode === "create" && "*"}
+                </label>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                    imageError ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="product-image"
+                  />
+                  <label htmlFor="product-image" className="cursor-pointer">
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm text-gray-600">
+                      Click to upload product image
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PNG, JPG up to 10MB
+                    </p>
+                  </label>
+                </div>
+
+                {previewUrl && (
+                  <div className="mt-4 relative w-40">
+                    <img
+                      src={previewUrl}
+                      alt="Product preview"
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+
+                {imageError && (
+                  <p className="mt-2 text-sm text-red-600">{imageError}</p>
+                )}
+              </div>
             </div>
-          </div>
+          </form>
         </div>
 
         {/* FOOTER */}
@@ -306,22 +399,26 @@ const ProductModal: React.FC<ProductModalProps> = ({
           <button
             onClick={onClose}
             disabled={loading}
-            className="px-6 py-3 border rounded-lg text-gray-700 hover:bg-gray-100"
+            className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium disabled:opacity-50"
           >
             Cancel
           </button>
           <button
-            onClick={handleSubmit(onSubmit)}
+            type="submit"
+            form="product-form"
             disabled={loading}
-            className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
+            className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {loading
-              ? mode === "create"
-                ? "Creating..."
-                : "Updating..."
-              : mode === "create"
-              ? "Create Product"
-              : "Update Product"}
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                {mode === "create" ? "Creating..." : "Updating..."}
+              </>
+            ) : mode === "create" ? (
+              "Create Product"
+            ) : (
+              "Update Product"
+            )}
           </button>
         </div>
       </div>

@@ -14,7 +14,7 @@ export interface Product {
     categoryId: number
 }
 
-export interface CreateProductRequest {
+export interface ProductRequest {
     name: string;
     description: string;
     price: number;

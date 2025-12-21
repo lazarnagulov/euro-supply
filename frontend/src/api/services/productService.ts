@@ -1,5 +1,5 @@
 import apiClient from "../client";
-import type { CreateProductRequest, Product, ProductWithImage } from "../../features/product/types/product.types";
+import type { Product, ProductRequest, ProductWithImage } from "../../features/product/types/product.types";
 
 export const productService = {
 
@@ -9,16 +9,15 @@ export const productService = {
       /*isSearch ? "/products/search" :*/ "/products",
       { params: { page, size, /*...params*/ } }
     );
-    console.log("Fetched products:", response.data);
     return response.data;
   },
 
-  createProduct: async (data: CreateProductRequest): Promise<ProductWithImage> => {
+  createProduct: async (data: ProductRequest): Promise<ProductWithImage> => {
     const response = await apiClient.post<Product>("/products", data);
     return response.data as ProductWithImage;
   },
 
-  updateProduct: async (id: number, data: CreateProductRequest): Promise<ProductWithImage> => {
+  updateProduct: async (id: number, data: ProductRequest): Promise<ProductWithImage> => {
     const response = await apiClient.put<Product>(`/products/${id}`, data);
     return response.data as ProductWithImage;
   },

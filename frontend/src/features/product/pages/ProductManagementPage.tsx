@@ -91,7 +91,15 @@ const ProductManagementPage = () => {
 
   const handleSuccess = () => {
     setShowModal(false);
+    setSelectedProduct(null);
+    setModalMode("create");
     loadProducts();
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedProduct(null);
+    setModalMode("create");
   };
 
   return (
@@ -193,9 +201,10 @@ const ProductManagementPage = () => {
         {/* CREATE / EDIT MODAL */}
         {showModal && (
           <ProductModal
+            key={modalMode}
             mode={modalMode}
             product={selectedProduct}
-            onClose={() => setShowModal(false)}
+            onClose={handleCloseModal}
             onSuccess={handleSuccess}
           />
         )}
