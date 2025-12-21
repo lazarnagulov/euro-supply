@@ -6,9 +6,12 @@ export interface Product {
     name: string;
     description: string;
     price: number;
+    weight: number;
+    onSale: boolean;
     category: Category;
     createdAt: string;
     updatedAt: string;
+    categoryId: number
 }
 
 export interface CreateProductRequest {
@@ -18,8 +21,9 @@ export interface CreateProductRequest {
     weight: number;
     onSale: boolean;
     categoryId: number;
+    category?: Category;
 }
 
 export interface ProductWithImage extends Product {
-    image: StoredFile;
+    imageUrl: StoredFile;
 }

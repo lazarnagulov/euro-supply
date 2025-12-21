@@ -1,0 +1,70 @@
+import React from "react";
+import { Edit2, Trash2, Package } from "lucide-react";
+import type { ProductWithImage } from "../types/product.types";
+
+interface ProductCardProps {
+  product: ProductWithImage;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  onEdit,
+  onDelete,
+}) => {
+  return (
+    <div className="bg-white rounded-xl shadow hover:shadow-xl transition-all overflow-hidden">
+      {/* IMAGE */}
+      <div className="relative h-48 bg-gray-200">
+        {product.imageUrl?.url ? (
+          <img
+            src={product.imageUrl.url}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Package className="w-16 h-16 text-gray-400" />
+          </div>
+        )}
+      </div>
+
+      {/* CONTENT */}
+      <div className="p-4">
+        <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
+
+        <div className="space-y-2 text-sm text-gray-600 mb-4">
+          <p>
+            <span className="font-semibold">Category:</span>{" "}
+            {product.category?.name || "N/A"}
+          </p>
+          <p>
+            <span className="font-semibold">Price:</span> €
+            {product.price.toFixed(2)}
+          </p>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="flex gap-2">
+          <button
+            onClick={onEdit}
+            className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Edit2 className="w-4 h-4" />
+            Edit
+          </button>
+
+          <button
+            onClick={onDelete}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductCard;

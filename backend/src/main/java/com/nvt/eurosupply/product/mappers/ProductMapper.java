@@ -5,8 +5,10 @@ import com.nvt.eurosupply.product.dtos.ProductResponseDto;
 import com.nvt.eurosupply.product.models.Product;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
+import com.nvt.eurosupply.shared.models.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,5 +39,13 @@ public class ProductMapper {
                     ));
         }
         return response;
+    }
+
+    public PagedResponse<ProductResponseDto> toPagedResponse(Page<Product> page) {
+        return new PagedResponse<>(
+                page.getContent().stream().map(this::toResponse).toList(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
     }
 }

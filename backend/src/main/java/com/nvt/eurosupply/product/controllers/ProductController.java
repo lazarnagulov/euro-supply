@@ -4,12 +4,14 @@ import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
 import com.nvt.eurosupply.product.dtos.ProductResponseDto;
 import com.nvt.eurosupply.product.services.ProductService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.models.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,5 +55,17 @@ public class ProductController {
             @Valid @RequestBody MultipartFile image
     ) {
         return ResponseEntity.ok(service.uploadImage(id, image));
+    }
+
+    @Operation(
+            summary = "Get all products",
+            description = "Retrieves a paginated list of all products."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Products retrieved successfully")
+    })
+    @GetMapping
+    public ResponseEntity<PagedResponse<ProductResponseDto>> getProducts(Pageable pageable) {
+        return ResponseEntity.ok(service.getProducts(pageable));
     }
 }

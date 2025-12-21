@@ -4,7 +4,7 @@ import { CompanyRegistrationPage } from "./features/company/pages/CompanyRegistr
 import CompanyReviewPage from "./features/company/pages/CompanyReviewPage.tsx";
 import NavigationHeader from "./components/layout/NavigationHeader.tsx";
 import VehicleManagementPage from "./features/vehicle/pages/VehicleManagementPage.tsx";
-import { ProductCreatePage } from "./features/product/pages/CreateProductPage.tsx";
+import ProductManagementPage from "./features/product/pages/ProductManagementPage.tsx";
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
         />
         <Route path="/company-review" element={<CompanyReviewPage />} />
         <Route path="/vehicle-management" element={<VehicleManagementPage />} />
-        <Route path="/create-product" element={<ProductCreatePage />} />
+        <Route path="/product-management" element={<ProductManagementPage />} />
       </Routes>
     </>
   );

@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Building2, Home, FileCheck, Menu, X, Truck } from "lucide-react";
+import {
+  Building2,
+  Home,
+  FileCheck,
+  Menu,
+  X,
+  Truck,
+  Package,
+} from "lucide-react";
 
 const NavigationHeader: React.FC = () => {
   const location = useLocation();
@@ -15,7 +23,11 @@ const NavigationHeader: React.FC = () => {
     },
     { path: "/company-review", label: "Review Companies", icon: FileCheck },
     { path: "/vehicle-management", label: "Vehicle Management", icon: Truck },
-    { path: "/create-product", label: "Create Product", icon: FileCheck },
+    {
+      path: "/product-management",
+      label: "Product Management",
+      icon: Package,
+    },
   ];
 
   const isActive = (path: string) => location.pathname === path;

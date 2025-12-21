@@ -17,4 +17,5 @@ public class ProductResponseDto {
     private Double price;
     private Double weight;
     private FileResponseDto imageUrl;
+    private CategoryDto category;
 }

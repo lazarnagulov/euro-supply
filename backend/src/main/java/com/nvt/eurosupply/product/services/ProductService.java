@@ -8,11 +8,13 @@ import com.nvt.eurosupply.product.repositories.ProductRepository;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
+import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,5 +47,9 @@ public class ProductService {
         repository.save(product);
 
         return fileMapper.toResponse(FileFolder.PRODUCT, id, file);
+    }
+
+    public PagedResponse<ProductResponseDto> getProducts(Pageable pageable) {
+        return mapper.toPagedResponse(repository.findAll(pageable));
     }
 }
