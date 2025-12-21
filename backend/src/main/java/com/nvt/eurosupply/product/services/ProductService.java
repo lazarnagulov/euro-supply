@@ -52,4 +52,8 @@ public class ProductService {
     public PagedResponse<ProductResponseDto> getProducts(Pageable pageable) {
         return mapper.toPagedResponse(repository.findAll(pageable));
     }
+
+    public void deleteProduct(Long id) {
+        repository.delete(find(id));
+    }
 }

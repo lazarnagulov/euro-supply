@@ -68,4 +68,18 @@ public class ProductController {
     public ResponseEntity<PagedResponse<ProductResponseDto>> getProducts(Pageable pageable) {
         return ResponseEntity.ok(service.getProducts(pageable));
     }
+
+    @Operation(
+            summary = "Delete vehicle",
+            description = "Deletes a vehicle by its ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        service.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
 }
