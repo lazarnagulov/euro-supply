@@ -255,4 +255,29 @@ INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (3,3),
     (4,4);
 
-
+INSERT INTO categories (id, name) VALUES
+  (1, 'Electronics'),
+  (2, 'Computers & Laptops'),
+  (3, 'Smartphones & Accessories'),
+  (4, 'Home Appliances'),
+  (5, 'Furniture'),
+  (6, 'Books'),
+  (7, 'Clothing & Apparel'),
+  (8, 'Shoes & Footwear'),
+  (9, 'Sports & Outdoors'),
+  (10, 'Toys & Games'),
+  (11, 'Beauty & Personal Care'),
+  (12, 'Health & Fitness'),
+  (13, 'Automotive'),
+  (14, 'Garden & Outdoor'),
+  (15, 'Pet Supplies'),
+  (16, 'Office Supplies'),
+  (17, 'Jewelry & Watches'),
+  (18, 'Music & Instruments'),
+  (19, 'Baby Products'),
+  (20, 'Groceries & Gourmet Food'),
+  (21, 'Tools & Home Improvement'),
+  (22, 'Arts & Crafts'),
+  (23, 'Travel & Luggage'),
+  (24, 'Video Games & Consoles'),
+  (25, 'Photography & Cameras');
