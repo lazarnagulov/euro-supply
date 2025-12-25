@@ -30,6 +30,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <Package className="w-16 h-16 text-gray-400" />
           </div>
         )}
+        <span
+          className={`absolute top-2 right-2 px-2 py-1 text-xs font-semibold rounded-full shadow
+      ${product.onSale ? "bg-green-600 text-white" : "bg-gray-500 text-white"}
+    `}
+        >
+          {product.onSale ? "Available" : "Not available"}
+        </span>
       </div>
 
       {/* CONTENT */}
@@ -45,10 +52,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <span className="font-semibold">Price:</span> €
             {product.price.toFixed(2)}
           </p>
+          <p>
+            <span className="font-semibold">Weight:</span> {product.weight} kg
+          </p>
         </div>
 
         {/* ACTIONS */}
-
         <button
           onClick={() => navigate(`/products/${product.id}`)}
           className="w-full mb-3 flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 font-medium"

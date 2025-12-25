@@ -186,15 +186,18 @@ const ProductDetailsPage: React.FC = () => {
               <Tag size={16} />
               Status
             </h3>
-            {product.onSale ? (
-              <span className="px-4 py-2 bg-green-100 text-green-700 font-semibold rounded-lg inline-block">
-                On Sale
-              </span>
-            ) : (
-              <span className="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg inline-block">
-                Not on Sale
-              </span>
-            )}
+
+            <span
+              className={`px-4 py-2 font-semibold rounded-lg inline-block
+      ${
+        product.onSale
+          ? "bg-green-100 text-green-700"
+          : "bg-gray-100 text-gray-700"
+      }
+    `}
+            >
+              {product.onSale ? "Available" : "Not available"}
+            </span>
           </div>
         </div>
       </div>

@@ -106,7 +106,7 @@ const ProductManagementPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-teal-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">

@@ -1,4 +1,3 @@
-// hooks/useProductData.ts
 import { useEffect, useState } from "react";
 import { productService } from "../../../api/services/productService";
 import type { ProductWithImage } from "../types/product.types";
