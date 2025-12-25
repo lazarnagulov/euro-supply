@@ -21,7 +21,7 @@ const ProductDetailsPage: React.FC = () => {
 
   if (!product) {
     return (
-      <div className="flex flex-col items-center justify-center text-center min-h-screen bg-gradient-to-br from-indigo-50 to-teal-100 py-8 px-4">
+      <div className="flex flex-col items-center justify-center text-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
         <div className="p-6 bg-red-100 text-red-600 rounded-full shadow-inner mb-4">
           <Package size={48} />
         </div>
