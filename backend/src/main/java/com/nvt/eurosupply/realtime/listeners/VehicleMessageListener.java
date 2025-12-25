@@ -38,7 +38,7 @@ public class VehicleMessageListener {
         try {
             VehicleLocationMessage location = mapper.readValue(message, new TypeReference<>() {});
             realTimeService.saveLocation(location);
-            service.updateLocation(location.getVehicleId(), new Location(location.getLatitude(), location.getLongitude()));
+            service.updateLocation(location.getVehicleId(), new Location(location.getLatitude(), location.getLongitude(), location.getTimestamp()));
             log.info("[{}] Received location: {} {}", location.getTimestamp(), location.getLatitude(), location.getLongitude());
         } catch (JsonProcessingException e) {
             log.error("Error processing location: {}", e.getMessage(), e);

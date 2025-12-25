@@ -4,12 +4,12 @@ import type {
   ProductSearchParams,
   ProductWithImage,
 } from "../types/product.types";
-import Pagination from "../../../components/pagination/Pagination";
 import ProductCard from "../components/ProductCard";
 import { Filter, Plus, Package } from "lucide-react";
 import ProductModal from "../components/ProductModal";
 import DeleteConfirmationModal from "../../../components/modal/DeleteConfirmationModal";
 import SearchFilters from "../components/SearchFilter";
+import Pagination from "../../../components/common/Pagination.tsx";
 
 const ProductManagementPage = () => {
   const [products, setProducts] = useState<ProductWithImage[]>([]);

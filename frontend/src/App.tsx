@@ -6,6 +6,7 @@ import NavigationHeader from "./components/layout/NavigationHeader.tsx";
 import VehicleManagementPage from "./features/vehicle/pages/VehicleManagementPage.tsx";
 import ProductManagementPage from "./features/product/pages/ProductManagementPage.tsx";
 import ProductDetailsPage from "./features/product/pages/ProductDetailsPage.tsx";
+import VehicleDetailsPage from "./features/vehicle/pages/VehicleDetailsPage.tsx";
 
 function App() {
   return (
@@ -21,9 +22,10 @@ function App() {
         <Route path="/vehicle-management" element={<VehicleManagementPage />} />
         <Route path="/product-management" element={<ProductManagementPage />} />
         <Route path="/products/:productId" element={<ProductDetailsPage />} />
+        <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
       </Routes>
     </>
   );
 }
 
-export default App;
+export default App

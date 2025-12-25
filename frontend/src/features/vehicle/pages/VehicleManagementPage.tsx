@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {vehicleService} from "../../../api/services/vehicleService.ts";
 import type {VehicleResponse, VehicleSearchParams} from "../types/vehicle.types.ts";
-import Pagination from "../../../components/pagination/Pagination.tsx";
+import Pagination from "../../../components/common/Pagination.tsx";
 import VehicleCard from "../components/VehicleCard.tsx";
 import {Filter, Plus, Truck} from "lucide-react";
 import VehicleModal from "../components/VehicleModal.tsx";
