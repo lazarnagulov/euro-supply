@@ -19,23 +19,29 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String description;
 
     @OneToOne(cascade = CascadeType.ALL)
     private StoredFile image;
 
+    @Column(nullable = false)
     private Double price;
+    @Column(nullable = false)
     private Double weight;
 
+    @Column(nullable = false)
     private Boolean onSale;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+    @Column(nullable = false)
     private Instant updatedAt;
 
     @Version
