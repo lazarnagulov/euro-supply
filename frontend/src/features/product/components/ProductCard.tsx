@@ -1,6 +1,7 @@
 import React from "react";
-import { Edit2, Trash2, Package } from "lucide-react";
+import { Edit2, Trash2, Package, ArrowRight } from "lucide-react";
 import type { ProductWithImage } from "../types/product.types";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
   product: ProductWithImage;
@@ -13,6 +14,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="bg-white rounded-xl shadow hover:shadow-xl transition-all overflow-hidden">
       {/* IMAGE */}
@@ -46,6 +48,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* ACTIONS */}
+
+        <button
+          onClick={() => navigate(`/products/${product.id}`)}
+          className="w-full mb-3 flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+        >
+          View details
+          <ArrowRight size={16} />
+        </button>
+
         <div className="flex gap-2">
           <button
             onClick={onEdit}
