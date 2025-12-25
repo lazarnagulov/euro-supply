@@ -73,6 +73,19 @@ public class ProductController {
     }
 
     @Operation(
+            summary = "Get product details",
+            description = "Retrieves a product by its ID, including its image (public url)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponseDto> getProduct(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getProduct(id));
+    }
+
+    @Operation(
             summary = "Update product",
             description = "Updates an existing product by its ID."
     )

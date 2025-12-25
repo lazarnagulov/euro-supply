@@ -14,6 +14,7 @@ public class ProductResponseDto {
     private Long id;
     private String name;
     private String description;
+    private Boolean onSale;
     private Double price;
     private Double weight;
     private FileResponseDto imageUrl;

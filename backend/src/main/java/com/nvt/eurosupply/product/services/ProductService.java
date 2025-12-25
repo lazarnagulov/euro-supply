@@ -61,6 +61,10 @@ public class ProductService {
         return mapper.toPagedResponse(repository.findAll(pageable));
     }
 
+    public ProductResponseDto getProduct(Long id) {
+        return mapper.toResponse(find(id));
+    }
+
     public ProductResponseDto updateProduct(Long id, UpdateProductRequestDto request) {
         Product product = find(id);
 

@@ -12,6 +12,13 @@ export const productService = {
     return response.data;
   },
 
+  getProduct: async (id: number) => {
+        const response = await  apiClient.get(
+            `/products/${id}`
+        );
+        return response.data;
+    },
+
   createProduct: async (data: ProductRequest): Promise<ProductWithImage> => {
     const response = await apiClient.post<Product>("/products", data);
     return response.data as ProductWithImage;
