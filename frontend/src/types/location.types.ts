@@ -10,3 +10,8 @@ export interface City {
     countryId: number;
 }
 
+export interface MapLocation {
+    latitude: number;
+    longitude: number;
+    timestamp: number;
+}

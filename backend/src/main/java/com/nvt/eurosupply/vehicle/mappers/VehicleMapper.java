@@ -1,6 +1,5 @@
 package com.nvt.eurosupply.vehicle.mappers;
 
-import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.models.PagedResponse;
