@@ -4,8 +4,8 @@ import { CompanyRegistrationPage } from "./features/company/pages/CompanyRegistr
 import CompanyReviewPage from "./features/company/pages/CompanyReviewPage.tsx";
 import NavigationHeader from "./components/layout/NavigationHeader.tsx";
 import VehicleManagementPage from "./features/vehicle/pages/VehicleManagementPage.tsx";
-import ProductDetailsPage from "./features/product/pages/ProductDetailsPage.tsx";
 import ProductManagementPage from "./features/product/pages/ProductManagementPage.tsx";
+import ProductDetailsPage from "./features/product/pages/ProductDetailsPage.tsx";
 import VehicleDetailsPage from "./features/vehicle/pages/VehicleDetailsPage.tsx";
 
 function App() {
