@@ -1,13 +1,13 @@
 import apiClient from "../client";
-import type { Product, ProductRequest, ProductWithImage } from "../../features/product/types/product.types";
+import type { Product, ProductRequest, ProductSearchParams, ProductWithImage } from "../../features/product/types/product.types";
 
 export const productService = {
 
-  getProducts: async (page: number, size: number, /*params: any*/) => {
-    // const isSearch = params && Object.keys(params).length !== 0;
+  getProducts: async (page: number, size: number, params: ProductSearchParams) => {
+    const isSearch = params && Object.keys(params).length !== 0;
     const response = await apiClient.get(
-      /*isSearch ? "/products/search" :*/ "/products",
-      { params: { page, size, /*...params*/ } }
+      isSearch ? "/products/search" : "/products",
+      { params: { page, size, ...params } }
     );
     return response.data;
   },

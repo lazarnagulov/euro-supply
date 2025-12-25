@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { productService } from "../../../api/services/productService";
-import type { ProductWithImage } from "../types/product.types";
+import type {
+  ProductSearchParams,
+  ProductWithImage,
+} from "../types/product.types";
 import Pagination from "../../../components/pagination/Pagination";
 import ProductCard from "../components/ProductCard";
 import { Filter, Plus, Package } from "lucide-react";
 import ProductModal from "../components/ProductModal";
-// import SearchFilters from "../components/SearchFilter";
 import DeleteConfirmationModal from "../../../components/modal/DeleteConfirmationModal";
+import SearchFilters from "../components/SearchFilter";
 
 const ProductManagementPage = () => {
   const [products, setProducts] = useState<ProductWithImage[]>([]);
@@ -17,7 +20,7 @@ const ProductManagementPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
-  // const [searchParams, setSearchParams] = useState({});
+  const [searchParams, setSearchParams] = useState<ProductSearchParams>({});
   const [showFilters, setShowFilters] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
@@ -31,15 +34,15 @@ const ProductManagementPage = () => {
 
   useEffect(() => {
     loadProducts();
-  }, [currentPage /*, searchParams*/]);
+  }, [currentPage, searchParams]);
 
   const loadProducts = async () => {
     setLoading(true);
     try {
       const data = await productService.getProducts(
         currentPage,
-        pageSize
-        //searchParams
+        pageSize,
+        searchParams
       );
       setProducts(data.content);
       setTotalPages(data.totalPages);
@@ -84,10 +87,10 @@ const ProductManagementPage = () => {
     }
   };
 
-  // const handleSearch = (params: any) => {
-  //   setSearchParams(params);
-  //   setCurrentPage(0);
-  // };
+  const handleSearch = (params: ProductSearchParams) => {
+    setSearchParams(params);
+    setCurrentPage(0);
+  };
 
   const handleSuccess = () => {
     setShowModal(false);
@@ -140,15 +143,12 @@ const ProductManagementPage = () => {
           </div>
         </div>
         {/* FILTERS */}
-        {
-          showFilters
-          //  && (
-          //   <SearchFilters
-          //     onSearch={handleSearch}
-          //     onClose={() => setShowFilters(false)}
-          //   />
-          // )
-        }
+        {showFilters && (
+          <SearchFilters
+            onSearch={handleSearch}
+            onClose={() => setShowFilters(false)}
+          />
+        )}
         {/* LOADING */}
         {loading && (
           <div className="bg-white rounded-xl shadow p-12 text-center">

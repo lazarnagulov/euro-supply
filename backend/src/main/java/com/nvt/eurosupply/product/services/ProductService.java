@@ -2,11 +2,13 @@ package com.nvt.eurosupply.product.services;
 
 import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
 import com.nvt.eurosupply.product.dtos.ProductResponseDto;
+import com.nvt.eurosupply.product.dtos.ProductSearchRequestDto;
 import com.nvt.eurosupply.product.dtos.UpdateProductRequestDto;
 import com.nvt.eurosupply.product.mappers.ProductMapper;
 import com.nvt.eurosupply.product.models.Category;
 import com.nvt.eurosupply.product.models.Product;
 import com.nvt.eurosupply.product.repositories.ProductRepository;
+import com.nvt.eurosupply.product.specifications.ProductSpecification;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -17,6 +19,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -74,6 +77,11 @@ public class ProductService {
         product.setUpdatedAt(Instant.now());
 
         return mapper.toResponse(repository.save(product));
+    }
+
+    public PagedResponse<ProductResponseDto> searchProducts(ProductSearchRequestDto request, Pageable pageable) {
+        Specification<Product> specification = ProductSpecification.search(request);
+        return mapper.toPagedResponse(repository.findAll(specification, pageable));
     }
 
     public void deleteProduct(Long id) {

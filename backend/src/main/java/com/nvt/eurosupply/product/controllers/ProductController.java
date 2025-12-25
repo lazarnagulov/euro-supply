@@ -6,7 +6,9 @@ import com.nvt.eurosupply.product.dtos.UpdateProductRequestDto;
 import com.nvt.eurosupply.product.services.ProductService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
+import com.nvt.eurosupply.product.dtos.ProductSearchRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -89,8 +91,38 @@ public class ProductController {
     }
 
     @Operation(
-            summary = "Delete vehicle",
-            description = "Deletes a vehicle by its ID."
+            summary = "Search products",
+            description = """
+                        Searches products using optional filter criteria. 
+                        All parameters are optional and can be combined.
+                        
+                        **Available filters:**
+                        - `name`: Exact or partial name match (case-insensitive)
+                        - `description`: Exact or partial description match
+                        - `minPrice / maxPrice`: Numeric range for product price
+                        - `minWeight / maxWeight`: Numeric range for product weight (in grams/kg)
+                        - `onSale`: Boolean flag to filter discounted items (`true`/`false`)
+                        - `categoryId`: The unique identifier of the product category
+                        
+                        Results are paginated.
+                        """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Products retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid search parameters (e.g. negative price or invalid format)")
+    })
+    @GetMapping("/search")
+    public ResponseEntity<PagedResponse<ProductResponseDto>> searchProducts(
+            @Parameter(description = "Filter criteria for product search")
+            @ModelAttribute ProductSearchRequestDto request,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(service.searchProducts(request, pageable));
+    }
+
+    @Operation(
+            summary = "Delete product",
+            description = "Deletes a product by its ID."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Product deleted successfully"),

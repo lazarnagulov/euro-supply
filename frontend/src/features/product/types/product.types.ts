@@ -27,3 +27,14 @@ export interface ProductRequest {
 export interface ProductWithImage extends Product {
     imageUrl: StoredFile;
 }
+
+export interface ProductSearchParams {
+  name?: string;
+  description?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minWeight?: number;
+  maxWeight?: number;
+  onSale?: boolean;
+  categoryId?: number;
+}
