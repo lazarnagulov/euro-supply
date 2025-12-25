@@ -40,7 +40,7 @@ export const vehicleService = {
 
     getDistances: async (id: number, request: DistanceRequest) => {
         const vehicleResponse = await apiClient.get<DistancePoint[]>(
-            `/api/v1/vehicles/${id}/distances`,
+            `/vehicles/${id}/distances`,
             { params: request }
         );
         return vehicleResponse.data;

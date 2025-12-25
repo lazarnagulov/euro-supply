@@ -38,7 +38,7 @@ public class VehicleService {
     private final FileService fileService;
 
     private final VehicleMapper mapper;
-    private final FileMapper fileMapper;;
+    private final FileMapper fileMapper;
 
     @Transactional
     public VehicleResponseDto createVehicle(CreateVehicleRequestDto request) {
