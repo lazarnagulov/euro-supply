@@ -6,6 +6,7 @@ import com.nvt.eurosupply.product.models.Category;
 import com.nvt.eurosupply.product.repositories.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
     }
 
+    @Cacheable(value = "categories")
     public List<CategoryDto> getCategories() {
         return repository.findAll().stream().map(mapper::toDto).toList();
     }
