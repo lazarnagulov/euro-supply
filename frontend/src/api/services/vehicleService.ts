@@ -1,4 +1,5 @@
 import type {
+    DistancePoint, DistanceRequest,
     Vehicle,
     VehicleBrand,
     VehicleModel,
@@ -18,6 +19,13 @@ export const vehicleService = {
         return response.data;
     },
 
+    getVehicle: async (id: number) => {
+        const response = await  apiClient.get(
+            `/vehicles/${id}`
+        );
+        return response.data;
+    },
+
     getBrands: async () => {
         const response = await apiClient.get<VehicleBrand[]>('/vehicles/brands');
         return response.data;
@@ -28,6 +36,14 @@ export const vehicleService = {
             `/vehicles/brands/${brandId}/models`
         );
         return response.data;
+    },
+
+    getDistances: async (id: number, request: DistanceRequest) => {
+        const vehicleResponse = await apiClient.get<DistancePoint[]>(
+            `/vehicles/${id}/distances`,
+            { params: request }
+        );
+        return vehicleResponse.data;
     },
 
     createVehicle: async (data: Vehicle, images: File[]) => {

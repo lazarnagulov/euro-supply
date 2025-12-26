@@ -1,5 +1,7 @@
 import type {FileResponse} from "../../../types/file.types.ts";
 
+import type {MapLocation} from "../../../types/location.types.ts";
+
 export interface Vehicle {
     registrationNumber: string;
     maxLoadKg: number;
@@ -23,6 +25,7 @@ export interface VehicleResponse {
     maxLoadKg: number;
     brand: VehicleBrand;
     model: VehicleModel;
+    lastLocation?: MapLocation;
     imageUrls: FileResponse[];
 }
 
@@ -34,3 +37,12 @@ export interface VehicleSearchParams {
     maxLoad?: number;
 }
 
+export interface DistanceRequest {
+    start?: string;
+    end?: string;
+}
+
+export interface DistancePoint {
+    time: string;
+    distance: number;
+}
