@@ -28,6 +28,7 @@ public class RedisConfig {
                 "countryCities", baseConfig(serializer, Duration.ofHours(12)),
                 "vehicleModels", baseConfig(serializer, Duration.ofHours(12)),
                 "vehicleBrands", baseConfig(serializer, Duration.ofHours(12)),
+                "categories", baseConfig(serializer, Duration.ofHours(12)),
                 "cities", baseConfig(serializer, Duration.ofHours(12))
         );
 
