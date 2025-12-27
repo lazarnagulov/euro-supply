@@ -7,6 +7,8 @@ import type {
     VehicleSearchParams
 } from "../../features/vehicle/types/vehicle.types.ts";
 import apiClient from "../client.ts";
+import type {MapLocation} from "../../types/location.types.ts";
+import type {ConnectionStatus} from "../../types/status.types.ts";
 
 export const vehicleService = {
     getVehicles: async (page: number, size: number, params: VehicleSearchParams) => {
@@ -39,8 +41,15 @@ export const vehicleService = {
     },
 
     getVehicleLocation: async (id: number) => {
-        const response = await apiClient.get<VehicleModel[]>(
+        const response = await apiClient.get<MapLocation>(
             `/vehicles/${id}/location`
+        );
+        return response.data;
+    },
+
+    getVehicleStatus: async (id: number) => {
+        const response = await apiClient.get<ConnectionStatus>(
+            `/vehicles/${id}/status`
         );
         return response.data;
     },

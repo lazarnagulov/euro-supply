@@ -27,6 +27,7 @@ export interface VehicleResponse {
     model: VehicleModel;
     lastLocation?: MapLocation;
     imageUrls: FileResponse[];
+    online: boolean;
 }
 
 export interface VehicleSearchParams {

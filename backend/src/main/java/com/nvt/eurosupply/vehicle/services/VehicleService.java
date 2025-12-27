@@ -25,7 +25,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,6 +51,7 @@ public class VehicleService {
         VehicleModel model = brandService.findModel(request.getModelId());
         vehicle.setBrand(brand);
         vehicle.setModel(model);
+        vehicle.setIsOnline(false);
         return mapper.toResponse(repository.save(vehicle));
     }
 
