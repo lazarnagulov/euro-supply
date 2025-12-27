@@ -1,8 +1,10 @@
 package com.nvt.eurosupply.vehicle.services;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.dtos.LocationResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
+import com.nvt.eurosupply.shared.mappers.LocationMapper;
 import com.nvt.eurosupply.shared.models.Location;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
@@ -22,6 +24,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +42,7 @@ public class VehicleService {
 
     private final VehicleMapper mapper;
     private final FileMapper fileMapper;
+    private final LocationMapper locationMapper;
 
     @Transactional
     public VehicleResponseDto createVehicle(CreateVehicleRequestDto request) {
@@ -107,5 +111,10 @@ public class VehicleService {
     public PagedResponse<VehicleResponseDto> searchVehicles(VehicleSearchRequestDto request, Pageable pageable) {
         Specification<Vehicle> specification = VehicleSpecification.search(request);
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
+    }
+
+    public LocationResponseDto getVehicleLocation(Long id) {
+        Vehicle vehicle = find(id);
+        return locationMapper.toResponse(vehicle.getLastLocation());
     }
 }

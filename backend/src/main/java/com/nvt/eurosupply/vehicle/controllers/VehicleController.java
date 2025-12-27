@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.vehicle.controllers;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.dtos.LocationResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.vehicle.dtos.*;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
@@ -127,6 +128,19 @@ public class VehicleController {
     @GetMapping
     public ResponseEntity<PagedResponse<VehicleResponseDto>> getVehicles(Pageable pageable) {
         return ResponseEntity.ok(service.getVehicles(pageable));
+    }
+
+    @Operation(
+            summary = "Get vehicle last location",
+            description = "Retrieves a vehicle location by its ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Vehicle location retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Vehicle not found")
+    })
+    @GetMapping("/{id}/location")
+    public ResponseEntity<LocationResponseDto> getVehicleLocation(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getVehicleLocation(id));
     }
 
     @Operation(

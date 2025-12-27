@@ -2,6 +2,7 @@ package com.nvt.eurosupply.vehicle.mappers;
 
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
+import com.nvt.eurosupply.shared.mappers.LocationMapper;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleBrandDto;
@@ -24,6 +25,7 @@ public class VehicleMapper {
 
     private final ModelMapper modelMapper;
     private final FileMapper fileMapper;
+    private final LocationMapper locationMapper;
 
     public Vehicle fromCreateRequest(CreateVehicleRequestDto request) {
         return Vehicle.builder()
@@ -34,6 +36,7 @@ public class VehicleMapper {
 
     public VehicleResponseDto toResponse(Vehicle vehicle) {
         VehicleResponseDto response = modelMapper.map(vehicle, VehicleResponseDto.class);
+        response.setLastLocation(locationMapper.toResponse(vehicle.getLastLocation()));
         response.setImageUrls(
                 Optional.ofNullable(vehicle.getImages())
                         .orElseGet(List::of)

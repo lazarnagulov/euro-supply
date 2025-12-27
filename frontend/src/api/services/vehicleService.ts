@@ -38,6 +38,13 @@ export const vehicleService = {
         return response.data;
     },
 
+    getVehicleLocation: async (id: number) => {
+        const response = await apiClient.get<VehicleModel[]>(
+            `/vehicles/${id}/location`
+        );
+        return response.data;
+    },
+
     getDistances: async (id: number, request: DistanceRequest) => {
         const vehicleResponse = await apiClient.get<DistancePoint[]>(
             `/vehicles/${id}/distances`,
