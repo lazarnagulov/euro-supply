@@ -1,29 +1,30 @@
-package com.nvt.eurosupply.company.models;
+package com.nvt.eurosupply.factory.models;
 
-import com.nvt.eurosupply.company.enums.RequestStatus;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
 import com.nvt.eurosupply.shared.models.StoredFile;
-import com.nvt.eurosupply.user.models.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "companies")
+@Table(name = "factories")
 @Builder
-public class Company {
+public class Factory {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 50, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Column(length = 50, nullable = false)
@@ -38,20 +39,23 @@ public class Company {
     private Double latitude;
     private Double longitude;
 
-    @OneToMany(cascade = CascadeType.MERGE)
-    private List<StoredFile> files;
+    private Boolean isOnline = false;
 
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status;
+    private Instant lastHeartbeat;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    private User owner;
+    @OneToMany
+    private List<StoredFile> images;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+    private Instant updatedAt;
+
+    @Version
+    private Long version;
 
     @PrePersist
     public void onCreate() {
         this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 }

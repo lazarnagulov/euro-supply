@@ -1,7 +1,7 @@
 package com.nvt.eurosupply.shared.services;
 
-import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
+import com.nvt.eurosupply.shared.exceptions.FileDeleteException;
 import com.nvt.eurosupply.shared.exceptions.FileUploadException;
 import com.nvt.eurosupply.shared.enums.FileType;
 import com.nvt.eurosupply.shared.models.StoredFile;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.time.Instant;
@@ -82,4 +83,24 @@ public class FileService {
 
         return FileType.OTHER;
     }
+
+    public void deleteFiles(List<Long> fileIds) {
+        List<StoredFile> files = storedFileRepository.findAllById(fileIds);
+
+        for (StoredFile file : files) {
+            deletePhysicalFile(file);
+            storedFileRepository.delete(file);
+        }
+    }
+
+    public void deletePhysicalFile(StoredFile file) {
+        try {
+            Path path = Paths.get(file.getPath());
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            throw new FileDeleteException("Failed to delete file " + file.getPath());
+        }
+    }
+
+
 }
