@@ -102,16 +102,11 @@ public class FactoryService {
     public void deleteImages(Long factoryId, List<Long> imageIds) {
         Factory factory = find(factoryId);
 
-        List<StoredFile> remainingImages = factory.getImages().stream()
-                .filter(img -> !imageIds.contains(img.getId()))
-                .toList();
+        factory.getImages().removeIf(img -> imageIds.contains(img.getId()));
 
         fileService.deleteFiles(imageIds);
-        factory.getImages().clear();
-        factory.setImages(remainingImages);
-
-        repository.save(factory);
     }
+
 
     @Transactional
     public void deleteFactory(Long id) {
