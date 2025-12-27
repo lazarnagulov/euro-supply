@@ -36,7 +36,8 @@ public class VehicleMapper {
 
     public VehicleResponseDto toResponse(Vehicle vehicle) {
         VehicleResponseDto response = modelMapper.map(vehicle, VehicleResponseDto.class);
-        response.setLastLocation(locationMapper.toResponse(vehicle.getLastLocation()));
+        if(vehicle.getLastLocation() != null)
+            response.setLastLocation(locationMapper.toResponse(vehicle.getLastLocation()));
         response.setImageUrls(
                 Optional.ofNullable(vehicle.getImages())
                         .orElseGet(List::of)

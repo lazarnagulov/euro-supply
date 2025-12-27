@@ -35,6 +35,7 @@ public class Vehicle {
     @ManyToOne(optional = false)
     private VehicleModel model;
 
+    @Column(nullable = false)
     private Boolean isOnline = false;
 
     private Instant lastHeartbeat;

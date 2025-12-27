@@ -21,4 +21,5 @@ public class VehicleResponseDto {
     private VehicleModelDto model;
     private LocationResponseDto lastLocation;
     private List<FileResponseDto> imageUrls;
+    private Boolean online;
 }

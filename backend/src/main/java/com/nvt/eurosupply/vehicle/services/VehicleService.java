@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.vehicle.services;
 
+import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.dtos.LocationResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
@@ -116,5 +117,18 @@ public class VehicleService {
     public LocationResponseDto getVehicleLocation(Long id) {
         Vehicle vehicle = find(id);
         return locationMapper.toResponse(vehicle.getLastLocation());
+    }
+
+    public ConnectionStatusDto getVehicleStatus(Long id) {
+        Vehicle vehicle = find(id);
+        return new ConnectionStatusDto(vehicle.getIsOnline());
+    }
+
+    public void updateStatus(Long id) {
+        Vehicle vehicle = find(id);
+        if (Boolean.FALSE.equals(vehicle.getIsOnline())) {
+            vehicle.setIsOnline(true);
+            repository.save(vehicle);
+        }
     }
 }
