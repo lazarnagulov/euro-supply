@@ -104,6 +104,7 @@ public class FactoryService {
         Factory factory = find(factoryId);
 
         factory.getImages().removeIf(img -> imageIds.contains(img.getId()));
+        repository.saveAndFlush(factory);
 
         fileService.deleteFiles(imageIds);
     }
@@ -116,6 +117,7 @@ public class FactoryService {
         List<Long> imageIds = factory.getImages().stream()
                 .map(StoredFile::getId)
                 .toList();
+        repository.saveAndFlush(factory);
 
         deleteImagesInternal(factory, imageIds);
         repository.delete(factory);
