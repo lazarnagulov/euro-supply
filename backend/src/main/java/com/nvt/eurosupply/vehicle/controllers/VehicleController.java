@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.vehicle.controllers;
 
 import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
+import com.nvt.eurosupply.shared.dtos.DeleteImagesRequestDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.dtos.LocationResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
@@ -13,11 +14,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -40,7 +41,10 @@ public class VehicleController {
     })
     @PostMapping
     public ResponseEntity<VehicleResponseDto> createVehicle(@Valid @RequestBody CreateVehicleRequestDto request) {
-        return new ResponseEntity<>(service.createVehicle(request), HttpStatus.CREATED);
+        VehicleResponseDto response = service.createVehicle(request);
+        return ResponseEntity
+                .created(URI.create("/api/v1/vehicles/" + response.getId()))
+                .body(response);
     }
 
     @Operation(
@@ -168,6 +172,24 @@ public class VehicleController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         service.deleteVehicle(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Delete vehicle images",
+            description = "Deletes one or more images associated with a vehicle."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Images deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Vehicle or images not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid image IDs or request body")
+    })
+    @DeleteMapping("/{id}/images")
+    public ResponseEntity<Void> deleteImages(
+            @PathVariable Long id,
+            @Valid @RequestBody DeleteImagesRequestDto request) {
+
+        service.deleteImages(id, request.getImageIds());
         return ResponseEntity.noContent().build();
     }
 

@@ -21,7 +21,7 @@ const VehicleManagementPage = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [modalMode, setModalMode] = useState('create');
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
     const [selectedVehicle, setSelectedVehicle] = useState<VehicleResponse | null>(null);
     const pageSize = 10;
 
