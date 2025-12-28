@@ -73,10 +73,9 @@ func (s *Simulator) heartbeatLoop() {
 		select {
 		case <-s.ctx.Done():
 			return
-
 		case <-s.heartbeatTicker.C:
 			if err := s.sendHeartbeat(); err != nil {
-				fmt.Println("failed to send heartbeat")
+				fmt.Println("failed to send heartbeat:", err)
 			}
 		}
 	}
@@ -88,7 +87,9 @@ func (s *Simulator) sendHeartbeat() error {
 	ctx, cancel := context.WithTimeout(s.ctx, 5*time.Second)
 	defer cancel()
 
-	if err := s.publisher.PublishHeartbeat(ctx, msg); err != nil {
+	routingKey := fmt.Sprintf("vehicle.%d.heartbeat", s.vehicle.ID)
+
+	if err := s.publisher.Publish(ctx, "vehicle.heartbeat", routingKey, msg); err != nil {
 		return fmt.Errorf("failed to publish heartbeat: %w", err)
 	}
 
@@ -99,13 +100,16 @@ func (s *Simulator) sendLocation() error {
 	intervalMinutes := s.config.ReportingInterval.Minutes()
 	newLocation, distance := s.movement.SimulateMovement(s.vehicle.Location, intervalMinutes)
 	s.vehicle.Location = newLocation
+
 	msg := domain.NewLocationMessage(s.vehicle.ID, newLocation, distance)
 
 	ctx, cancel := context.WithTimeout(s.ctx, 5*time.Second)
 	defer cancel()
 
-	if err := s.publisher.PublishLocation(ctx, msg); err != nil {
-		return fmt.Errorf("failed to publish heartbeat: %w", err)
+	routingKey := fmt.Sprintf("vehicle.%d.location", s.vehicle.ID)
+
+	if err := s.publisher.Publish(ctx, "vehicle.location", routingKey, msg); err != nil {
+		return fmt.Errorf("failed to publish location: %w", err)
 	}
 
 	return nil
@@ -117,10 +121,9 @@ func (s *Simulator) locationLoop() {
 		select {
 		case <-s.ctx.Done():
 			return
-
 		case <-s.locationTicker.C:
 			if err := s.sendLocation(); err != nil {
-				fmt.Println("failed to send location")
+				fmt.Println("failed to send location:", err)
 			}
 		}
 	}
