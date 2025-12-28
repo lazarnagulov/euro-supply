@@ -56,10 +56,6 @@ const FactoryCard: React.FC<FactoryCardProps> = ({
             <span className="font-semibold">Country:</span>{" "}
             {factory.country.name}
           </p>
-          <p className="text-xs text-gray-500">
-            Location: {factory.latitude.toFixed(5)},{" "}
-            {factory.longitude.toFixed(5)}
-          </p>
         </div>
 
         <button

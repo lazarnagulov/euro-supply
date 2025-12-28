@@ -49,6 +49,7 @@ public class FactoryService {
 
     public FactoryResponseDto createFactory(CreateFactoryRequestDto request) {
         Factory factory = mapper.fromRequest(request);
+        factory.setIsOnline(false);
         City city = cityService.find(request.getCityId());
         Country country = countryService.find(request.getCountryId());
         factory.setCity(city);

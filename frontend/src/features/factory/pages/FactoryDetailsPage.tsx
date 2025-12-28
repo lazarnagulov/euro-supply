@@ -214,13 +214,15 @@ const FactoryDetailsPage: React.FC = () => {
         />
       </div>
 
-      <ImageModal
-        images={factory?.imageUrls || []}
-        selectedIndex={selectedImageIndex}
-        onClose={closeImageModal}
-        onPrevious={goToPreviousImage}
-        onNext={goToNextImage}
-      />
+      <div className="p-0 space-y-0">
+        <ImageModal
+          images={factory?.imageUrls || []}
+          selectedIndex={selectedImageIndex}
+          onClose={closeImageModal}
+          onPrevious={goToPreviousImage}
+          onNext={goToNextImage}
+        />
+      </div>
     </div>
   );
 };
