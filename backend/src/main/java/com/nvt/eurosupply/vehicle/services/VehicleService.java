@@ -78,7 +78,14 @@ public class VehicleService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteVehicle(Long id) {
-        repository.delete(find(id));
+        Vehicle vehicle = find(id);
+
+        List<Long> imageIds = vehicle.getImages().stream()
+                .map(StoredFile::getId)
+                .toList();
+
+        deleteImagesInternal(vehicle, imageIds);
+        repository.delete(vehicle);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -99,7 +106,6 @@ public class VehicleService {
         vehicle.setRegistrationNumber(request.getRegistrationNumber());
         vehicle.setUpdatedAt(Instant.now());
 
-        // TODO: Update images once they are served with enginx
         return mapper.toResponse(repository.save(vehicle));
     }
 
@@ -115,4 +121,15 @@ public class VehicleService {
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
     }
 
+    @Transactional
+    public void deleteImages(Long id, List<Long> imageIds) {
+        Vehicle vehicle = find(id);
+        vehicle.getImages().removeIf(img -> imageIds.contains(img.getId()));
+        fileService.deleteFiles(imageIds);
+    }
+
+    private void deleteImagesInternal(Vehicle vehicle, List<Long> imageIds) {
+        fileService.deleteFiles(imageIds);
+        vehicle.getImages().clear();
+    }
 }

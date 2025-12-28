@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.vehicle.controllers;
 
+import com.nvt.eurosupply.shared.dtos.DeleteImagesRequestDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.vehicle.dtos.*;
@@ -147,12 +148,21 @@ public class VehicleController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{vehicleId}/images/{imageId}")
-    public ResponseEntity<Void> deleteImage(
-            @PathVariable Long vehicleId,
-            @PathVariable Long imageId
-    ) {
-        // TODO: Add service call when vehicle details is merged
+    @Operation(
+            summary = "Delete vehicle images",
+            description = "Deletes one or more images associated with a vehicle."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Images deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Vehicle or images not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid image IDs or request body")
+    })
+    @DeleteMapping("/{id}/images")
+    public ResponseEntity<Void> deleteImages(
+            @PathVariable Long id,
+            @Valid @RequestBody DeleteImagesRequestDto request) {
+
+        service.deleteImages(id, request.getImageIds());
         return ResponseEntity.noContent().build();
     }
 
