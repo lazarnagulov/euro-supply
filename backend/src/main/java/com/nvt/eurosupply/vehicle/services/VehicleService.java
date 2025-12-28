@@ -18,11 +18,12 @@ import com.nvt.eurosupply.vehicle.models.VehicleModel;
 import com.nvt.eurosupply.vehicle.repositories.VehicleRepository;
 import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
@@ -31,6 +32,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class VehicleService {
 
     private final VehicleRepository repository;
@@ -50,10 +52,11 @@ public class VehicleService {
         return mapper.toResponse(repository.save(vehicle));
     }
 
+    @Transactional
     public List<FileResponseDto> uploadImages(Long id, List<MultipartFile> images) {
         Vehicle vehicle = find(id);
         List<StoredFile> stored = fileService.uploadFiles(FileFolder.VEHICLE, id, images);
-        vehicle.setImages(stored);
+        vehicle.getImages().addAll(stored);
         repository.save(vehicle);
 
         return stored.stream()
@@ -73,10 +76,18 @@ public class VehicleService {
         return mapper.toPagedResponse(repository.findAll(pageable));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteVehicle(Long id) {
-        repository.delete(find(id));
+        Vehicle vehicle = find(id);
+
+        List<Long> imageIds = vehicle.getImages().stream()
+                .map(StoredFile::getId)
+                .toList();
+        deleteImagesInternal(vehicle, imageIds);
+        repository.delete(vehicle);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public VehicleResponseDto updateVehicle(Long id, UpdateVehicleRequestDto request) {
         Vehicle vehicle = find(id);
 
@@ -94,10 +105,10 @@ public class VehicleService {
         vehicle.setRegistrationNumber(request.getRegistrationNumber());
         vehicle.setUpdatedAt(Instant.now());
 
-        // TODO: Update images once they are served with enginx
         return mapper.toResponse(repository.save(vehicle));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateLocation(Long id, Location location) {
         Vehicle vehicle = find(id);
         vehicle.setLastLocation(location);
@@ -107,5 +118,19 @@ public class VehicleService {
     public PagedResponse<VehicleResponseDto> searchVehicles(VehicleSearchRequestDto request, Pageable pageable) {
         Specification<Vehicle> specification = VehicleSpecification.search(request);
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
+    }
+
+    @Transactional
+    public void deleteImages(Long id, List<Long> imageIds) {
+        Vehicle vehicle = find(id);
+        vehicle.getImages().removeIf(img -> imageIds.contains(img.getId()));
+        repository.saveAndFlush(vehicle);
+        fileService.deleteFiles(imageIds);
+    }
+
+    private void deleteImagesInternal(Vehicle vehicle, List<Long> imageIds) {
+        vehicle.getImages().clear();
+        repository.saveAndFlush(vehicle);
+        fileService.deleteFiles(imageIds);
     }
 }

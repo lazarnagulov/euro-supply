@@ -60,7 +60,7 @@ public class FileService {
             FileType type = detectType(file.getContentType());
 
             StoredFile stored = StoredFile.builder()
-                    .path(filePath.toString())
+                    .path(relativeDir)
                     .filename(storedName)
                     .contentType(file.getContentType())
                     .type(type)
@@ -86,17 +86,20 @@ public class FileService {
 
     public void deleteFiles(List<Long> fileIds) {
         List<StoredFile> files = storedFileRepository.findAllById(fileIds);
+        storedFileRepository.deleteAllByIdIn(fileIds);
 
         for (StoredFile file : files) {
             deletePhysicalFile(file);
-            storedFileRepository.delete(file);
         }
     }
 
     public void deletePhysicalFile(StoredFile file) {
         try {
-            Path path = Paths.get(file.getPath());
-            Files.deleteIfExists(path);
+            Path toDelete = Paths.get(fileStoragePath)
+                    .resolve(Paths.get(file.getPath(), file.getFilename()))
+                    .normalize()
+                    .toAbsolutePath();
+            Files.deleteIfExists(toDelete);
         } catch (IOException e) {
             throw new FileDeleteException("Failed to delete file " + file.getPath());
         }
