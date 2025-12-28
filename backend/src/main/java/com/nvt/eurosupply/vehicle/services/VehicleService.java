@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.vehicle.services;
 
+import com.nvt.eurosupply.factory.models.Factory;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -56,7 +57,7 @@ public class VehicleService {
     public List<FileResponseDto> uploadImages(Long id, List<MultipartFile> images) {
         Vehicle vehicle = find(id);
         List<StoredFile> stored = fileService.uploadFiles(FileFolder.VEHICLE, id, images);
-        vehicle.setImages(stored);
+        vehicle.getImages().addAll(stored);
         repository.save(vehicle);
 
         return stored.stream()

@@ -56,8 +56,12 @@ export const vehicleService = {
         try {
             const formData = new FormData();
             images.forEach(img => formData.append('images', img));
-
-            await apiClient.post(`/vehicles/${vehicleResponse.data.id}/images`, formData);
+            console.log(images);
+            await apiClient.post(
+                `/vehicles/${vehicleResponse.data.id}/images`,
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
 
             return { vehicle: vehicleResponse.data, imagesUploaded: true };
         } catch (err) {
@@ -88,5 +92,11 @@ export const vehicleService = {
 
     deleteVehicleImage: async (id: number, imageId: number) => {
         await apiClient.delete(`/vehicles/${id}/images/${imageId}`);
-    }
+    },
+
+    deleteImages: async (id: number, imageIds: number[]) => {
+        await apiClient.delete(`/vehicles/${id}/images`, {
+            data: { imageIds }
+        });
+    },
 };
