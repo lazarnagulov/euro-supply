@@ -1,6 +1,5 @@
 package com.nvt.eurosupply.vehicle.services;
 
-import com.nvt.eurosupply.factory.models.Factory;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -84,7 +83,6 @@ public class VehicleService {
         List<Long> imageIds = vehicle.getImages().stream()
                 .map(StoredFile::getId)
                 .toList();
-
         deleteImagesInternal(vehicle, imageIds);
         repository.delete(vehicle);
     }
@@ -126,11 +124,13 @@ public class VehicleService {
     public void deleteImages(Long id, List<Long> imageIds) {
         Vehicle vehicle = find(id);
         vehicle.getImages().removeIf(img -> imageIds.contains(img.getId()));
+        repository.saveAndFlush(vehicle);
         fileService.deleteFiles(imageIds);
     }
 
     private void deleteImagesInternal(Vehicle vehicle, List<Long> imageIds) {
-        fileService.deleteFiles(imageIds);
         vehicle.getImages().clear();
+        repository.saveAndFlush(vehicle);
+        fileService.deleteFiles(imageIds);
     }
 }

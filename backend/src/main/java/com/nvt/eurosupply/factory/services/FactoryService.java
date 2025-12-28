@@ -122,8 +122,9 @@ public class FactoryService {
     }
 
     private void deleteImagesInternal(Factory factory, List<Long> imageIds) {
-        fileService.deleteFiles(imageIds);
         factory.getImages().clear();
+        repository.saveAndFlush(factory);
+        fileService.deleteFiles(imageIds);
     }
 
     public PagedResponse<FactoryResponseDto> searchFactories(FactorySearchRequestDto request, Pageable pageable) {

@@ -86,10 +86,10 @@ public class FileService {
 
     public void deleteFiles(List<Long> fileIds) {
         List<StoredFile> files = storedFileRepository.findAllById(fileIds);
+        storedFileRepository.deleteAllByIdIn(fileIds);
 
         for (StoredFile file : files) {
             deletePhysicalFile(file);
-            storedFileRepository.delete(file);
         }
     }
 
