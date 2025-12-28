@@ -6,15 +6,16 @@ import (
 
 	"github.com/spf13/pflag"
 
-	amqp "github.com/rabbitmq/amqp091-go"
+	sharedConfig "eurosupply/simulator/shared/config"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Vehicle   VehicleConfig   `mapstructure:"vehicle"`
-	RabbitMQ  RabbitMQConfig  `mapstructure:"rabbitmq"`
-	Simulator SimulatorConfig `mapstructure:"simulator"`
-	Logging   LoggingConfig   `mapstructure:"logging"`
+	Vehicle   VehicleConfig               `mapstructure:"vehicle"`
+	Simulator SimulatorConfig             `mapstructure:"simulator"`
+	Logging   LoggingConfig               `mapstructure:"logging"`
+	RabbitMQ  sharedConfig.RabbitMQConfig `mapstructure:"rabbitmq"`
 }
 
 type VehicleConfig struct {
@@ -25,26 +26,6 @@ type VehicleConfig struct {
 	MaxLoadKg          float64 `mapstructure:"max_load_kg" validate:"gt=0"`
 	InitialLat         float64 `mapstructure:"initial_latitude" validate:"min=-90,max=90"`
 	InitialLon         float64 `mapstructure:"initial_longitude" validate:"min=-180,max=180"`
-}
-
-type RabbitMQConfig struct {
-	URL                 string           `mapstructure:"url" validate:"required"`
-	Exchanges           []ExchangeConfig `mapstructure:"exchanges"`
-	HeartbeatExchange   string           `mapstructure:"heartbeat_exchange"`
-	LocationExchange    string           `mapstructure:"location_exchange"`
-	ConnectionTimeout   time.Duration    `mapstructure:"connection_timeout"`
-	ReconnectDelay      time.Duration    `mapstructure:"reconnect_delay"`
-	MaxReconnectAttempt int              `mapstructure:"max_reconnect_attempts"`
-}
-
-type ExchangeConfig struct {
-	Name       string     `mapstructure:"name" validate:"required"`
-	Kind       string     `mapstructure:"kind" validate:"required,oneof=direct fanout topic headers"`
-	Durable    bool       `mapstructure:"durable"`
-	AutoDelete bool       `mapstructure:"auto_delete"`
-	Internal   bool       `mapstructure:"internal"`
-	NoWait     bool       `mapstructure:"no_wait"`
-	Args       amqp.Table `mapstructure:"args"`
 }
 
 type SimulatorConfig struct {

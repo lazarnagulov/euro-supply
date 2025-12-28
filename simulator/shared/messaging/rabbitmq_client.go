@@ -2,7 +2,7 @@ package messaging
 
 import (
 	"context"
-	"eurosupply/simulator/internal/vehicle/config"
+	"eurosupply/simulator/shared/config"
 	"fmt"
 
 	amqp "github.com/rabbitmq/amqp091-go"

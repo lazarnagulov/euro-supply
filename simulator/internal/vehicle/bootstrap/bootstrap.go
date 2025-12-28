@@ -2,33 +2,35 @@ package bootstrap
 
 import (
 	"context"
-	"eurosupply/simulator/internal/vehicle/config"
+	internalConfig "eurosupply/simulator/internal/vehicle/config"
 	"eurosupply/simulator/internal/vehicle/domain"
 	"eurosupply/simulator/internal/vehicle/simulator"
+	sharedConfig "eurosupply/simulator/shared/config"
 	"eurosupply/simulator/shared/messaging"
-	"github.com/spf13/pflag"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/spf13/pflag"
 )
 
-func LoadConfig() *config.Config {
-	config.RegisterFlags()
+func LoadConfig() *internalConfig.Config {
+	internalConfig.RegisterFlags()
 	configPath := pflag.String("config", "", "Optional path to configuration file (YAML/JSON)")
 	pflag.Parse()
 
-	cfg, err := config.Load(*configPath)
+	cfg, err := internalConfig.Load(*configPath)
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 	return cfg
 }
 
-func InitMessaging(cfg *config.Config) *messaging.RabbitMQClient {
-	mqClient := messaging.NewRabbitMQClient(cfg.RabbitMQ)
+func InitMessaging(rabbitCfg sharedConfig.RabbitMQConfig) *messaging.RabbitMQClient {
+	mqClient := messaging.NewRabbitMQClient(rabbitCfg)
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.RabbitMQ.ConnectionTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), rabbitCfg.ConnectionTimeout)
 	defer cancel()
 
 	if err := mqClient.Connect(ctx); err != nil {
@@ -38,7 +40,7 @@ func InitMessaging(cfg *config.Config) *messaging.RabbitMQClient {
 	return mqClient
 }
 
-func StartSimulator(cfg *config.Config, mq *messaging.RabbitMQClient) *simulator.Simulator {
+func StartSimulator(cfg *internalConfig.Config, mq *messaging.RabbitMQClient) *simulator.Simulator {
 	vehicle := domain.NewVehicle(cfg)
 	sim := simulator.New(*vehicle, mq.Publisher(), cfg.Simulator)
 
