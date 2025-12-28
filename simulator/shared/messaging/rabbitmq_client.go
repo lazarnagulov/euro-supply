@@ -65,29 +65,25 @@ func (r *RabbitMQClient) IsConnected() bool {
 }
 
 func (r *RabbitMQClient) declareExchanges(channel *amqp.Channel) error {
-	if err := channel.ExchangeDeclare(
-		r.config.HeartbeatExchange,
-		"topic",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	); err != nil {
-		return fmt.Errorf("failed to declare heartbeat exchange: %w", err)
+	if len(r.config.Exchanges) == 0 {
+		return fmt.Errorf("no exchanges defined in RabbitMQ config")
 	}
 
-	if err := channel.ExchangeDeclare(
-		r.config.LocationExchange,
-		"topic",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	); err != nil {
-		return fmt.Errorf("failed to declare location exchange: %w", err)
+	for _, ex := range r.config.Exchanges {
+		if err := channel.ExchangeDeclare(
+			ex.Name,
+			ex.Kind,
+			ex.Durable,
+			ex.AutoDelete,
+			ex.Internal,
+			ex.NoWait,
+			ex.Args,
+		); err != nil {
+			return fmt.Errorf("failed to declare exchange %s: %w", ex.Name, err)
+		}
+		fmt.Printf("Declared exchange: %s\n", ex.Name)
 	}
+
 	return nil
 }
 

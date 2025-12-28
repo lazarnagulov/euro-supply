@@ -2,9 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/spf13/pflag"
 	"time"
 
+	"github.com/spf13/pflag"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 )
 
@@ -26,12 +28,23 @@ type VehicleConfig struct {
 }
 
 type RabbitMQConfig struct {
-	URL                 string        `mapstructure:"url" validate:"required"`
-	HeartbeatExchange   string        `mapstructure:"heartbeat_exchange"`
-	LocationExchange    string        `mapstructure:"location_exchange"`
-	ConnectionTimeout   time.Duration `mapstructure:"connection_timeout"`
-	ReconnectDelay      time.Duration `mapstructure:"reconnect_delay"`
-	MaxReconnectAttempt int           `mapstructure:"max_reconnect_attempts"`
+	URL                 string           `mapstructure:"url" validate:"required"`
+	Exchanges           []ExchangeConfig `mapstructure:"exchanges"`
+	HeartbeatExchange   string           `mapstructure:"heartbeat_exchange"`
+	LocationExchange    string           `mapstructure:"location_exchange"`
+	ConnectionTimeout   time.Duration    `mapstructure:"connection_timeout"`
+	ReconnectDelay      time.Duration    `mapstructure:"reconnect_delay"`
+	MaxReconnectAttempt int              `mapstructure:"max_reconnect_attempts"`
+}
+
+type ExchangeConfig struct {
+	Name       string     `mapstructure:"name" validate:"required"`
+	Kind       string     `mapstructure:"kind" validate:"required,oneof=direct fanout topic headers"`
+	Durable    bool       `mapstructure:"durable"`
+	AutoDelete bool       `mapstructure:"auto_delete"`
+	Internal   bool       `mapstructure:"internal"`
+	NoWait     bool       `mapstructure:"no_wait"`
+	Args       amqp.Table `mapstructure:"args"`
 }
 
 type SimulatorConfig struct {

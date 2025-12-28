@@ -4,13 +4,18 @@ vehicle:
   brand: "Mercedes-Benz"
   model: "E-class"
   max_load_kg: 18000
-  initial_latitude: 45.2671   # Novi Sad
+  initial_latitude: 45.2671 # Novi Sad
   initial_longitude: 19.8335
 
 rabbitmq:
   url: "amqp://guest:guest@localhost:5672/"
-  heartbeat_exchange: "vehicle.heartbeat"
-  location_exchange: "vehicle.location"
+  exchanges:
+    - name: "simulator.vehicle.heartbeat"
+      kind: "topic"
+      durable: true
+    - name: "simulator.vehicle.location"
+      kind: "topic"
+      durable: true
   connection_timeout: "10s"
   reconnect_delay: "5s"
   max_reconnect_attempts: 10
@@ -18,10 +23,10 @@ rabbitmq:
 simulator:
   heartbeat_interval: "3s"
   reporting_interval: "10s"
-  min_speed: 0      # km/h
-  max_speed: 90     # km/h
+  min_speed: 0 # km/h
+  max_speed: 90 # km/h
 
 logging:
-  level: "info"      # debug, info, warn, error
-  format: "console"  # console or json
+  level: "info" # debug, info, warn, error
+  format: "console" # console or json
   output_path: "stdout"
