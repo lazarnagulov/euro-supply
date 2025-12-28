@@ -1,10 +1,11 @@
-package com.nvt.eurosupply.company.mappers;
+package com.nvt.eurosupply.factory.mappers;
 
-import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
-import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
-import com.nvt.eurosupply.company.models.Company;
-import com.nvt.eurosupply.company.enums.RequestStatus;
+import com.nvt.eurosupply.factory.dtos.CreateFactoryRequestDto;
+import com.nvt.eurosupply.factory.dtos.FactoryResponseDto;
+import com.nvt.eurosupply.factory.models.Factory;
 import com.nvt.eurosupply.shared.enums.FileFolder;
+import com.nvt.eurosupply.shared.mappers.CityMapper;
+import com.nvt.eurosupply.shared.mappers.CountryMapper;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,42 +18,42 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class CompanyMapper {
+public class FactoryMapper {
 
     private final ModelMapper modelMapper;
     private final FileMapper fileMapper;
+    private final CityMapper cityMapper;
+    private final CountryMapper countryMapper;
 
-    public Company fromRequest(RegisterCompanyRequestDto request) {
-        return Company.builder()
+    public Factory fromRequest(CreateFactoryRequestDto request) {
+        return Factory.builder()
                 .name(request.getName())
                 .address(request.getAddress())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .status(RequestStatus.PENDING)
                 .build();
     }
 
-    public CompanyResponseDto toResponse(Company company) {
-        CompanyResponseDto response =
-                modelMapper.map(company, CompanyResponseDto.class);
+    public FactoryResponseDto toResponse(Factory factory) {
+        FactoryResponseDto response =
+                modelMapper.map(factory, FactoryResponseDto.class);
 
-        response.setFiles(
-                Optional.ofNullable(company.getFiles())
+        response.setImageUrls(
+                Optional.ofNullable(factory.getImages())
                         .orElseGet(List::of)
                         .stream()
                         .map(f -> fileMapper.toResponse(
-                                FileFolder.COMPANY, company.getId(), f))
+                                FileFolder.FACTORY, factory.getId(), f))
                         .toList()
         );
 
-        response.setCity(company.getCity().getName());
-        response.setCountry(company.getCountry().getName());
+        response.setCity(cityMapper.toResponse(factory.getCity()));
+        response.setCountry(countryMapper.toResponse(factory.getCountry()));
 
         return response;
     }
 
-
-    public PagedResponse<CompanyResponseDto> toPagedResponse(Page<Company> page) {
+    public PagedResponse<FactoryResponseDto> toPagedResponse(Page<Factory> page) {
         return new PagedResponse<>(
                 page.getContent().stream().map(this::toResponse).toList(),
                 page.getTotalPages(),
