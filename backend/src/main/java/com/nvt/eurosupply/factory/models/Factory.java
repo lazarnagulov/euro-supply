@@ -36,9 +36,12 @@ public class Factory {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private Country country;
 
+    @Column(nullable = false)
     private Double latitude;
+    @Column(nullable = false)
     private Double longitude;
 
+    @Column(nullable = false)
     private Boolean isOnline = false;
 
     private Instant lastHeartbeat;
@@ -48,6 +51,7 @@ public class Factory {
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+    @Column(nullable = false)
     private Instant updatedAt;
 
     @Version
