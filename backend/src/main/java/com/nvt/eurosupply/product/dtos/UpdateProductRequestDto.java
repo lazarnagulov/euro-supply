@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,4 +32,7 @@ public class UpdateProductRequestDto {
 
     @NotNull(message = "Category is required")
     private Long categoryId;
+
+    @NotNull(message = "Factories are required")
+    private List<Long> factoryIds;
 }

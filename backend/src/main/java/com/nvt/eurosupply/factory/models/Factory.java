@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.factory.models;
 
+import com.nvt.eurosupply.product.models.Production;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
 import com.nvt.eurosupply.shared.models.StoredFile;
@@ -10,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -48,6 +50,9 @@ public class Factory {
 
     @OneToMany
     private List<StoredFile> images;
+
+    @OneToMany(mappedBy = "factory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Production> productions = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

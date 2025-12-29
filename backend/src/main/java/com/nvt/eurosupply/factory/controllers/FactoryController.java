@@ -160,4 +160,18 @@ public class FactoryController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            summary = "Get factories producing a product",
+            description = "Retrieves the list of factories where the specified product is being produced."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Factories producing the product retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found")
+    })
+    @GetMapping("/producing-product/{productId}")
+    public ResponseEntity<List<FactoryResponseDto>> getFactoriesByProductId(
+            @PathVariable Long productId) {
+        List<FactoryResponseDto> factories = service.getFactoriesByProductId(productId);
+        return ResponseEntity.ok(factories);
+    }
 }

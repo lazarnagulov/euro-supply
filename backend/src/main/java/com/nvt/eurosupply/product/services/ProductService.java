@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.product.services;
 
+import com.nvt.eurosupply.factory.repositories.FactoryRepository;
 import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
 import com.nvt.eurosupply.product.dtos.ProductResponseDto;
 import com.nvt.eurosupply.product.dtos.ProductSearchRequestDto;
@@ -36,6 +37,7 @@ public class ProductService {
     private final CategoryService categoryService;
     private final FileService fileService;
     private final FileMapper fileMapper;
+    private final FactoryRepository factoryRepository;
 
     public Product find(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product not found"));
@@ -45,6 +47,7 @@ public class ProductService {
     public ProductResponseDto createProduct(CreateProductRequestDto request) {
         Product product = mapper.fromCreateRequest(request);
         product.setCategory(categoryService.find(request.getCategoryId()));
+        product.setProducingFactories(factoryRepository.findAllById(request.getFactoryIds()));
         return mapper.toResponse(repository.save(product));
     }
 
@@ -79,6 +82,7 @@ public class ProductService {
         product.setWeight(request.getWeight());
         product.setOnSale(request.getOnSale());
         product.setUpdatedAt(Instant.now());
+        product.setProducingFactories(factoryRepository.findAllById(request.getFactoryIds()));
 
         return mapper.toResponse(repository.save(product));
     }

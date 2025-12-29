@@ -8,6 +8,8 @@ import com.nvt.eurosupply.factory.mappers.FactoryMapper;
 import com.nvt.eurosupply.factory.models.Factory;
 import com.nvt.eurosupply.factory.repositories.FactoryRepository;
 import com.nvt.eurosupply.factory.specifications.FactorySpecification;
+import com.nvt.eurosupply.product.models.Product;
+import com.nvt.eurosupply.product.services.ProductService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -21,6 +23,7 @@ import com.nvt.eurosupply.shared.services.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,7 @@ public class FactoryService {
     private final CityService cityService;
     private final CountryService countryService;
     private final FileService fileService;
+    private final ProductService productService;
 
     private final FactoryMapper mapper;
     private final FileMapper fileMapper;
@@ -132,5 +136,12 @@ public class FactoryService {
     public PagedResponse<FactoryResponseDto> searchFactories(FactorySearchRequestDto request, Pageable pageable) {
         Specification<Factory> specification = FactorySpecification.search(request);
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
+    }
+
+    public List<FactoryResponseDto> getFactoriesByProductId(Long id) {
+        Product product = productService.find(id);
+        return product.getProducingFactories().stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 }
