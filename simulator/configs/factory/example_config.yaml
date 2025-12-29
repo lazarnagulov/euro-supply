@@ -1,0 +1,26 @@
+factory:
+  id: 3
+  name: "GumaTech Novi Sad"
+  products:
+    - product_id: 1
+      min_qty: 100
+      max_qty: 400
+    - product_id: 2
+      min_qty: 50
+      max_qty: 300
+
+simulator:
+  heartbeat_interval: "30s"
+  production_times:
+    - "12:00"
+    - "00:00"
+
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672/"
+  exchanges:
+    - name: "factory.heartbeat"
+      kind: "topic"
+      durable: true
+    - name: "factory.production"
+      kind: "topic"
+      durable: true
