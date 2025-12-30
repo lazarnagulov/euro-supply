@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"eurosupply/simulator/internal/factory/config"
+	"time"
+)
 
 type Factory struct {
 	ID       int64
@@ -30,9 +33,17 @@ type ProductionReportMessage struct {
 	Items      []ProductionItem `json:"items"`
 }
 
-func NewFactoryFromDB(id int64, products []ProductConfig) Factory {
+func NewFactory(cfg config.FactoryConfig) Factory {
+	products := make([]ProductConfig, 0, len(cfg.Products))
+
+	for _, p := range cfg.Products {
+		products = append(products, ProductConfig{
+			ProductID: p.ProductID,
+		})
+	}
+
 	return Factory{
-		ID:       id,
+		ID:       cfg.ID,
 		Products: products,
 	}
 }
