@@ -125,9 +125,11 @@ func (s *Simulator) productionLoop() {
 }
 
 func (s *Simulator) sendProductionReport() error {
+	now := time.Now()
+
 	var items []domain.ProductionItem
 	for _, p := range s.factory.Products {
-		quantity := randomInt(p.MinQty, p.MaxQty)
+		quantity := simulateQuantity(p.ProductID, now)
 		items = append(items, domain.ProductionItem{
 			ProductID: p.ProductID,
 			Quantity:  quantity,
@@ -136,7 +138,7 @@ func (s *Simulator) sendProductionReport() error {
 
 	msg := domain.ProductionReportMessage{
 		FactoryID:  s.factory.ID,
-		ProducedAt: time.Now(),
+		ProducedAt: now,
 		Items:      items,
 	}
 
@@ -144,7 +146,6 @@ func (s *Simulator) sendProductionReport() error {
 	defer cancel()
 
 	routingKey := fmt.Sprintf("factory.%d.production", s.factory.ID)
-
 	if err := s.publisher.Publish(ctx, "factory.production", routingKey, msg); err != nil {
 		return fmt.Errorf("failed to publish production: %w", err)
 	}
@@ -153,12 +154,23 @@ func (s *Simulator) sendProductionReport() error {
 	return nil
 }
 
+// TODO: think about more realistic simulation
+func simulateQuantity(productID int64, now time.Time) int {
+	base := 20 + int(productID*5)
+	var variation int
+
+	if now.Hour() == 12 {
+		variation = rand.Intn(50)
+	} else {
+		variation = rand.Intn(100)
+	}
+
+	return base + variation
+}
+
 func randomInt(min, max int) int {
 	if max <= min {
 		return min
 	}
-	rand.Seed(time.Now().UnixNano())
-	mid := (min + max) / 2
-	variation := (max - min) / 5 // 20%
-	return mid + rand.Intn(variation*2+1) - variation
+	return min + rand.Intn(max-min+1)
 }

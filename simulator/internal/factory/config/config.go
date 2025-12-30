@@ -10,23 +10,14 @@ import (
 	"eurosupply/simulator/shared/config"
 )
 
+type DBConfig struct {
+	URL string `mapstructure:"url" validate:"required"`
+}
 type Config struct {
-	Factory   FactoryConfig         `mapstructure:"factory"`
 	Simulator SimulatorConfig       `mapstructure:"simulator"`
 	Logging   LoggingConfig         `mapstructure:"logging"`
 	RabbitMQ  config.RabbitMQConfig `mapstructure:"rabbitmq"`
-}
-
-type FactoryConfig struct {
-	ID       int64           `mapstructure:"id" validate:"required"`
-	Name     string          `mapstructure:"name" validate:"required"`
-	Products []ProductConfig `mapstructure:"products" validate:"required,dive"`
-}
-
-type ProductConfig struct {
-	ProductID int64 `mapstructure:"product_id" validate:"required"`
-	MinQty    int   `mapstructure:"min_qty" validate:"required"`
-	MaxQty    int   `mapstructure:"max_qty" validate:"required"`
+	DB        DBConfig              `mapstructure:"db"`
 }
 
 type SimulatorConfig struct {

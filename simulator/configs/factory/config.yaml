@@ -1,0 +1,23 @@
+db:
+  url: "postgres://user:pass@localhost:5432/eurosupply?sslmode=disable"
+
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672/"
+  exchanges:
+    - name: "factory.heartbeat"
+      kind: "topic"
+      durable: true
+    - name: "factory.production"
+      kind: "topic"
+      durable: true
+
+simulator:
+  heartbeat_interval: "30s"
+  production_times:
+    - "19:50"
+    - "00:00"
+
+logging:
+  level: "info"
+  format: "console"
+  output_path: "stdout"

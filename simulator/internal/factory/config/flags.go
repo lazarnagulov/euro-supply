@@ -4,7 +4,6 @@ import "github.com/spf13/pflag"
 
 func RegisterFlags() {
 	pflag.Int64("factory.id", 0, "Factory ID")
-	pflag.String("factory.name", "", "Factory name")
 
 	pflag.Duration("simulator.heartbeat_interval", 0, "Heartbeat interval")
 	pflag.StringSlice("simulator.production_times", nil, "Production times in HH:MM format")
