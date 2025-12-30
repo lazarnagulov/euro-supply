@@ -91,7 +91,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
   }, [product?.id, mode, reset]);
 
   useEffect(() => {
-    console.log("Product factory IDs changed:", product?.factoryIds);
     if (product && mode === "edit" && product.factoryIds?.length) {
       console.log("Calling getFactoriesByProductId with:", product.id);
       const loadSelectedFactories = async () => {

@@ -25,7 +25,6 @@ export const factoryService = {
 
     getFactoriesByProductId: async (productId: number) => {
         const response = await apiClient.get(`/factories/producing-product/${productId}`);
-        console.log("Factories by product ID response:", response.data);
         return response.data;
     },
 
