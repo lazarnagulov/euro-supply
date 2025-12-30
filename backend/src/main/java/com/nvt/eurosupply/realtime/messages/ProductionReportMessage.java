@@ -1,7 +1,6 @@
 package com.nvt.eurosupply.realtime.messages;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nvt.eurosupply.realtime.models.ProductionItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +18,5 @@ public class ProductionReportMessage {
     private Long factoryId;
     @JsonProperty("produced_at")
     private Instant producedAt;
-    private List<ProductionItem> items;
+    private List<ProductionItemMessage> items;
 }

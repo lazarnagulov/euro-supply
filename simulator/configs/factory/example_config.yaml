@@ -1,5 +1,5 @@
 factory:
-  id: 3
+  id: 1
   name: "GumaTech Novi Sad"
   products:
     - product_id: 1

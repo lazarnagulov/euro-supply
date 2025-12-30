@@ -1,6 +1,5 @@
 package com.nvt.eurosupply.factory.models;
 
-import com.nvt.eurosupply.product.models.Production;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
 import com.nvt.eurosupply.shared.models.StoredFile;

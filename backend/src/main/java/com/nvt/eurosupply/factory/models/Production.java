@@ -1,17 +1,16 @@
-package com.nvt.eurosupply.product.models;
+package com.nvt.eurosupply.factory.models;
 
-import com.nvt.eurosupply.factory.models.Factory;
+import com.nvt.eurosupply.product.models.Product;
 import jakarta.persistence.*;
-
-import java.time.Instant;
+import lombok.*;
 
 @Entity
-@Table(
-        name = "productions",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"factory_id", "product_id", "produced_at"})
-        }
-)
+@Table(name = "productions")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Production {
 
     @Id
@@ -28,7 +27,4 @@ public class Production {
 
     @Column(nullable = false)
     private Integer quantity;
-
-    @Column(nullable = false)
-    private Instant producedAt;
 }
