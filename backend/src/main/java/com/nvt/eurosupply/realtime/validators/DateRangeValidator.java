@@ -1,22 +1,26 @@
 package com.nvt.eurosupply.realtime.validators;
 
-import com.nvt.eurosupply.realtime.dtos.FactoryProductionRequestDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.Duration;
 import java.time.Instant;
 
-public class FactoryProductionRangeValidator implements ConstraintValidator<ValidFactoryProductionRange, FactoryProductionRequestDto> {
+public class DateRangeValidator
+        implements ConstraintValidator<ValidDateRange, DateRangeRequest> {
 
     @Override
-    public boolean isValid(FactoryProductionRequestDto request, ConstraintValidatorContext context) {
+    public boolean isValid(DateRangeRequest request,
+                           ConstraintValidatorContext context) {
+
         if (request == null) return false;
 
         Instant start = request.getStart();
         Instant end = request.getEnd();
 
         if (start == null || end == null) return false;
+
+        context.disableDefaultConstraintViolation();
 
         if (!start.isBefore(end)) {
             context.buildConstraintViolationWithTemplate("Start must be before end")
@@ -25,8 +29,7 @@ public class FactoryProductionRangeValidator implements ConstraintValidator<Vali
             return false;
         }
 
-        long days = Duration.between(start, end).toDays();
-        if (days > 365) {
+        if (Duration.between(start, end).toDays() > 365) {
             context.buildConstraintViolationWithTemplate("Date range cannot exceed 1 year")
                     .addPropertyNode("end")
                     .addConstraintViolation();
