@@ -25,12 +25,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -151,13 +153,25 @@ public class VehicleService {
         return new ConnectionStatusDto(vehicle.getIsOnline());
     }
 
+    @Scheduled(fixedRate = 5 * 60 * 1000)
     @Transactional
-    public void updateStatus(Long id) {
-        Vehicle vehicle = find(id);
+    public void markVehiclesOffline() {
+        log.info("Updating vehicle status");
+        Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
 
-        if (Boolean.FALSE.equals(vehicle.getIsOnline())) {
-            vehicle.setIsOnline(true);
-            repository.save(vehicle);
+        int updated = repository.markOffline(cutoff);
+
+        if (updated > 0) {
+            log.info("Marked {} vehicles as offline", updated);
+        }
+    }
+
+    @Transactional
+    public void applyHeartbeat(Long vehicleId, Instant timestamp) {
+        int updated = repository.applyHeartbeat(vehicleId, timestamp);
+
+        if (updated == 0) {
+            throw new EntityNotFoundException("Vehicle not found: " + vehicleId);
         }
     }
 }
