@@ -5,6 +5,7 @@ import {
     Calendar,
     Car,
     ChartBar,
+    RefreshCw,
 } from "lucide-react";
 import {
     LineChart,
@@ -22,15 +23,30 @@ import { InteractiveMap } from "../../../components/map/InteractiveMap";
 import { PeriodSelector } from "../../../components/common/PeriodSelector";
 import { useVehicleData } from "../hooks/useVehicleData";
 import { useDistanceData } from "../hooks/useDistanceData";
-import { usePeriodSelector } from "../../../hooks/common/usePeriodSelector.tsx";
-import {ImageModal} from "../../../components/modal/ImageModal.tsx";
+import { usePeriodSelector } from "../../../hooks/common/usePeriodSelector";
+import { ImageModal } from "../../../components/modal/ImageModal";
+import { useVehiclePolling } from "../hooks/useVehiclePolling";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
     const navigate = useNavigate();
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
-    const { vehicle, loading: vehicleLoading } = useVehicleData(vehicleId);
+    const {
+        vehicle,
+        loading: vehicleLoading,
+        updateLocation,
+        updateStatus
+    } = useVehicleData(vehicleId);
+
+    const { refreshLocation } = useVehiclePolling({
+        vehicleId,
+        onLocationUpdate: updateLocation,
+        onStatusUpdate: updateStatus,
+        locationInterval: 5 * 60 * 1000,
+        statusInterval: 2 * 60 * 1000,
+        enabled: !!vehicle,
+    });
 
     const traveledPeriod = usePeriodSelector("7d");
     const {
@@ -164,8 +180,22 @@ const VehicleDetailsPage: React.FC = () => {
                 <div className="bg-gray-100 p-4 rounded-2xl shadow">
                     <Car size={40} />
                 </div>
-                <div>
-                    <h1 className="text-2xl font-bold">{vehicle.registrationNumber}</h1>
+                <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl font-bold">{vehicle.registrationNumber}</h1>
+                        <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${
+                                vehicle.online
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-gray-100 text-gray-700'
+                            }`}
+                        >
+                            <span className={`w-2 h-2 rounded-full ${
+                                vehicle.online ? 'bg-green-500' : 'bg-gray-400'
+                            }`}></span>
+                            {vehicle.online ? 'Online' : 'Offline'}
+                        </span>
+                    </div>
                     <p className="text-gray-600">
                         {vehicle.brand.name} {vehicle.model.name}
                     </p>
@@ -220,9 +250,19 @@ const VehicleDetailsPage: React.FC = () => {
             </div>
 
             <div className="bg-white rounded-2xl shadow p-6 space-y-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <MapPin size={18} /> Last Known Location
-                </h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                        <MapPin size={18} /> Last Known Location
+                    </h2>
+                    <button
+                        onClick={refreshLocation}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
+                        title="Refresh location"
+                    >
+                        <RefreshCw size={16} />
+                        Refresh
+                    </button>
+                </div>
 
                 {vehicle.lastLocation ? (
                     <>
@@ -345,6 +385,7 @@ const VehicleDetailsPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
             <div className="p-0 space-y-0">
                 <ImageModal
                     images={vehicle?.imageUrls || []}

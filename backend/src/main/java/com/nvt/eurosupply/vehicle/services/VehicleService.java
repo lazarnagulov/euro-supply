@@ -1,8 +1,11 @@
 package com.nvt.eurosupply.vehicle.services;
 
+import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.dtos.LocationResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
+import com.nvt.eurosupply.shared.mappers.LocationMapper;
 import com.nvt.eurosupply.shared.models.Location;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
@@ -19,20 +22,24 @@ import com.nvt.eurosupply.vehicle.repositories.VehicleRepository;
 import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class VehicleService {
 
     private final VehicleRepository repository;
@@ -41,6 +48,7 @@ public class VehicleService {
 
     private final VehicleMapper mapper;
     private final FileMapper fileMapper;
+    private final LocationMapper locationMapper;
 
     @Transactional
     public VehicleResponseDto createVehicle(CreateVehicleRequestDto request) {
@@ -49,6 +57,7 @@ public class VehicleService {
         VehicleModel model = brandService.findModel(request.getModelId());
         vehicle.setBrand(brand);
         vehicle.setModel(model);
+        vehicle.setIsOnline(false);
         return mapper.toResponse(repository.save(vehicle));
     }
 
@@ -132,5 +141,37 @@ public class VehicleService {
         vehicle.getImages().clear();
         repository.saveAndFlush(vehicle);
         fileService.deleteFiles(imageIds);
+    }
+
+    public LocationResponseDto getVehicleLocation(Long id) {
+        Vehicle vehicle = find(id);
+        return locationMapper.toResponse(vehicle.getLastLocation());
+    }
+
+    public ConnectionStatusDto getVehicleStatus(Long id) {
+        Vehicle vehicle = find(id);
+        return new ConnectionStatusDto(vehicle.getIsOnline());
+    }
+
+    @Scheduled(fixedRate = 5 * 60 * 1000)
+    @Transactional
+    public void markVehiclesOffline() {
+        log.info("Updating vehicle status");
+        Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
+
+        int updated = repository.markOffline(cutoff);
+
+        if (updated > 0) {
+            log.info("Marked {} vehicles as offline", updated);
+        }
+    }
+
+    @Transactional
+    public void applyHeartbeat(Long vehicleId, Instant timestamp) {
+        int updated = repository.applyHeartbeat(vehicleId, timestamp);
+
+        if (updated == 0) {
+            throw new EntityNotFoundException("Vehicle not found: " + vehicleId);
+        }
     }
 }

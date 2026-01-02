@@ -1,43 +1,64 @@
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import type { VehicleResponse } from "../types/vehicle.types";
-import { vehicleService } from "../../../api/services/vehicleService";
+import { useState, useEffect, useCallback } from 'react';
+import { vehicleService } from '../../../api/services/vehicleService';
+import type {VehicleResponse} from "../types/vehicle.types.ts";
+import type {ConnectionStatus} from "../../../types/status.types.ts";
 
-interface UseVehicleDataReturn {
-    vehicle: VehicleResponse | null;
-    loading: boolean;
-    error: string | null;
-}
-
-export function useVehicleData(vehicleId: string | undefined): UseVehicleDataReturn {
+export function useVehicleData(vehicleId: string | undefined) {
     const [vehicle, setVehicle] = useState<VehicleResponse | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<Error | null>(null);
 
-    useEffect(() => {
+    const fetchVehicle = useCallback(async () => {
         if (!vehicleId) {
             setLoading(false);
             return;
         }
 
-        const loadVehicle = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const data = await vehicleService.getVehicle(+vehicleId);
-                setVehicle(data);
-            } catch (err) {
-                const errorMessage = "Failed to load vehicle details";
-                setError(errorMessage);
-                toast.error(errorMessage);
-                console.error("Failed to load vehicle:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadVehicle();
+        try {
+            setLoading(true);
+            const data = await vehicleService.getVehicle(+vehicleId);
+            setVehicle(data);
+            setError(null);
+        } catch (err) {
+            setError(err as Error);
+            setVehicle(null);
+        } finally {
+            setLoading(false);
+        }
     }, [vehicleId]);
 
-    return { vehicle, loading, error };
+    const updateLocation = useCallback((location: any) => {
+        console.log('Updating location:', location);
+        setVehicle((prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                lastLocation: location,
+            };
+        });
+    }, []);
+
+    const updateStatus = useCallback((status: ConnectionStatus) => {
+        console.log('Updating status:', status);
+        setVehicle((prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                online: status.online,
+            };
+        });
+    }, []);
+
+    useEffect(() => {
+        fetchVehicle();
+    }, [fetchVehicle]);
+
+    return {
+        vehicle,
+        loading,
+        error,
+        updateLocation,
+        updateStatus,
+        refetch: fetchVehicle
+    };
 }

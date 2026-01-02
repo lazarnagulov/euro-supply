@@ -221,24 +221,24 @@ INSERT INTO vehicles (
     model_id, updated_at, registration_number, version
 ) VALUES
       (
-          NULL, NULL, NULL, 20000,
+          FALSE, NULL, NULL, 20000,
           16, '2025-12-08 16:42:07.714908+01', NULL,
-          48, NULL, 'BG-123-AB', 0
+          48, '2025-12-08 16:42:07.714908+01', 'BG-123-AB', 0
       ),
       (
-          NULL, NULL, NULL, 19000,
+          FALSE, NULL, NULL, 19000,
           14, '2025-12-08 16:44:19.99891+01', NULL,
-          41, NULL, 'NS-456-CD', 0
+          41, '2025-12-08 16:42:07.714908+01', 'NS-456-CD', 0
       ),
       (
-          NULL, NULL, NULL, 18500,
+          FALSE, NULL, NULL, 18500,
           3, '2025-12-08 16:45:28.130303+01', NULL,
-          8, NULL, 'BG-789-EF', 0
+          8, '2025-12-08 16:42:07.714908+01', 'BG-789-EF', 0
       ),
       (
-          NULL, NULL, NULL, 18000,
+          FALSE, NULL, NULL, 18000,
           6, '2025-12-08 16:39:02.306783+01', NULL,
-          17, NULL, 'NS-012-GH', 0
+          17, '2025-12-08 16:42:07.714908+01', 'NS-012-GH', 0
       );
 
 
