@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -42,7 +42,10 @@ public class FactoryController {
     })
     @PostMapping
     public ResponseEntity<FactoryResponseDto> createFactory(@Valid @RequestBody CreateFactoryRequestDto request) {
-        return new ResponseEntity<>(service.createFactory(request), HttpStatus.CREATED);
+        FactoryResponseDto response = service.createFactory(request);
+        return ResponseEntity
+                .created(URI.create("/api/v1/factories/" + response.getId()))
+                .body(response);
     }
 
     @Operation(
