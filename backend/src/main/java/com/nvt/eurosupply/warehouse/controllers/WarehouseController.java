@@ -11,10 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/warehouses")
@@ -36,5 +33,20 @@ public class WarehouseController {
     @PostMapping
     public ResponseEntity<WarehouseResponseDto> createWarehouse(@Valid @RequestBody CreateWarehouseRequestDto request) {
         return new ResponseEntity<>(service.createWarehouse(request), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Deletes a warehouse.",
+            description = "Deletes a warehouse by its ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Warehouse successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Warehouse not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteWarehouse(@PathVariable Long id) {
+        service.deleteWarehouse(id);
+        return ResponseEntity.noContent().build();
     }
 }
