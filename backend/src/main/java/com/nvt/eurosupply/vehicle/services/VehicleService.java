@@ -22,6 +22,7 @@ import com.nvt.eurosupply.vehicle.repositories.VehicleRepository;
 import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class VehicleService {
 
     private final VehicleRepository repository;
@@ -149,8 +151,10 @@ public class VehicleService {
         return new ConnectionStatusDto(vehicle.getIsOnline());
     }
 
+    @Transactional
     public void updateStatus(Long id) {
         Vehicle vehicle = find(id);
+
         if (Boolean.FALSE.equals(vehicle.getIsOnline())) {
             vehicle.setIsOnline(true);
             repository.save(vehicle);

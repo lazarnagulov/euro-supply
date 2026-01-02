@@ -48,6 +48,8 @@ public class Vehicle {
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(nullable = false, updatable = false)
     private Instant updatedAt;
     
     @Version
