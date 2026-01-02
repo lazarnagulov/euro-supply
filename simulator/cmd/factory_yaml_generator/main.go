@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	_ "github.com/lib/pq"
 	"gopkg.in/yaml.v2"
@@ -73,9 +74,14 @@ func main() {
 		})
 	}
 
+	factoryIDInt, err := strconv.ParseInt(factoryID, 10, 64)
+	if err != nil {
+		log.Fatalf("Invalid factory ID: %v", err)
+	}
+
 	cfg := Config{
 		Factory: FactoryConfig{
-			ID:       atoi(factoryID),
+			ID:       factoryIDInt,
 			Products: productConfigs,
 		},
 		Simulator: SimulatorConfig{
@@ -116,10 +122,4 @@ func main() {
 	}
 
 	fmt.Printf("Configuration file generated successfully.\n")
-}
-
-func atoi(s string) int64 {
-	var i int64
-	fmt.Sscanf(s, "%d", &i)
-	return i
 }
