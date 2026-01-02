@@ -2,12 +2,10 @@ package messaging
 
 import (
 	"context"
-	"eurosupply/simulator/internal/vehicle/domain"
 )
 
 type Publisher interface {
-	PublishHeartbeat(ctx context.Context, msg domain.HeartbeatMessage) error
-	PublishLocation(ctx context.Context, msg domain.LocationMessage) error
+	Publish(ctx context.Context, exchange string, routingKey string, message any) error
 	Close() error
 }
 

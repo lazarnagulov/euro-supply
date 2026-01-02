@@ -1,10 +1,12 @@
 package com.nvt.eurosupply.product.models;
 
+import com.nvt.eurosupply.factory.models.Factory;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,6 +40,14 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_factory",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "factory_id")
+    )
+    private List<Factory> producingFactories;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

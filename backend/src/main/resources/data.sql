@@ -1,3 +1,15 @@
+INSERT INTO files (path, filename, content_type, type, created_at) VALUES
+('vehicle/1', 'vehicle_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:42:07.714908+01'),
+('vehicle/2', 'vehicle_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:44:19.99891+01'),
+('vehicle/3', 'vehicle_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:45:28.130303+01'),
+('vehicle/4', 'vehicle_4.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('product/1', 'product_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('product/2', 'product_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('product/3', 'product_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('factory/1', 'factory_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('factory/2', 'factory_2.png', 'image/png', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('factory/3', 'factory_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
+
 INSERT INTO countries (id, name) VALUES
     (1,'Albania'),
     (2,'Andorra'),
@@ -146,6 +158,33 @@ INSERT INTO countries_cities (country_id, cities_id) VALUES
     (46,1136),(46,1137),(46,1138),
     (47,1139),(47,1140),(47,1141);
 
+INSERT INTO categories (id, name) VALUES
+                                      (1, 'Electronics'),
+                                      (2, 'Computers & Laptops'),
+                                      (3, 'Smartphones & Accessories'),
+                                      (4, 'Home Appliances'),
+                                      (5, 'Furniture'),
+                                      (6, 'Books'),
+                                      (7, 'Clothing & Apparel'),
+                                      (8, 'Shoes & Footwear'),
+                                      (9, 'Sports & Outdoors'),
+                                      (10, 'Toys & Games'),
+                                      (11, 'Beauty & Personal Care'),
+                                      (12, 'Health & Fitness'),
+                                      (13, 'Automotive'),
+                                      (14, 'Garden & Outdoor'),
+                                      (15, 'Pet Supplies'),
+                                      (16, 'Office Supplies'),
+                                      (17, 'Jewelry & Watches'),
+                                      (18, 'Music & Instruments'),
+                                      (19, 'Baby Products'),
+                                      (20, 'Groceries & Gourmet Food'),
+                                      (21, 'Tools & Home Improvement'),
+                                      (22, 'Arts & Crafts'),
+                                      (23, 'Travel & Luggage'),
+                                      (24, 'Video Games & Consoles'),
+                                      (25, 'Photography & Cameras');
+
 
 INSERT INTO vehicle_brands (id, name) VALUES
     (1, 'Toyota'),
@@ -242,12 +281,88 @@ INSERT INTO vehicles (
       );
 
 
-INSERT INTO files (path, filename, content_type, type, created_at) VALUES
-    ('vehicle/1', 'vehicle_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:42:07.714908+01'),
-    ('vehicle/2', 'vehicle_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:44:19.99891+01'),
-    ('vehicle/3', 'vehicle_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:45:28.130303+01'),
-    ('vehicle/4', 'vehicle_4.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
+INSERT INTO factories (
+    name, address,
+    city_id, country_id,
+    latitude, longitude,
+    created_at, updated_at,
+    last_heartbeat, version,
+    is_online
+)
+VALUES
+-- Country 1 / City 1001
+('EuroSteel Plant',
+ 'Industrijska zona 1',
+ 1001, 1,
+ 44.8167, 20.4667,
+ now(), now(),
+ now(), 0, false),
 
+-- Country 2 / City 1005
+('NordChem Factory',
+ 'Chemical Park 12',
+ 1005, 2,
+ 52.5200, 13.4050,
+ now(), now(),
+ now(), 0, false),
+
+-- Country 3 / City 1008
+('Adriatic Food Processing',
+ 'Port Area bb',
+ 1008, 3,
+ 43.5081, 16.4402,
+ now(), now(),
+ now(), 0, false);
+
+
+INSERT INTO products
+(name, description,
+ price, weight, on_sale,
+ category_id, created_at,
+ updated_at, version, image_id)
+VALUES
+    (
+        'Steel Beam S235',
+        'Structural steel beam for construction and industrial use',
+        120.50,
+        18.75,
+        false,
+        3,
+        now(),
+        now(),
+        0,
+     5
+    ),
+    (
+        'Industrial Lubricant XL',
+        'High-performance lubricant for heavy machinery',
+        45.90,
+        5.20,
+        true,
+        12,
+        now(),
+        now(),
+        0,
+     6
+    ),
+    (
+        'Electronic Control Unit',
+        'Automotive-grade electronic control unit for industrial systems',
+        320.00,
+        1.35,
+        false,
+        21,
+        now(),
+        now(),
+        0,
+     7
+    );
+
+
+insert into product_factory (product_id, factory_id) values
+ (1, 1), (1, 2), (1, 3),
+ (2, 1), (2, 2), (2, 3),
+ (3, 1), (3, 2), (3, 3);
 
 INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (1,1),
@@ -255,29 +370,7 @@ INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (3,3),
     (4,4);
 
-INSERT INTO categories (id, name) VALUES
-  (1, 'Electronics'),
-  (2, 'Computers & Laptops'),
-  (3, 'Smartphones & Accessories'),
-  (4, 'Home Appliances'),
-  (5, 'Furniture'),
-  (6, 'Books'),
-  (7, 'Clothing & Apparel'),
-  (8, 'Shoes & Footwear'),
-  (9, 'Sports & Outdoors'),
-  (10, 'Toys & Games'),
-  (11, 'Beauty & Personal Care'),
-  (12, 'Health & Fitness'),
-  (13, 'Automotive'),
-  (14, 'Garden & Outdoor'),
-  (15, 'Pet Supplies'),
-  (16, 'Office Supplies'),
-  (17, 'Jewelry & Watches'),
-  (18, 'Music & Instruments'),
-  (19, 'Baby Products'),
-  (20, 'Groceries & Gourmet Food'),
-  (21, 'Tools & Home Improvement'),
-  (22, 'Arts & Crafts'),
-  (23, 'Travel & Luggage'),
-  (24, 'Video Games & Consoles'),
-  (25, 'Photography & Cameras');
+INSERT INTO factories_images (images_id, factory_id) VALUES
+    (8,1),
+    (9,2),
+    (10,3);

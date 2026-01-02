@@ -23,6 +23,11 @@ export const factoryService = {
         return response.data;
     },
 
+    getFactoriesByProductId: async (productId: number) => {
+        const response = await apiClient.get(`/factories/producing-product/${productId}`);
+        return response.data;
+    },
+
     createFactory: async (data: Factory, images: File[]) => {
         const factoryResponse = await apiClient.post<FactoryResponse>(
             '/factories',

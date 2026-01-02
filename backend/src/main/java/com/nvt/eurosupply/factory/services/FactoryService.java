@@ -6,8 +6,13 @@ import com.nvt.eurosupply.factory.dtos.FactorySearchRequestDto;
 import com.nvt.eurosupply.factory.dtos.UpdateFactoryRequestDto;
 import com.nvt.eurosupply.factory.mappers.FactoryMapper;
 import com.nvt.eurosupply.factory.models.Factory;
+import com.nvt.eurosupply.factory.models.Production;
 import com.nvt.eurosupply.factory.repositories.FactoryRepository;
+import com.nvt.eurosupply.factory.repositories.ProductionRepository;
 import com.nvt.eurosupply.factory.specifications.FactorySpecification;
+import com.nvt.eurosupply.product.models.Product;
+import com.nvt.eurosupply.product.services.ProductService;
+import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -35,10 +40,12 @@ import java.util.Objects;
 public class FactoryService {
 
     private final FactoryRepository repository;
+    private final ProductionRepository productionRepository;
 
     private final CityService cityService;
     private final CountryService countryService;
     private final FileService fileService;
+    private final ProductService productService;
 
     private final FactoryMapper mapper;
     private final FileMapper fileMapper;
@@ -109,7 +116,6 @@ public class FactoryService {
         fileService.deleteFiles(imageIds);
     }
 
-
     @Transactional
     public void deleteFactory(Long id) {
         Factory factory = find(id);
@@ -132,5 +138,26 @@ public class FactoryService {
     public PagedResponse<FactoryResponseDto> searchFactories(FactorySearchRequestDto request, Pageable pageable) {
         Specification<Factory> specification = FactorySpecification.search(request);
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
+    }
+
+    public List<FactoryResponseDto> getFactoriesByProductId(Long id) {
+        Product product = productService.find(id);
+        return product.getProducingFactories().stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    public void saveProductions(ProductionReportMessage report) {
+        Factory factory = find(report.getFactoryId());
+
+        List<Production> productions = report.getItems().stream()
+                .map(item -> Production.builder()
+                        .factory(factory)
+                        .product(productService.find(item.getProductId()))
+                        .quantity(item.getQuantity())
+                        .build())
+                .toList();
+
+        productionRepository.saveAll(productions);
     }
 }

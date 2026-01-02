@@ -11,7 +11,9 @@ export interface Product {
     category: Category;
     createdAt: string;
     updatedAt: string;
-    categoryId: number
+    categoryId: number;
+    factoryIds: number[];
+    factoryNames: string[];
 }
 
 export interface ProductRequest {
@@ -22,6 +24,7 @@ export interface ProductRequest {
     onSale: boolean;
     categoryId: number;
     category?: Category;
+    factoryIds: number[];
 }
 
 export interface ProductWithImage extends Product {

@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -42,7 +42,10 @@ public class FactoryController {
     })
     @PostMapping
     public ResponseEntity<FactoryResponseDto> createFactory(@Valid @RequestBody CreateFactoryRequestDto request) {
-        return new ResponseEntity<>(service.createFactory(request), HttpStatus.CREATED);
+        FactoryResponseDto response = service.createFactory(request);
+        return ResponseEntity
+                .created(URI.create("/api/v1/factories/" + response.getId()))
+                .body(response);
     }
 
     @Operation(
@@ -160,4 +163,18 @@ public class FactoryController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            summary = "Get factories producing a product",
+            description = "Retrieves the list of factories where the specified product is being produced."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Factories producing the product retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found")
+    })
+    @GetMapping("/producing-product/{productId}")
+    public ResponseEntity<List<FactoryResponseDto>> getFactoriesByProductId(
+            @PathVariable Long productId) {
+        List<FactoryResponseDto> factories = service.getFactoriesByProductId(productId);
+        return ResponseEntity.ok(factories);
+    }
 }

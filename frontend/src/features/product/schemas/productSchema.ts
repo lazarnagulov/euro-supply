@@ -27,6 +27,10 @@ export const productSchema = z.object({
         .number()
         .int()
         .positive('Please select a category'),
+
+    factoryIds: z
+        .array(z.number().int().positive())
+        .min(1, 'At least one factory must be selected'),
 });
 
 export const imageSchema = z.object({
