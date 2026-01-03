@@ -5,6 +5,8 @@ import { factoryService } from "../../../api/services/factoryService.ts";
 import type { FactoryResponse } from "../types/factory.types.ts";
 import { InteractiveMap } from "../../../components/map/InteractiveMap";
 import { ImageModal } from "../../../components/modal/ImageModal.tsx";
+import type { ConnectionStatus } from "../../../types/status.types.ts";
+import { useFactoryPolling } from "../hooks/useFactoryPolling.ts";
 
 const FactoryDetailsPage: React.FC = () => {
   const { factoryId } = useParams();
@@ -12,6 +14,9 @@ const FactoryDetailsPage: React.FC = () => {
   const [factory, setFactory] = useState<FactoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null
+  );
+  const [factoryStatus, setFactoryStatus] = useState<ConnectionStatus | null>(
     null
   );
 
@@ -32,6 +37,12 @@ const FactoryDetailsPage: React.FC = () => {
 
     loadFactory();
   }, [factoryId]);
+
+  useFactoryPolling({
+    factoryId,
+    onStatusUpdate: setFactoryStatus,
+    enabled: !!factory,
+  });
 
   const openImageModal = (index: number) => {
     setSelectedImageIndex(index);
@@ -106,7 +117,26 @@ const FactoryDetailsPage: React.FC = () => {
           <Factory size={40} className="text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">{factory.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">{factory.name}</h1>
+            {factoryStatus && (
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${
+                  factoryStatus.online
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    factoryStatus.online ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                />
+                {factoryStatus.online ? "Online" : "Offline"}
+              </span>
+            )}
+          </div>
+
           <p className="text-gray-600">{factory.address}</p>
           <p className="text-gray-600">
             {factory.city.name}, {factory.country.name}

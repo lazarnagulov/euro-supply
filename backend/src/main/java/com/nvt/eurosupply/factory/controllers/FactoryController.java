@@ -5,6 +5,7 @@ import com.nvt.eurosupply.factory.dtos.FactoryResponseDto;
 import com.nvt.eurosupply.factory.dtos.FactorySearchRequestDto;
 import com.nvt.eurosupply.factory.dtos.UpdateFactoryRequestDto;
 import com.nvt.eurosupply.factory.services.FactoryService;
+import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.DeleteImagesRequestDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
@@ -176,5 +177,18 @@ public class FactoryController {
             @PathVariable Long productId) {
         List<FactoryResponseDto> factories = service.getFactoriesByProductId(productId);
         return ResponseEntity.ok(factories);
+    }
+
+    @Operation(
+            summary = "Get factory connection status",
+            description = "Retrieves a factory connection status by its ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Factory connection status retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Factory not found")
+    })
+    @GetMapping("/{id}/status")
+    public ResponseEntity<ConnectionStatusDto> getFactoryStatus(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getFactoryStatus(id));
     }
 }
