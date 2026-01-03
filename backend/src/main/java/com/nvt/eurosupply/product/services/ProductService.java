@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.product.services;
 
+import com.nvt.eurosupply.factory.dtos.FactoryProductListItemDto;
 import com.nvt.eurosupply.factory.repositories.FactoryRepository;
 import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
 import com.nvt.eurosupply.product.dtos.ProductResponseDto;
@@ -19,12 +20,14 @@ import com.nvt.eurosupply.shared.services.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -94,5 +97,10 @@ public class ProductService {
 
     public void deleteProduct(Long id) {
         repository.delete(find(id));
+    }
+
+    public PagedResponse<FactoryProductListItemDto> getProductsByFactoryId(Long factoryId, Pageable pageable) {
+        Page<Product> page = repository.findAllByProducingFactories_Id(factoryId, pageable);
+        return mapper.toFactoryProductListItemPagedResponse(page);
     }
 }

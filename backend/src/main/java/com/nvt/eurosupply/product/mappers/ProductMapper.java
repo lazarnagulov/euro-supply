@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.product.mappers;
 
+import com.nvt.eurosupply.factory.dtos.FactoryProductListItemDto;
 import com.nvt.eurosupply.factory.models.Factory;
 import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
 import com.nvt.eurosupply.product.dtos.ProductResponseDto;
@@ -58,6 +59,22 @@ public class ProductMapper {
     public PagedResponse<ProductResponseDto> toPagedResponse(Page<Product> page) {
         return new PagedResponse<>(
                 page.getContent().stream().map(this::toResponse).toList(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
+    }
+
+    public FactoryProductListItemDto toFactoryProductListItemDto(Product product) {
+        return FactoryProductListItemDto.builder()
+                .productId(product.getId())
+                .productName(product.getName())
+                .categoryName(product.getCategory().getName())
+                .build();
+    }
+
+    public PagedResponse<FactoryProductListItemDto> toFactoryProductListItemPagedResponse(Page<Product> page) {
+        return new PagedResponse<>(
+                page.getContent().stream().map(this::toFactoryProductListItemDto).toList(),
                 page.getTotalPages(),
                 page.getTotalElements()
         );

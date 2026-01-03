@@ -36,6 +36,17 @@ export const factoryService = {
         return response.data;
     },
 
+    getProductsByFactory: async (
+        factoryId: number,
+        page: number,
+        size: number) => {
+        const response = await apiClient.get(
+            `/factories/${factoryId}/products`,
+            { params: { page, size } }
+        );
+        return response.data;
+    },
+
     createFactory: async (data: Factory, images: File[]) => {
         const factoryResponse = await apiClient.post<FactoryResponse>(
             '/factories',

@@ -165,6 +165,7 @@ public class FactoryService {
                         .factory(factory)
                         .product(productService.find(item.getProductId()))
                         .quantity(item.getQuantity())
+                        .productionDate(report.getProducedAt())
                         .build())
                 .toList();
 
