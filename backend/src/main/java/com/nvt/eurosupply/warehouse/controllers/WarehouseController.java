@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.warehouse.controllers;
 
 import com.nvt.eurosupply.warehouse.dtos.CreateWarehouseRequestDto;
+import com.nvt.eurosupply.warehouse.dtos.UpdateWarehouseRequestDto;
 import com.nvt.eurosupply.warehouse.dtos.WarehouseResponseDto;
 import com.nvt.eurosupply.warehouse.services.WarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +37,20 @@ public class WarehouseController {
     }
 
     @Operation(
+            summary = "Updates a warehouse."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Warehouse successfully updated"),
+            @ApiResponse(responseCode = "404", description = "Warehouse not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<WarehouseResponseDto> updateWarehouse(@PathVariable Long id,
+                                                                @Valid @RequestBody UpdateWarehouseRequestDto request) {
+        return ResponseEntity.ok(service.updateWarehouse(id, request));
+    }
+
+    @Operation(
             summary = "Deletes a warehouse.",
             description = "Deletes a warehouse by its ID."
     )
@@ -44,7 +59,7 @@ public class WarehouseController {
             @ApiResponse(responseCode = "404", description = "Warehouse not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWarehouse(@PathVariable Long id) {
         service.deleteWarehouse(id);
         return ResponseEntity.noContent().build();
