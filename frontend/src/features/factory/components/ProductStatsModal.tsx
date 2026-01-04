@@ -8,7 +8,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
-import { Calendar } from "lucide-react";
+import { Calendar, X } from "lucide-react";
 import { PeriodSelector } from "../../../components/common/PeriodSelector.tsx";
 import type { PeriodAggregation } from "../../../types/time.types.ts";
 import productionService from "../../../api/services/productionService.ts";
@@ -83,7 +83,19 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
         },
       });
 
-      setProductionData(data);
+      // Format the time to be more readable (date and hour)
+      const formattedData = data.map((item: any) => ({
+        ...item,
+        time: new Date(item.time).toLocaleString("sr-RS", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }));
+
+      setProductionData(formattedData);
     } catch (err: ApiError | any) {
       setError(err.message || "An error occurred while fetching data.");
     } finally {
@@ -100,13 +112,20 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-2xl shadow w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6 space-y-6">
+      <div className="bg-white rounded-2xl shadow w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Calendar size={18} /> Production Statistics:{" "}
             {productName || "Product"}
           </h2>
-
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="p-6 space-y-6 overflow-y-auto">
           <PeriodSelector
             selectedPeriod={selectedPeriod}
             onSelectPeriod={handleSelectPeriod}
@@ -156,15 +175,6 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </div>
-
-          <div className="flex justify-end mt-4 gap-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-            >
-              Close
-            </button>
           </div>
         </div>
       </div>
