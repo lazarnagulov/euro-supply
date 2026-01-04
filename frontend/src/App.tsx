@@ -7,6 +7,7 @@ import VehicleManagementPage from "./features/vehicle/pages/VehicleManagementPag
 import ProductManagementPage from "./features/product/pages/ProductManagementPage.tsx";
 import ProductDetailsPage from "./features/product/pages/ProductDetailsPage.tsx";
 import VehicleDetailsPage from "./features/vehicle/pages/VehicleDetailsPage.tsx";
+import WarehouseManagementPage from "./features/warehouse/pages/WarehouseManagementPage.tsx";
 import FactoryDetailsPage from "./features/factory/pages/FactoryDetailsPage.tsx";
 import FactoryManagementPage from "./features/factory/pages/FactoryManagementPage.tsx";
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/company-review" element={<CompanyReviewPage />} />
         <Route path="/vehicle-management" element={<VehicleManagementPage />} />
         <Route path="/product-management" element={<ProductManagementPage />} />
+        <Route path="/warehouse-management" element={<WarehouseManagementPage />} />
         <Route path="/products/:productId" element={<ProductDetailsPage />} />
         <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
         <Route path="/factory-management" element={<FactoryManagementPage />} />

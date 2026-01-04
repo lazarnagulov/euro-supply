@@ -8,7 +8,9 @@ INSERT INTO files (path, filename, content_type, type, created_at) VALUES
 ('product/3', 'product_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
 ('factory/1', 'factory_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
 ('factory/2', 'factory_2.png', 'image/png', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
-('factory/3', 'factory_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
+('factory/3', 'factory_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('warehouse/1', 'warehouse_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('warehouse/2', 'warehouse_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
 
 INSERT INTO countries (id, name) VALUES
     (1,'Albania'),
@@ -280,7 +282,6 @@ INSERT INTO vehicles (
           17, '2025-12-08 16:42:07.714908+01', 'NS-012-GH', 0
       );
 
-
 INSERT INTO factories (
     name, address,
     city_id, country_id,
@@ -368,6 +369,14 @@ INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (3,3),
     (4,4);
 
+INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude) VALUES
+     ('Central Warehouse', 'Kralja Milana 6, Beograd', 40, 1118, 16020, 454545),
+     ('Belgrade Warehouse', 'Lamartinova 52, Vracar', 40, 1118, 16520, 454545);
+
+INSERT INTO warehouses_images (images_id, warehouse_id) VALUES
+                                                        (11, 1),
+                                                        (12, 2);
+                                                        
 INSERT INTO factories_images (images_id, factory_id) VALUES
     (8,1),
     (9,2),
