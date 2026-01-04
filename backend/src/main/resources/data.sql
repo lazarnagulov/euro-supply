@@ -290,15 +290,13 @@ INSERT INTO factories (
     is_online
 )
 VALUES
--- Country 1 / City 1001
 ('EuroSteel Plant',
  'Industrijska zona 1',
- 1001, 1,
+ 1118, 40,
  44.8167, 20.4667,
  now(), now(),
  now(), 0, false),
 
--- Country 2 / City 1005
 ('NordChem Factory',
  'Chemical Park 12',
  1005, 2,
@@ -306,7 +304,6 @@ VALUES
  now(), now(),
  now(), 0, false),
 
--- Country 3 / City 1008
 ('Adriatic Food Processing',
  'Port Area bb',
  1008, 3,
@@ -364,6 +361,7 @@ insert into product_factory (product_id, factory_id) values
  (2, 1), (2, 2), (2, 3),
  (3, 1), (3, 2), (3, 3);
 
+
 INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (1,1),
     (2,2),
@@ -374,3 +372,11 @@ INSERT INTO factories_images (images_id, factory_id) VALUES
     (8,1),
     (9,2),
     (10,3);
+
+INSERT INTO productions (factory_id, product_id, quantity, production_date)
+SELECT
+    1 AS factory_id,
+    1 AS product_id,
+    (10 + (random() * 15)::int) AS quantity,
+    (NOW() - (gs || ' days')::interval) AS production_date
+FROM generate_series(0, 364) AS gs;

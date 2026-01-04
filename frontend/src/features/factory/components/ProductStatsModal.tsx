@@ -1,26 +1,122 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
+import { Calendar } from "lucide-react";
+import { PeriodSelector } from "../../../components/common/PeriodSelector.tsx";
+import type { PeriodAggregation } from "../../../types/time.types.ts";
+import productionService from "../../../api/services/productionService.ts";
 
 interface ProductStatsModalProps {
   open: boolean;
   onClose: () => void;
   productName?: string;
+  productId: number;
+  factoryId: number;
 }
 
 export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
   open,
   onClose,
   productName,
+  productId,
+  factoryId,
 }) => {
+  const [selectedPeriod, setSelectedPeriod] =
+    useState<PeriodAggregation | null>("7d");
+  const [useCustomRange, setUseCustomRange] = useState(false);
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [productionData, setProductionData] = useState<
+    { time: string; quantity: number }[]
+  >([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchProductionData = async () => {
+    if (!productName) return;
+    setLoading(true);
+    try {
+      const data = await productionService.fetchProductionData({
+        factoryId: factoryId,
+        productId: productId,
+        productName,
+        selectedPeriod: selectedPeriod || undefined,
+        useCustomRange,
+        customFrom,
+        customTo,
+      });
+      setProductionData(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductionData();
+  }, [selectedPeriod, useCustomRange, customFrom, customTo, productName]);
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-xl shadow-lg p-6 w-96">
-        <h2 className="text-lg font-bold mb-4">
-          Statistics for {productName || "Product"}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-2xl shadow p-6 w-full max-w-3xl space-y-6">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <Calendar size={18} /> Production Statistics:{" "}
+          {productName || "Product"}
         </h2>
-        <p className="text-gray-600">Stats content will be here...</p>
-        <div className="mt-6 flex justify-end">
+
+        <PeriodSelector
+          selectedPeriod={selectedPeriod}
+          onSelectPeriod={setSelectedPeriod}
+          useCustomRange={useCustomRange}
+          onToggleCustomRange={() => setUseCustomRange(!useCustomRange)}
+          customFrom={customFrom}
+          customTo={customTo}
+          onCustomFromChange={setCustomFrom}
+          onCustomToChange={setCustomTo}
+          onApplyCustomRange={fetchProductionData}
+        />
+
+        <div className="relative">
+          <h3 className="font-semibold mb-4">Production Chart</h3>
+          <div className="w-full h-80">
+            {loading && (
+              <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-lg">
+                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+            <ResponsiveContainer>
+              <LineChart data={productionData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="time"
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="quantity"
+                  stroke="#2563eb"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="flex justify-end mt-4 gap-2">
           <button
             onClick={onClose}
             className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"

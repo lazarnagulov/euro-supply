@@ -2,7 +2,6 @@ package com.nvt.eurosupply.factory.controllers;
 
 import com.nvt.eurosupply.factory.dtos.*;
 import com.nvt.eurosupply.factory.services.FactoryService;
-import com.nvt.eurosupply.product.dtos.ProductResponseDto;
 import com.nvt.eurosupply.product.services.ProductService;
 import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.DeleteImagesRequestDto;

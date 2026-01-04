@@ -35,6 +35,7 @@ const FactoryDetailsPage: React.FC = () => {
   const [selectedProductName, setSelectedProductName] = useState<
     string | undefined
   >(undefined);
+  const [selectedProductId, setSelectedProductId] = useState<number>(0);
 
   const [productsPage, setProductsPage] =
     useState<PagedResponse<FactoryProductListItemDto> | null>(null);
@@ -97,14 +98,16 @@ const FactoryDetailsPage: React.FC = () => {
     setSelectedImageIndex(null);
   };
 
-  const openStatsModal = (productName: string) => {
+  const openStatsModal = (productName: string, productId: number) => {
     setSelectedProductName(productName);
     setStatsModalOpen(true);
+    setSelectedProductId(productId);
   };
 
   const closeStatsModal = () => {
     setStatsModalOpen(false);
     setSelectedProductName(undefined);
+    setSelectedProductId(0);
   };
 
   const goToPreviousImage = () => {
@@ -326,7 +329,9 @@ const FactoryDetailsPage: React.FC = () => {
                     <td className="py-2 px-4 text-center">
                       <button
                         className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
-                        onClick={() => openStatsModal(prod.productName)}
+                        onClick={() =>
+                          openStatsModal(prod.productName, prod.productId)
+                        }
                         title="View Stats"
                       >
                         <ChartBar size={16} />
@@ -408,6 +413,8 @@ const FactoryDetailsPage: React.FC = () => {
           open={statsModalOpen}
           onClose={closeStatsModal}
           productName={selectedProductName}
+          productId={selectedProductId}
+          factoryId={factory.id}
         />
       </div>
     </div>
