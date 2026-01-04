@@ -13,6 +13,7 @@ import { PeriodSelector } from "../../../components/common/PeriodSelector.tsx";
 import type { PeriodAggregation } from "../../../types/time.types.ts";
 import productionService from "../../../api/services/productionService.ts";
 import type { ApiError } from "../../../types/api.types.ts";
+import { validateCustomRange } from "../../../utils/timeRangeValidator";
 
 interface ProductStatsModalProps {
   open: boolean;
@@ -38,7 +39,7 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
     { time: string; quantity: number }[]
   >([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const handleSelectPeriod = (period: PeriodAggregation) => {
     setSelectedPeriod(period);
@@ -53,23 +54,17 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
   };
 
   const fetchProductionData = async () => {
-    setError(null);
+    setError(undefined);
     if (!productName) return;
     setLoading(true);
 
     try {
-      // Custom range validation - max 1 year
-      if (useCustomRange && customFrom && customTo) {
-        const fromDate = new Date(customFrom);
-        const toDate = new Date(customTo);
-        const diff = toDate.getTime() - fromDate.getTime();
-        const oneYearMs = 366 * 24 * 60 * 60 * 1000;
+      const { valid, error } = validateCustomRange(customFrom, customTo);
 
-        if (diff > oneYearMs) {
-          setError("Custom range cannot exceed 1 year.");
-          setLoading(false);
-          return;
-        }
+      if (!valid) {
+        setError(error);
+        setLoading(false);
+        return;
       }
 
       const data = await productionService.fetchProductionData({

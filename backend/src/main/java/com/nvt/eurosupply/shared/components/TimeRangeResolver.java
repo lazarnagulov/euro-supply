@@ -15,7 +15,7 @@ public class TimeRangeResolver {
 
         if (from != null && to != null) {
             long daysBetween = ChronoUnit.DAYS.between(from, to);
-            if (daysBetween > 366) 
+            if (daysBetween > 365)
                 throw new CustomRangeTooLargeException();
             
             return new TimeRange(from, to);
