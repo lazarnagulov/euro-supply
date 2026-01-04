@@ -8,11 +8,11 @@ import com.nvt.eurosupply.realtime.dtos.VehicleDistanceDto;
 import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
 import com.nvt.eurosupply.realtime.messages.VehicleHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
+import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -22,15 +22,18 @@ public class VehicleRealTimeService {
     private final WriteApiBlocking writeApi;
     private final InfluxQueryService service;
     private final VehicleService vehicleService;
+    private final TimeWindowCalculator timeWindowCalculator;
 
     public VehicleRealTimeService(
             @Qualifier("vehicleInfluxClient") InfluxDBClient influxDBClient,
             InfluxQueryService service,
-            VehicleService vehicleService
+            VehicleService vehicleService,
+            TimeWindowCalculator timeWindowCalculator
     ) {
         this.writeApi = influxDBClient.getWriteApiBlocking();
         this.service = service;
         this.vehicleService = vehicleService;
+        this.timeWindowCalculator = timeWindowCalculator;
     }
 
     public List<VehicleDistanceDto> getDistances(Long id, VehicleDistanceRequestDto request) {
@@ -38,7 +41,7 @@ public class VehicleRealTimeService {
 
         Instant start = request.getStart();
         Instant end = request.getEnd();
-        String window = calculateWindowDuration(start, end);
+        String window = timeWindowCalculator.calculateWindowDuration(start, end);
 
         String query = String.format(
                 """
@@ -85,23 +88,6 @@ public class VehicleRealTimeService {
                 .time(heartbeat.getTimestamp(), WritePrecision.NS);
 
         writeApi.writePoint(point);
-    }
-
-    private String calculateWindowDuration(Instant start, Instant stop) {
-        Duration d = Duration.between(start, stop);
-
-        long hours = d.toHours();
-        long days = d.toDays();
-
-        if (hours < 1) return "1m";
-        if (hours <= 6) return "5m";
-        if (hours <= 24) return "15m";
-        if (days <= 7) return "1h";
-        if (days <= 30) return "6h";
-        if (days <= 90) return "1d";
-        if (days <= 365) return "1w";
-
-        return "1mo";
     }
 
 }

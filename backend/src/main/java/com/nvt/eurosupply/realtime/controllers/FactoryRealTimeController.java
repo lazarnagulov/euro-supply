@@ -1,19 +1,21 @@
 package com.nvt.eurosupply.realtime.controllers;
 
 import com.nvt.eurosupply.realtime.dtos.ProductionChartDto;
-import com.nvt.eurosupply.realtime.dtos.FactoryProductionRequestDto;
+import com.nvt.eurosupply.realtime.dtos.TimeRangeRequestDto;
 import com.nvt.eurosupply.realtime.services.FactoryRealTimeService;
+import com.nvt.eurosupply.shared.components.TimeRangeResolver;
+import com.nvt.eurosupply.shared.records.TimeRange;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -25,6 +27,7 @@ import java.util.List;
 public class FactoryRealTimeController {
 
     private final FactoryRealTimeService service;
+    private final TimeRangeResolver timeRangeResolver;
 
     @Operation(
             summary = "Get production data for a product",
@@ -54,8 +57,9 @@ public class FactoryRealTimeController {
     public ResponseEntity<List<ProductionChartDto>> getProductions(
             @PathVariable Long id,
             @PathVariable Long productId,
-            @Valid @ModelAttribute FactoryProductionRequestDto request
+            @ModelAttribute TimeRangeRequestDto request
             ) {
-        return ResponseEntity.ok(service.getProduction(id, productId, request));
+        TimeRange timeRange = timeRangeResolver.resolve(request.getPeriod(), request.getStart(), request.getEnd());
+        return ResponseEntity.ok(service.getProduction(id, productId, timeRange.from(), timeRange.to()));
     }
 }

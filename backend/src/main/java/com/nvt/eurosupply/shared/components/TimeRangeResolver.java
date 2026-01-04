@@ -21,6 +21,10 @@ public class TimeRangeResolver {
             return new TimeRange(from, to);
         }
 
+        if (period == null || period.isBlank()) {
+            return new TimeRange(now.minus(365, ChronoUnit.DAYS), now);
+        }
+
         return switch (period) {
             case "7d" -> new TimeRange(now.minus(7, ChronoUnit.DAYS), now);
             case "30d" -> new TimeRange(now.minus(30, ChronoUnit.DAYS), now);

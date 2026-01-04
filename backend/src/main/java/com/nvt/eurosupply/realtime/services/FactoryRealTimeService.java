@@ -6,43 +6,46 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import com.nvt.eurosupply.realtime.dtos.ProductionChartDto;
 import com.nvt.eurosupply.factory.services.FactoryService;
-import com.nvt.eurosupply.realtime.dtos.FactoryProductionRequestDto;
 import com.nvt.eurosupply.realtime.messages.FactoryHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
+import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @Service
 public class FactoryRealTimeService {
 
     private final WriteApiBlocking writeApi;
     private final InfluxQueryService service;
     private final FactoryService factoryService;
+    private final TimeWindowCalculator timeWindowCalculator;
 
     public FactoryRealTimeService(
             @Qualifier("factoryInfluxClient") InfluxDBClient influxDBClient,
             InfluxQueryService service,
-            FactoryService factoryService
+            FactoryService factoryService,
+            TimeWindowCalculator timeWindowCalculator
     ) {
         this.writeApi = influxDBClient.getWriteApiBlocking();
         this.service = service;
         this.factoryService = factoryService;
+        this.timeWindowCalculator = timeWindowCalculator;
     }
 
     public List<ProductionChartDto> getProduction(
             Long factoryId,
             Long productId,
-            FactoryProductionRequestDto request
+            Instant start,
+            Instant end
     ) {
         factoryService.find(factoryId);
 
-        Instant start = request.getStart();
-        Instant end = request.getEnd();
-        String window = calculateWindowDuration(start, end);
+        String window = timeWindowCalculator.calculateWindowDuration(start, end);
 
         String query = String.format(
                 """
@@ -55,7 +58,7 @@ public class FactoryRealTimeService {
                 |> aggregateWindow(every: %s, fn: sum, createEmpty: false)
                 |> yield()
                 """,
-                start, end, factoryId, productId, window
+                start.toString(), end.toString(), factoryId, productId, window
         );
 
         return service.query(query, fluxRecord -> new ProductionChartDto(
@@ -87,20 +90,4 @@ public class FactoryRealTimeService {
         writeApi.writePoint(point);
     }
 
-    private String calculateWindowDuration(Instant start, Instant stop) {
-        Duration d = Duration.between(start, stop);
-
-        long hours = d.toHours();
-        long days = d.toDays();
-
-        if (hours < 1) return "1m";
-        if (hours <= 6) return "5m";
-        if (hours <= 24) return "15m";
-        if (days <= 7) return "1h";
-        if (days <= 30) return "6h";
-        if (days <= 90) return "1d";
-        if (days <= 365) return "1w";
-
-        return "1mo";
-    }
 }

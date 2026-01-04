@@ -12,6 +12,7 @@ import { Calendar } from "lucide-react";
 import { PeriodSelector } from "../../../components/common/PeriodSelector.tsx";
 import type { PeriodAggregation } from "../../../types/time.types.ts";
 import productionService from "../../../api/services/productionService.ts";
+import type { ApiError } from "../../../types/api.types.ts";
 
 interface ProductStatsModalProps {
   open: boolean;
@@ -52,34 +53,44 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
   };
 
   const fetchProductionData = async () => {
-    // custom range validation - max 1 year
-    if (useCustomRange && customFrom && customTo) {
-      const fromDate = new Date(customFrom);
-      const toDate = new Date(customTo);
-
-      const diff = toDate.getTime() - fromDate.getTime();
-
-      const oneYearMs = 366 * 24 * 60 * 60 * 1000;
-
-      if (diff > oneYearMs) {
-        setError("Custom range cannot exceed 1 year.");
-        return;
-      }
-    }
-
     setError(null);
     if (!productName) return;
     setLoading(true);
+
     try {
+      // Custom range validation - max 1 year
+      if (useCustomRange && customFrom && customTo) {
+        const fromDate = new Date(customFrom);
+        const toDate = new Date(customTo);
+        const diff = toDate.getTime() - fromDate.getTime();
+        const oneYearMs = 366 * 24 * 60 * 60 * 1000;
+
+        if (diff > oneYearMs) {
+          setError("Custom range cannot exceed 1 year.");
+          setLoading(false);
+          return;
+        }
+      }
+
       const data = await productionService.fetchProductionData({
         factoryId,
         productId,
-        selectedPeriod: selectedPeriod || undefined,
-        useCustomRange,
-        customFrom,
-        customTo,
+        timeRange: {
+          period: selectedPeriod || undefined,
+          start:
+            useCustomRange && customFrom
+              ? new Date(customFrom).toISOString()
+              : undefined,
+          end:
+            useCustomRange && customTo
+              ? new Date(customTo).toISOString()
+              : undefined,
+        },
       });
+
       setProductionData(data);
+    } catch (err: ApiError | any) {
+      setError(err.message || "An error occurred while fetching data.");
     } finally {
       setLoading(false);
     }
@@ -87,7 +98,7 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
 
   useEffect(() => {
     fetchProductionData();
-  }, [selectedPeriod, useCustomRange, customFrom, customTo]);
+  }, [selectedPeriod, useCustomRange]);
 
   if (!open) return null;
 
