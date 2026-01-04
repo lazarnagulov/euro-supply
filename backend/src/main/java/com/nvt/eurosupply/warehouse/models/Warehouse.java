@@ -2,8 +2,11 @@ package com.nvt.eurosupply.warehouse.models;
 
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
+import com.nvt.eurosupply.shared.models.StoredFile;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -28,6 +31,9 @@ public class Warehouse {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private Country country;
+
+    @OneToMany
+    private List<StoredFile> images;
 
     private Double latitude;
     

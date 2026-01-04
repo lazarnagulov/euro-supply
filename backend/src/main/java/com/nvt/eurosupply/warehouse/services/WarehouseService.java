@@ -1,20 +1,34 @@
 package com.nvt.eurosupply.warehouse.services;
 
 import com.nvt.eurosupply.product.models.Category;
+import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.enums.FileFolder;
+import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
+import com.nvt.eurosupply.shared.models.PagedResponse;
+import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
+import com.nvt.eurosupply.shared.services.FileService;
+import com.nvt.eurosupply.vehicle.models.Vehicle;
+import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import com.nvt.eurosupply.warehouse.dtos.CreateWarehouseRequestDto;
 import com.nvt.eurosupply.warehouse.dtos.UpdateWarehouseRequestDto;
 import com.nvt.eurosupply.warehouse.dtos.WarehouseResponseDto;
+import com.nvt.eurosupply.warehouse.dtos.WarehouseSearchRequestDto;
 import com.nvt.eurosupply.warehouse.mappers.WarehouseMapper;
 import com.nvt.eurosupply.warehouse.models.Warehouse;
 import com.nvt.eurosupply.warehouse.repositories.WarehouseRepository;
+import com.nvt.eurosupply.warehouse.specifications.WarehouseSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -23,8 +37,10 @@ public class WarehouseService {
 
     private final CityService cityService;
     private final CountryService countryService;
+    private final FileService fileService;
 
     private final WarehouseRepository repository;
+    private final FileMapper fileMapper;
     private final WarehouseMapper mapper;
 
     public Warehouse find (Long id) {
@@ -63,5 +79,25 @@ public class WarehouseService {
 
     public void deleteWarehouse(Long id) {
         repository.delete(find(id));
+    }
+
+    public PagedResponse<WarehouseResponseDto> getWarehouses(Pageable pageable) {
+        return mapper.toPagedResponse(repository.findAll(pageable));
+    }
+
+    public PagedResponse<WarehouseResponseDto> searchWarehouses(WarehouseSearchRequestDto request, Pageable pageable) {
+        Specification<Warehouse> specification = WarehouseSpecification.search(request);
+        return mapper.toPagedResponse(repository.findAll(specification, pageable));
+    }
+
+    public List<FileResponseDto> uploadImages(Long id, List<MultipartFile> images) {
+        Warehouse warehouse = find(id);
+        List<StoredFile> stored = fileService.uploadFiles(FileFolder.WAREHOUSE, id, images);
+        warehouse.setImages(stored);
+        repository.save(warehouse);
+
+        return stored.stream()
+                .map(file -> fileMapper.toResponse(FileFolder.WAREHOUSE, id, file))
+                .toList();
     }
 }

@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum FileFolder {
     VEHICLE("vehicle"),
     COMPANY("company"),
-    PRODUCT("product");
+    PRODUCT("product"),
+    WAREHOUSE("warehouse");
 
     private final String path;
 }
