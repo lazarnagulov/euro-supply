@@ -37,6 +37,7 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
     { time: string; quantity: number }[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSelectPeriod = (period: PeriodAggregation) => {
     setSelectedPeriod(period);
@@ -51,6 +52,22 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
   };
 
   const fetchProductionData = async () => {
+    // custom range validation - max 1 year
+    if (useCustomRange && customFrom && customTo) {
+      const fromDate = new Date(customFrom);
+      const toDate = new Date(customTo);
+
+      const diff = toDate.getTime() - fromDate.getTime();
+
+      const oneYearMs = 366 * 24 * 60 * 60 * 1000;
+
+      if (diff > oneYearMs) {
+        setError("Custom range cannot exceed 1 year.");
+        return;
+      }
+    }
+
+    setError(null);
     if (!productName) return;
     setLoading(true);
     try {
@@ -94,6 +111,12 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
           onCustomToChange={setCustomTo}
           onApplyCustomRange={fetchProductionData}
         />
+
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+            {error}
+          </div>
+        )}
 
         <div className="relative">
           <h3 className="font-semibold mb-4">Production Chart</h3>

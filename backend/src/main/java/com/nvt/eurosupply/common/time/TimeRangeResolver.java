@@ -12,6 +12,10 @@ public class TimeRangeResolver {
         Instant now = Instant.now();
 
         if (from != null && to != null) {
+            long daysBetween = ChronoUnit.DAYS.between(from, to);
+            if (daysBetween > 366) 
+                throw new IllegalArgumentException("Custom range cannot exceed 1 year.");
+            
             return new TimeRange(from, to);
         }
 
