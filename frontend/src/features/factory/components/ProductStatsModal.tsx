@@ -97,8 +97,9 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
   };
 
   useEffect(() => {
+    if (!open) return;
     fetchProductionData();
-  }, [selectedPeriod, useCustomRange]);
+  }, [open, selectedPeriod, useCustomRange]);
 
   if (!open) return null;
 
