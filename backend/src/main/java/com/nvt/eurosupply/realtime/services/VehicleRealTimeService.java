@@ -9,7 +9,6 @@ import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
 import com.nvt.eurosupply.realtime.messages.VehicleHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
 import com.nvt.eurosupply.vehicle.services.VehicleLookupService;
-import com.nvt.eurosupply.vehicle.services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +32,6 @@ public class VehicleRealTimeService {
 
     public List<VehicleDistanceDto> getDistances(Long id, VehicleDistanceRequestDto request) {
         lookupService.find(id);
-
         Instant start = request.getStart();
         Instant end = request.getEnd();
         String window = calculateWindowDuration(start, end);
