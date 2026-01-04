@@ -100,70 +100,72 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-2xl shadow p-6 w-full max-w-3xl space-y-6">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Calendar size={18} /> Production Statistics:{" "}
-          {productName || "Product"}
-        </h2>
+      <div className="bg-white rounded-2xl shadow w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="p-6 space-y-6">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Calendar size={18} /> Production Statistics:{" "}
+            {productName || "Product"}
+          </h2>
 
-        <PeriodSelector
-          selectedPeriod={selectedPeriod}
-          onSelectPeriod={handleSelectPeriod}
-          useCustomRange={useCustomRange}
-          onToggleCustomRange={handleToggleCustomRange}
-          customFrom={customFrom}
-          customTo={customTo}
-          onCustomFromChange={setCustomFrom}
-          onCustomToChange={setCustomTo}
-          onApplyCustomRange={fetchProductionData}
-        />
+          <PeriodSelector
+            selectedPeriod={selectedPeriod}
+            onSelectPeriod={handleSelectPeriod}
+            useCustomRange={useCustomRange}
+            onToggleCustomRange={handleToggleCustomRange}
+            customFrom={customFrom}
+            customTo={customTo}
+            onCustomFromChange={setCustomFrom}
+            onCustomToChange={setCustomTo}
+            onApplyCustomRange={fetchProductionData}
+          />
 
-        {error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-            {error}
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          <div className="relative">
+            <h3 className="font-semibold mb-4">Production Chart</h3>
+            <div className="w-full h-96">
+              {loading && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-lg">
+                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+              <ResponsiveContainer>
+                <LineChart data={productionData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="time"
+                    angle={-45}
+                    textAnchor="end"
+                    height={100}
+                    tick={{ fontSize: 13 }}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="quantity"
+                    stroke="#2563eb"
+                    strokeWidth={3}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        )}
 
-        <div className="relative">
-          <h3 className="font-semibold mb-4">Production Chart</h3>
-          <div className="w-full h-80">
-            {loading && (
-              <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-lg">
-                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            )}
-            <ResponsiveContainer>
-              <LineChart data={productionData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="time"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="quantity"
-                  stroke="#2563eb"
-                  strokeWidth={3}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="flex justify-end mt-4 gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              Close
+            </button>
           </div>
-        </div>
-
-        <div className="flex justify-end mt-4 gap-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>
