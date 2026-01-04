@@ -9,6 +9,7 @@ import {
   Truck,
   Package,
   Warehouse,
+  Factory,
 } from "lucide-react";
 
 const NavigationHeader: React.FC = () => {
@@ -30,6 +31,7 @@ const NavigationHeader: React.FC = () => {
       label: "Product Management",
       icon: Package,
     },
+    { path: "/factory-management", label: "Factory Management", icon: Factory },
   ];
 
   const isActive = (path: string) => location.pathname === path;

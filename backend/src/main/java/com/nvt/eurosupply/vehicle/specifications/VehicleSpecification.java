@@ -2,7 +2,6 @@ package com.nvt.eurosupply.vehicle.specifications;
 
 import com.nvt.eurosupply.vehicle.dtos.VehicleSearchRequestDto;
 import com.nvt.eurosupply.vehicle.models.Vehicle;
-import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
 public class VehicleSpecification {

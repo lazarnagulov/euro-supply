@@ -27,6 +27,7 @@ public class VehicleMessageListener {
         try {
             VehicleHeartbeatMessage heartbeat = mapper.readValue(message, new TypeReference<>() {});
             realTimeService.saveHearthBeat(heartbeat);
+            service.applyHeartbeat(heartbeat.getVehicleId(), heartbeat.getTimestamp());
             log.info("[{}] Received heartbeat from vehicle: {}", heartbeat.getTimestamp(),  heartbeat.getStatus());
         } catch (JsonProcessingException e) {
             log.error("Error processing heartbeat: {}", e.getMessage(), e);

@@ -7,6 +7,8 @@ import type {
     VehicleSearchParams
 } from "../../features/vehicle/types/vehicle.types.ts";
 import apiClient from "../client.ts";
+import type {MapLocation} from "../../types/location.types.ts";
+import type {ConnectionStatus} from "../../types/status.types.ts";
 
 export const vehicleService = {
     getVehicles: async (page: number, size: number, params: VehicleSearchParams) => {
@@ -38,6 +40,20 @@ export const vehicleService = {
         return response.data;
     },
 
+    getVehicleLocation: async (id: number) => {
+        const response = await apiClient.get<MapLocation>(
+            `/vehicles/${id}/location`
+        );
+        return response.data;
+    },
+
+    getVehicleStatus: async (id: number) => {
+        const response = await apiClient.get<ConnectionStatus>(
+            `/vehicles/${id}/status`
+        );
+        return response.data;
+    },
+
     getDistances: async (id: number, request: DistanceRequest) => {
         const vehicleResponse = await apiClient.get<DistancePoint[]>(
             `/vehicles/${id}/distances`,
@@ -47,21 +63,35 @@ export const vehicleService = {
     },
 
     createVehicle: async (data: Vehicle, images: File[]) => {
-        const vehicleResponse = await apiClient.post<VehicleResponse>(
-            '/vehicles',
-            data
-        );
+        const vehicleResponse = await apiClient.post<VehicleResponse>('/vehicles', data);
 
-        const formData = new FormData();
-        images.forEach(img => formData.append('images', img));
+        if (images.length === 0) {
+            return { vehicle: vehicleResponse.data, imagesUploaded: true };
+        }
 
+        try {
+            const formData = new FormData();
+            images.forEach(img => formData.append('images', img));
+            console.log(images);
+            await apiClient.post(
+                `/vehicles/${vehicleResponse.data.id}/images`,
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+
+            return { vehicle: vehicleResponse.data, imagesUploaded: true };
+        } catch (err) {
+            return { vehicle: vehicleResponse.data, imagesUploaded: false };
+        }
+    },
+
+    uploadVehicleImages: async (vehicleId: number, formData: FormData) => {
         await apiClient.post(
-            `/vehicles/${vehicleResponse.data.id}/images`,
+            `/vehicles/${vehicleId}/images`,
             formData,
             { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-
-        return vehicleResponse.data;
+        return true;
     },
 
     updateVehicle: async (id: number, data: Vehicle) => {
@@ -74,5 +104,15 @@ export const vehicleService = {
 
     deleteVehicle: async (id: number) => {
         await apiClient.delete(`/vehicles/${id}`);
-    }
+    },
+
+    deleteVehicleImage: async (id: number, imageId: number) => {
+        await apiClient.delete(`/vehicles/${id}/images/${imageId}`);
+    },
+
+    deleteImages: async (id: number, imageIds: number[]) => {
+        await apiClient.delete(`/vehicles/${id}/images`, {
+            data: { imageIds }
+        });
+    },
 };

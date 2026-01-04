@@ -1,7 +1,7 @@
 package com.nvt.eurosupply.shared.services;
 
-import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
+import com.nvt.eurosupply.shared.exceptions.FileDeleteException;
 import com.nvt.eurosupply.shared.exceptions.FileUploadException;
 import com.nvt.eurosupply.shared.enums.FileType;
 import com.nvt.eurosupply.shared.models.StoredFile;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.time.Instant;
@@ -59,7 +60,7 @@ public class FileService {
             FileType type = detectType(file.getContentType());
 
             StoredFile stored = StoredFile.builder()
-                    .path(filePath.toString())
+                    .path(relativeDir)
                     .filename(storedName)
                     .contentType(file.getContentType())
                     .type(type)
@@ -82,4 +83,27 @@ public class FileService {
 
         return FileType.OTHER;
     }
+
+    public void deleteFiles(List<Long> fileIds) {
+        List<StoredFile> files = storedFileRepository.findAllById(fileIds);
+        storedFileRepository.deleteAllByIdIn(fileIds);
+
+        for (StoredFile file : files) {
+            deletePhysicalFile(file);
+        }
+    }
+
+    public void deletePhysicalFile(StoredFile file) {
+        try {
+            Path toDelete = Paths.get(fileStoragePath)
+                    .resolve(Paths.get(file.getPath(), file.getFilename()))
+                    .normalize()
+                    .toAbsolutePath();
+            Files.deleteIfExists(toDelete);
+        } catch (IOException e) {
+            throw new FileDeleteException("Failed to delete file " + file.getPath());
+        }
+    }
+
+
 }

@@ -15,10 +15,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -40,7 +41,10 @@ public class ProductController {
     })
     @PostMapping
     public ResponseEntity<ProductResponseDto> createProduct(@Valid @RequestBody CreateProductRequestDto request) {
-        return new ResponseEntity<>(service.createProduct(request), HttpStatus.CREATED);
+        ProductResponseDto response = service.createProduct(request);
+        return ResponseEntity
+                .created(URI.create("/api/v1/products/" + response.getId()))
+                .body(response);
     }
 
     @Operation(

@@ -1,16 +1,21 @@
 vehicle:
-  id: 5
+  id: 2
   registration_number: "NS-456-CD"
   brand: "Volvo"
-  model: "FH16 750"
+  model: "S60"
   max_load_kg: 20000
-  initial_latitude: 44.8176   # Novi Sad
-  initial_longitude: 20.4567
+  initial_latitude: 44.7866 # Novi Sad
+  initial_longitude: 20.4489
 
 rabbitmq:
   url: "amqp://guest:guest@localhost:5672/"
-  heartbeat_exchange: "vehicle.heartbeat"
-  location_exchange: "vehicle.location"
+  exchanges:
+    - name: "simulator.vehicle.heartbeat"
+      kind: "topic"
+      durable: true
+    - name: "simulator.vehicle.location"
+      kind: "topic"
+      durable: true
   connection_timeout: "10s"
   reconnect_delay: "5s"
   max_reconnect_attempts: 10
@@ -18,8 +23,8 @@ rabbitmq:
 simulator:
   heartbeat_interval: "3s"
   reporting_interval: "10s"
-  min_speed: 5
-  max_speed: 85
+  min_speed: 0
+  max_speed: 90
 
 logging:
   level: "info"

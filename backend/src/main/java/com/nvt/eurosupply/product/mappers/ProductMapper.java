@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.product.mappers;
 
+import com.nvt.eurosupply.factory.models.Factory;
 import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
 import com.nvt.eurosupply.product.dtos.ProductResponseDto;
 import com.nvt.eurosupply.product.models.Product;
@@ -38,6 +39,19 @@ public class ProductMapper {
                             product.getImage()
                     ));
         }
+        response.setFactoryIds(
+                product.getProducingFactories()
+                        .stream()
+                        .map(Factory::getId)
+                        .toList()
+        );
+
+        response.setFactoryNames(
+                product.getProducingFactories()
+                        .stream()
+                        .map(Factory::getName)
+                        .toList()
+        );
         return response;
     }
 

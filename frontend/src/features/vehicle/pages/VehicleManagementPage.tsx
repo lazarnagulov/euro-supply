@@ -7,6 +7,8 @@ import {Filter, Plus, Truck} from "lucide-react";
 import VehicleModal from "../components/VehicleModal.tsx";
 import SearchFilters from "../components/SearchFilter.tsx";
 import DeleteConfirmationModal from "../../../components/modal/DeleteConfirmationModal.tsx";
+import toast, {Toaster} from "react-hot-toast";
+
 
 const VehicleManagementPage = () => {
     const [vehicles, setVehicles] = useState<VehicleResponse[]>([]);
@@ -19,7 +21,7 @@ const VehicleManagementPage = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [modalMode, setModalMode] = useState('create');
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
     const [selectedVehicle, setSelectedVehicle] = useState<VehicleResponse | null>(null);
     const pageSize = 10;
 
@@ -35,7 +37,7 @@ const VehicleManagementPage = () => {
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
         } catch (error) {
-            console.error('Failed to load vehicles:', error);
+            toast.error('Failed to load vehicles!');
         } finally {
             setLoading(false);
         }
@@ -64,11 +66,12 @@ const VehicleManagementPage = () => {
         setDeleting(true);
         try {
             await vehicleService.deleteVehicle(selectedVehicle.id);
+            toast.success("Vehicle deleted successfully.");
             setShowDeleteModal(false);
             setSelectedVehicle(null);
             await loadVehicles();
         } catch (error) {
-            console.error('Failed to delete vehicle:', error);
+            toast.error('Failed to delete vehicle!');
         } finally {
             setDeleting(false);
         }
@@ -81,11 +84,41 @@ const VehicleManagementPage = () => {
 
     const handleSuccess = () => {
         setShowModal(false);
+        toast.success(
+            modalMode === "create"
+                ? "Vehicle created successfully!"
+                : "Vehicle updated successfully!"
+        );
         loadVehicles();
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 4000,
+                    style: {
+                        background: "#fff",
+                        color: "#363636",
+                        borderRadius: "12px",
+                        padding: "16px",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                    },
+                    success: {
+                        iconTheme: {
+                            primary: "#10b981",
+                            secondary: "#fff",
+                        },
+                    },
+                    error: {
+                        iconTheme: {
+                            primary: "#ef4444",
+                            secondary: "#fff",
+                        },
+                    },
+                }}
+            />
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
                     <div className="flex justify-between items-center">

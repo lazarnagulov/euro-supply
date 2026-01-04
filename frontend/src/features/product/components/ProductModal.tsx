@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, CheckCircle, Upload, X } from "lucide-react";
+import AsyncSelect from "react-select/async";
 
 import type { ProductRequest, ProductWithImage } from "../types/product.types";
 import type { Category } from "../types/category.types";
 import { productSchema } from "../schemas/productSchema";
 import { productService } from "../../../api/services/productService";
 import { categoryService } from "../../../api/services/categoryService";
+import { factoryService } from "../../../api/services/factoryService";
+import type { FactoryResponse } from "../../factory/types/factory.types";
 
 interface ProductModalProps {
   mode: "create" | "edit";
@@ -47,6 +50,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isImageChanged, setIsImageChanged] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [selectedFactories, setSelectedFactories] = useState<
+    { label: string; value: number }[]
+  >([]);
 
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(
@@ -83,6 +89,19 @@ const ProductModal: React.FC<ProductModalProps> = ({
     };
     init();
   }, [product?.id, mode, reset]);
+
+  useEffect(() => {
+    if (product && mode === "edit" && product.factoryIds?.length) {
+      console.log("Calling getFactoriesByProductId with:", product.id);
+      const loadSelectedFactories = async () => {
+        const data = await factoryService.getFactoriesByProductId(product.id);
+        setSelectedFactories(
+          data.map((f: FactoryResponse) => ({ label: f.name, value: f.id }))
+        );
+      };
+      loadSelectedFactories();
+    }
+  }, [product?.factoryIds, mode]);
 
   /* -------------------- IMAGE -------------------- */
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -339,6 +358,45 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     {errors.description.message}
                   </p>
                 )}
+              </div>
+
+              {/* FACTORIES */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Factories *
+                </label>
+                <Controller
+                  name="factoryIds"
+                  control={control}
+                  render={({ field }) => (
+                    <AsyncSelect
+                      isMulti
+                      cacheOptions
+                      defaultOptions
+                      loadOptions={async (inputValue: string) => {
+                        const res = await factoryService.getFactories(0, 50, {
+                          name: inputValue,
+                        });
+                        return res.content.map((f: FactoryResponse) => ({
+                          label: f.name,
+                          value: f.id,
+                        }));
+                      }}
+                      value={selectedFactories}
+                      onChange={(selected) => {
+                        const options = selected
+                          ? selected.map((s) => ({
+                              label: s.label,
+                              value: s.value,
+                            }))
+                          : [];
+                        setSelectedFactories(options);
+                        field.onChange(options.map((o) => o.value));
+                      }}
+                      placeholder="Select factories..."
+                    />
+                  )}
+                />{" "}
               </div>
 
               {/* IMAGE */}

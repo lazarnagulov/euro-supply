@@ -9,7 +9,8 @@ public enum FileFolder {
     VEHICLE("vehicle"),
     COMPANY("company"),
     PRODUCT("product"),
-    WAREHOUSE("warehouse");
+    WAREHOUSE("warehouse"),
+    FACTORY("factory");
 
     private final String path;
 }

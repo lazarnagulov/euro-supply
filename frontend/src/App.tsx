@@ -8,6 +8,8 @@ import ProductManagementPage from "./features/product/pages/ProductManagementPag
 import ProductDetailsPage from "./features/product/pages/ProductDetailsPage.tsx";
 import VehicleDetailsPage from "./features/vehicle/pages/VehicleDetailsPage.tsx";
 import WarehouseManagementPage from "./features/warehouse/pages/WarehouseManagementPage.tsx";
+import FactoryDetailsPage from "./features/factory/pages/FactoryDetailsPage.tsx";
+import FactoryManagementPage from "./features/factory/pages/FactoryManagementPage.tsx";
 
 function App() {
   return (
@@ -25,9 +27,11 @@ function App() {
         <Route path="/warehouse-management" element={<WarehouseManagementPage />} />
         <Route path="/products/:productId" element={<ProductDetailsPage />} />
         <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
+        <Route path="/factory-management" element={<FactoryManagementPage />} />
+        <Route path="/factories/:factoryId" element={<FactoryDetailsPage />} />
       </Routes>
     </>
   );
 }
 
-export default App
+export default App;

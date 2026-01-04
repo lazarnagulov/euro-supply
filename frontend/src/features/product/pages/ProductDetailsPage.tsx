@@ -180,6 +180,18 @@ const ProductDetailsPage: React.FC = () => {
             </p>
           </div>
 
+          <div>
+            <h3 className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
+              <Tag size={16} />
+              Producing in Factories
+            </h3>
+            <p className="text-lg font-medium text-gray-800 bg-indigo-50 px-4 py-2 rounded-lg inline-block">
+              {product.factoryNames.length > 0
+                ? product.factoryNames.join(", ")
+                : "No factories associated"}
+            </p>
+          </div>
+
           {/* Sale Status */}
           <div>
             <h3 className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">

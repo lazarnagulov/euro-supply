@@ -19,7 +19,6 @@ import java.util.List;
 @Table(name = "companies")
 @Builder
 public class Company {
-    // TODO: Add owner
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

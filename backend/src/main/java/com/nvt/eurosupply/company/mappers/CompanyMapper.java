@@ -4,7 +4,6 @@ import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.enums.RequestStatus;
-import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.models.PagedResponse;

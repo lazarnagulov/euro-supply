@@ -22,10 +22,10 @@ public class RegisterCompanyRequestDto {
     @Size(min = 2, max = 50, message = "Address must be between 2 and 50 characters")
     private String address;
 
-    @NotNull(message = "CityId is required")
+    @NotNull(message = "City is required")
     private Long cityId;
 
-    @NotNull(message = "CountryId is required")
+    @NotNull(message = "Country is required")
     private Long countryId;
 
     @NotNull(message = "Latitude is required")
