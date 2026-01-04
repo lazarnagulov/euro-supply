@@ -2,8 +2,8 @@ package com.nvt.eurosupply.factory.controllers;
 
 import com.nvt.eurosupply.factory.dtos.ProductionChartDto;
 import com.nvt.eurosupply.factory.services.ProductionService;
-import com.nvt.eurosupply.common.time.TimeRange;
-import com.nvt.eurosupply.common.time.TimeRangeResolver;
+import com.nvt.eurosupply.shared.records.TimeRange;
+import com.nvt.eurosupply.shared.components.TimeRangeResolver;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

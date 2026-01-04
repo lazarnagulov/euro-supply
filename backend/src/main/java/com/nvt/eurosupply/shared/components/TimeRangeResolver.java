@@ -1,5 +1,7 @@
-package com.nvt.eurosupply.common.time;
+package com.nvt.eurosupply.shared.components;
 
+import com.nvt.eurosupply.shared.records.TimeRange;
+import com.nvt.eurosupply.shared.exceptions.CustomRangeTooLargeException;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,7 +16,7 @@ public class TimeRangeResolver {
         if (from != null && to != null) {
             long daysBetween = ChronoUnit.DAYS.between(from, to);
             if (daysBetween > 366) 
-                throw new IllegalArgumentException("Custom range cannot exceed 1 year.");
+                throw new CustomRangeTooLargeException();
             
             return new TimeRange(from, to);
         }

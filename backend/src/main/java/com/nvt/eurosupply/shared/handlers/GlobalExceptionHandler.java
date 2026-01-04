@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.shared.handlers;
 
+import com.nvt.eurosupply.shared.exceptions.CustomRangeTooLargeException;
 import com.nvt.eurosupply.shared.exceptions.FileDeleteException;
 import com.nvt.eurosupply.shared.exceptions.FileUploadException;
 import com.nvt.eurosupply.shared.models.ExceptionResponse;
@@ -140,6 +141,22 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(CustomRangeTooLargeException.class)
+    public ResponseEntity<ExceptionResponse> handleCustomRangeTooLargeException(
+            CustomRangeTooLargeException ex,
+            HttpServletRequest request) {
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error("Bad Request")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
 

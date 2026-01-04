@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.common.time;
+package com.nvt.eurosupply.shared.records;
 
 import java.time.Instant;
 
