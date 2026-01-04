@@ -372,11 +372,3 @@ INSERT INTO factories_images (images_id, factory_id) VALUES
     (8,1),
     (9,2),
     (10,3);
-
-INSERT INTO productions (factory_id, product_id, quantity, production_date)
-SELECT
-    1 AS factory_id,
-    1 AS product_id,
-    (10 + (random() * 15)::int) AS quantity,
-    (NOW() - (gs || ' days')::interval) AS production_date
-FROM generate_series(0, 364) AS gs;

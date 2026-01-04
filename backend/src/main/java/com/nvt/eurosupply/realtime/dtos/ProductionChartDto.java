@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.factory.dtos;
+package com.nvt.eurosupply.realtime.dtos;
 
 public record ProductionChartDto(
         String time,

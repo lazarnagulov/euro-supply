@@ -74,7 +74,6 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
       const data = await productionService.fetchProductionData({
         factoryId,
         productId,
-        productName,
         selectedPeriod: selectedPeriod || undefined,
         useCustomRange,
         customFrom,
@@ -88,7 +87,7 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
 
   useEffect(() => {
     fetchProductionData();
-  }, [selectedPeriod, useCustomRange, customFrom, customTo, productName]);
+  }, [selectedPeriod, useCustomRange, customFrom, customTo]);
 
   if (!open) return null;
 

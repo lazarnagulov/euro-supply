@@ -29,7 +29,4 @@ public class Production {
 
     @Column(nullable = false)
     private Integer quantity;
-
-    @Column(nullable = false)
-    private Instant productionDate;
 }

@@ -157,6 +157,7 @@ public class FactoryService {
                 .toList();
     }
 
+    @Transactional
     public void saveProductions(ProductionReportMessage report) {
         Factory factory = find(report.getFactoryId());
 
@@ -165,7 +166,6 @@ public class FactoryService {
                         .factory(factory)
                         .product(productService.find(item.getProductId()))
                         .quantity(item.getQuantity())
-                        .productionDate(report.getProducedAt())
                         .build())
                 .toList();
 

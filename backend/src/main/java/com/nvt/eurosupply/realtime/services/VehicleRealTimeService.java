@@ -9,7 +9,7 @@ import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
 import com.nvt.eurosupply.realtime.messages.VehicleHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -19,13 +19,16 @@ import java.util.List;
 @Service
 public class VehicleRealTimeService {
 
-    private final InfluxQueryService service;
     private final WriteApiBlocking writeApi;
+    private final InfluxQueryService service;
     private final VehicleService vehicleService;
 
-    @Autowired
-    public VehicleRealTimeService(InfluxDBClient client, InfluxQueryService service, VehicleService vehicleService) {
-        writeApi = client.getWriteApiBlocking();
+    public VehicleRealTimeService(
+            @Qualifier("vehicleInfluxClient") InfluxDBClient influxDBClient,
+            InfluxQueryService service,
+            VehicleService vehicleService
+    ) {
+        this.writeApi = influxDBClient.getWriteApiBlocking();
         this.service = service;
         this.vehicleService = vehicleService;
     }
