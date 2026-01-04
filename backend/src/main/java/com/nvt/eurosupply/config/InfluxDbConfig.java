@@ -5,6 +5,7 @@ import com.influxdb.client.InfluxDBClientFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class InfluxDbConfig {
@@ -21,12 +22,16 @@ public class InfluxDbConfig {
     @Value("${influxdb.organization}")
     private String organization;
 
-    @Value("${influxdb.bucket}")
-    private String bucket;
-
-    @Bean
-    public InfluxDBClient influxDbClient() {
+    @Bean("vehicleInfluxClient")
+    @Primary
+    public InfluxDBClient vehicleInfluxClient() {
         String url = String.format("http://%s:%s", host, port);
-        return InfluxDBClientFactory.create(url, token.toCharArray(), organization, bucket);
+        return InfluxDBClientFactory.create(url, token.toCharArray(), organization, "vehicle");
+    }
+
+    @Bean("factoryInfluxClient")
+    public InfluxDBClient factoryInfluxClient() {
+        String url = String.format("http://%s:%s", host, port);
+        return InfluxDBClientFactory.create(url, token.toCharArray(), organization, "factory");
     }
 }

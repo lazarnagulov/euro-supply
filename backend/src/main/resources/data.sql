@@ -290,15 +290,13 @@ INSERT INTO factories (
     is_online
 )
 VALUES
--- Country 1 / City 1001
 ('EuroSteel Plant',
  'Industrijska zona 1',
- 1001, 1,
+ 1118, 40,
  44.8167, 20.4667,
  now(), now(),
  now(), 0, false),
 
--- Country 2 / City 1005
 ('NordChem Factory',
  'Chemical Park 12',
  1005, 2,
@@ -306,7 +304,6 @@ VALUES
  now(), now(),
  now(), 0, false),
 
--- Country 3 / City 1008
 ('Adriatic Food Processing',
  'Port Area bb',
  1008, 3,
@@ -363,6 +360,7 @@ insert into product_factory (product_id, factory_id) values
  (1, 1), (1, 2), (1, 3),
  (2, 1), (2, 2), (2, 3),
  (3, 1), (3, 2), (3, 3);
+
 
 INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (1,1),

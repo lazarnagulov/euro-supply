@@ -28,6 +28,7 @@ public class FactoryMessageListener {
             realTimeService.saveHeartbeat(heartbeat);
             log.info("[{}] Received heartbeat from factory {}: status={}",
                     heartbeat.getTimestamp(), heartbeat.getFactoryId(), heartbeat.getStatus());
+            service.applyHeartbeat(heartbeat.getFactoryId(), heartbeat.getTimestamp());
         } catch (JsonProcessingException e) {
             log.error("Error processing factory heartbeat: {}", e.getMessage(), e);
         }

@@ -29,3 +29,9 @@ export interface FactorySearchParams {
     cityId?: number;
     countryId?: number;
 }
+
+export interface FactoryProductListItemDto {
+    productId: number;
+    productName: string;
+    categoryName: string;
+}
