@@ -8,7 +8,9 @@ INSERT INTO files (path, filename, content_type, type, created_at) VALUES
 ('product/3', 'product_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
 ('factory/1', 'factory_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
 ('factory/2', 'factory_2.png', 'image/png', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
-('factory/3', 'factory_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
+('factory/3', 'factory_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('files/warehouse/1/', 'warehouse_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('files/warehouse/2/', 'warehouse_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
 
 INSERT INTO countries (id, name) VALUES
     (1,'Albania'),
@@ -280,15 +282,6 @@ INSERT INTO vehicles (
           17, '2025-12-08 16:42:07.714908+01', 'NS-012-GH', 0
       );
 
-
-INSERT INTO files (path, filename, content_type, type, created_at) VALUES
-    ('files/vehicle/1/', 'vehicle_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:42:07.714908+01'),
-    ('files/vehicle/2/', 'vehicle_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:44:19.99891+01'),
-    ('files/vehicle/3/', 'vehicle_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:45:28.130303+01'),
-    ('files/vehicle/4/', 'vehicle_4.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
-    ('files/warehouse/1/', 'warehouse_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
-    ('files/warehouse/2/', 'warehouse_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
-    
 INSERT INTO factories (
     name, address,
     city_id, country_id,
@@ -378,40 +371,13 @@ INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (3,3),
     (4,4);
 
-INSERT INTO categories (id, name) VALUES
-  (1, 'Electronics'),
-  (2, 'Computers & Laptops'),
-  (3, 'Smartphones & Accessories'),
-  (4, 'Home Appliances'),
-  (5, 'Furniture'),
-  (6, 'Books'),
-  (7, 'Clothing & Apparel'),
-  (8, 'Shoes & Footwear'),
-  (9, 'Sports & Outdoors'),
-  (10, 'Toys & Games'),
-  (11, 'Beauty & Personal Care'),
-  (12, 'Health & Fitness'),
-  (13, 'Automotive'),
-  (14, 'Garden & Outdoor'),
-  (15, 'Pet Supplies'),
-  (16, 'Office Supplies'),
-  (17, 'Jewelry & Watches'),
-  (18, 'Music & Instruments'),
-  (19, 'Baby Products'),
-  (20, 'Groceries & Gourmet Food'),
-  (21, 'Tools & Home Improvement'),
-  (22, 'Arts & Crafts'),
-  (23, 'Travel & Luggage'),
-  (24, 'Video Games & Consoles'),
-  (25, 'Photography & Cameras');
-
 INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude) VALUES
      ('Central Warehouse', 'Kralja Milana 6, Beograd', 40, 1118, 16020, 454545),
      ('Belgrade Warehouse', 'Lamartinova 52, Vracar', 40, 1118, 16520, 454545);
 
 INSERT INTO warehouses_images (images_id, warehouse_id) VALUES
-                                                        (5, 1),
-                                                        (6, 2);
+                                                        (11, 1),
+                                                        (12, 2);
                                                         
 INSERT INTO factories_images (images_id, factory_id) VALUES
     (8,1),
