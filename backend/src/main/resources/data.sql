@@ -9,8 +9,8 @@ INSERT INTO files (path, filename, content_type, type, created_at) VALUES
 ('factory/1', 'factory_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
 ('factory/2', 'factory_2.png', 'image/png', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
 ('factory/3', 'factory_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
-('files/warehouse/1/', 'warehouse_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
-('files/warehouse/2/', 'warehouse_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
+('warehouse/1', 'warehouse_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('warehouse/2', 'warehouse_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
 
 INSERT INTO countries (id, name) VALUES
     (1,'Albania'),

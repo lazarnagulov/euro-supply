@@ -1,6 +1,5 @@
 package com.nvt.eurosupply.warehouse.services;
 
-import com.nvt.eurosupply.product.models.Category;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -11,8 +10,6 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
-import com.nvt.eurosupply.vehicle.models.Vehicle;
-import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import com.nvt.eurosupply.warehouse.dtos.CreateWarehouseRequestDto;
 import com.nvt.eurosupply.warehouse.dtos.UpdateWarehouseRequestDto;
 import com.nvt.eurosupply.warehouse.dtos.WarehouseResponseDto;
@@ -26,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -77,8 +76,16 @@ public class WarehouseService {
         return mapper.toResponse(repository.save(warehouse));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteWarehouse(Long id) {
-        repository.delete(find(id));
+        Warehouse warehouse = find(id);
+
+        List<Long> imageIds = warehouse.getImages().stream()
+                .map(StoredFile::getId)
+                .toList();
+
+        deleteImagesInternal(warehouse, imageIds);
+        repository.delete(warehouse);
     }
 
     public PagedResponse<WarehouseResponseDto> getWarehouses(Pageable pageable) {
@@ -99,5 +106,11 @@ public class WarehouseService {
         return stored.stream()
                 .map(file -> fileMapper.toResponse(FileFolder.WAREHOUSE, id, file))
                 .toList();
+    }
+
+    private void deleteImagesInternal(Warehouse warehouse, List<Long> imageIds) {
+        warehouse.getImages().clear();
+        repository.saveAndFlush(warehouse);
+        fileService.deleteFiles(imageIds);
     }
 }
