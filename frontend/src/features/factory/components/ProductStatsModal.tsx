@@ -38,13 +38,25 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
   >([]);
   const [loading, setLoading] = useState(false);
 
+  const handleSelectPeriod = (period: PeriodAggregation) => {
+    setSelectedPeriod(period);
+    setUseCustomRange(false);
+    setCustomFrom("");
+    setCustomTo("");
+  };
+
+  const handleToggleCustomRange = () => {
+    setUseCustomRange(true);
+    setSelectedPeriod(null);
+  };
+
   const fetchProductionData = async () => {
     if (!productName) return;
     setLoading(true);
     try {
       const data = await productionService.fetchProductionData({
-        factoryId: factoryId,
-        productId: productId,
+        factoryId,
+        productId,
         productName,
         selectedPeriod: selectedPeriod || undefined,
         useCustomRange,
@@ -73,9 +85,9 @@ export const ProductStatsModal: React.FC<ProductStatsModalProps> = ({
 
         <PeriodSelector
           selectedPeriod={selectedPeriod}
-          onSelectPeriod={setSelectedPeriod}
+          onSelectPeriod={handleSelectPeriod}
           useCustomRange={useCustomRange}
-          onToggleCustomRange={() => setUseCustomRange(!useCustomRange)}
+          onToggleCustomRange={handleToggleCustomRange}
           customFrom={customFrom}
           customTo={customTo}
           onCustomFromChange={setCustomFrom}
