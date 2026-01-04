@@ -1,8 +1,8 @@
 package com.nvt.eurosupply.warehouse.dtos;
 
+import com.nvt.eurosupply.shared.dtos.CityDto;
+import com.nvt.eurosupply.shared.dtos.CountryDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
-import com.nvt.eurosupply.shared.models.City;
-import com.nvt.eurosupply.shared.models.Country;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +18,8 @@ public class WarehouseResponseDto {
     private Long id;
     private String name;
     private String address;
-    private Country country;
-    private City city;
+    private CountryDto country;
+    private CityDto city;
     private Double latitude;
     private Double longitude;
     private List<FileResponseDto> imageUrls;
