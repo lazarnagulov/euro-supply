@@ -53,6 +53,7 @@ public class FactoryService {
     private final CountryService countryService;
     private final FileService fileService;
     private final ProductService productService;
+    private final ProductFactoryCleanupService cleanupService;
 
     private final FactoryMapper mapper;
     private final FileMapper fileMapper;
@@ -136,6 +137,8 @@ public class FactoryService {
         repository.saveAndFlush(factory);
 
         deleteImagesInternal(factory, imageIds);
+
+        cleanupService.deleteByFactoryId(id);
         repository.delete(factory);
     }
 
