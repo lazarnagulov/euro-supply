@@ -161,7 +161,7 @@ const FactoryDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div className="p-6 space-y-6 bg-gradient-to-br from-indigo-50 to-teal-100 min-h-screen">
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
