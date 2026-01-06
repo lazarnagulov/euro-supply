@@ -41,6 +41,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
       onSale: false,
       categoryId: 0,
       category: undefined,
+      factoryIds: [],
     },
     mode: "onChange",
   });
@@ -76,6 +77,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             onSale: product.onSale,
             categoryId: product.category?.id || product.categoryId || 0,
             category: product.category,
+            factoryIds: product.factoryIds,
           });
 
           if (product.imageUrl) {
