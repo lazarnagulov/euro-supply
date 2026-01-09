@@ -4,70 +4,67 @@ import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.WriteApiBlocking;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
+import com.nvt.eurosupply.realtime.dtos.ProductionChartDto;
 import com.nvt.eurosupply.factory.services.FactoryService;
-import com.nvt.eurosupply.realtime.dtos.FactoryProductionDto;
-import com.nvt.eurosupply.realtime.dtos.FactoryProductionRequestDto;
 import com.nvt.eurosupply.realtime.messages.FactoryHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @Service
 public class FactoryRealTimeService {
 
-    private final InfluxQueryService service;
     private final WriteApiBlocking writeApi;
+    private final InfluxQueryService service;
     private final FactoryService factoryService;
+    private final TimeWindowCalculator timeWindowCalculator;
 
-    @Autowired
     public FactoryRealTimeService(
-            InfluxDBClient client,
+            @Qualifier("factoryInfluxClient") InfluxDBClient influxDBClient,
             InfluxQueryService service,
-            FactoryService factoryService
+            FactoryService factoryService,
+            TimeWindowCalculator timeWindowCalculator
     ) {
-        this.writeApi = client.getWriteApiBlocking();
+        this.writeApi = influxDBClient.getWriteApiBlocking();
         this.service = service;
         this.factoryService = factoryService;
+        this.timeWindowCalculator = timeWindowCalculator;
     }
 
-    public List<FactoryProductionDto> getProduction(
+    public List<ProductionChartDto> getProduction(
             Long factoryId,
-            FactoryProductionRequestDto request
+            Long productId,
+            Instant start,
+            Instant end
     ) {
         factoryService.find(factoryId);
 
-        Instant start = request.getStart();
-        Instant end = request.getEnd();
-        String window = calculateWindowDuration(start, end);
+        String window = timeWindowCalculator.calculateWindowDuration(start, end);
 
         String query = String.format(
                 """
                 from(bucket: "factory")
                 |> range(start: %s, stop: %s)
                 |> filter(fn: (r) => r["factory_id"] == "%d")
+                |> filter(fn: (r) => r["product_id"] == "%d")
                 |> filter(fn: (r) => r["_measurement"] == "factory_production")
                 |> filter(fn: (r) => r["_field"] == "quantity")
                 |> aggregateWindow(every: %s, fn: sum, createEmpty: false)
                 |> yield()
                 """,
-                start, end, factoryId, window
+                start.toString(), end.toString(), factoryId, productId, window
         );
 
-        return service.query(query, fluxRecord -> {
-            FactoryProductionDto dto = new FactoryProductionDto();
-            dto.setTime(fluxRecord.getTime());
-            dto.setProductId(
-                    Long.parseLong(fluxRecord.getValueByKey("product_id").toString())
-            );
-            dto.setQuantity(
-                    fluxRecord.getValue() == null ? null : ((Number) fluxRecord.getValue()).intValue()
-            );
-            return dto;
-        }).toList();
+        return service.query(query, fluxRecord -> new ProductionChartDto(
+                fluxRecord.getTime().toString(),
+                fluxRecord.getValue() == null ? 0 : ((Number) fluxRecord.getValue()).intValue()
+        )).toList();
     }
 
     public void saveProductionReport(ProductionReportMessage report) {
@@ -93,20 +90,4 @@ public class FactoryRealTimeService {
         writeApi.writePoint(point);
     }
 
-    private String calculateWindowDuration(Instant start, Instant stop) {
-        Duration d = Duration.between(start, stop);
-
-        long hours = d.toHours();
-        long days = d.toDays();
-
-        if (hours < 1) return "1m";
-        if (hours <= 6) return "5m";
-        if (hours <= 24) return "15m";
-        if (days <= 7) return "1h";
-        if (days <= 30) return "6h";
-        if (days <= 90) return "1d";
-        if (days <= 365) return "1w";
-
-        return "1mo";
-    }
 }

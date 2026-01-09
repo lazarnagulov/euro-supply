@@ -346,6 +346,11 @@ const FactoryModal: React.FC<FactoryModalProps> = ({
                 value={getCurrentLocation()}
                 onChange={handleLocationSelect}
                 height="400px"
+                center={
+                  mode === "edit" && factory
+                    ? [factory.latitude, factory.longitude]
+                    : undefined
+                }
               />
             </div>
 

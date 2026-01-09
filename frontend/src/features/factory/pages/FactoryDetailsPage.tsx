@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, MapPin, Factory, Building2, Globe } from "lucide-react";
+import {
+  ArrowLeft,
+  MapPin,
+  Factory,
+  Building2,
+  Globe,
+  ChartBar,
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { factoryService } from "../../../api/services/factoryService.ts";
-import type { FactoryResponse } from "../types/factory.types.ts";
+import type {
+  FactoryProductListItemDto,
+  FactoryResponse,
+} from "../types/factory.types.ts";
 import { InteractiveMap } from "../../../components/map/InteractiveMap";
 import { ImageModal } from "../../../components/modal/ImageModal.tsx";
+import type { ConnectionStatus } from "../../../types/status.types.ts";
+import { useFactoryPolling } from "../hooks/useFactoryPolling.ts";
+import type { PagedResponse } from "../../../types/api.types.ts";
+import { ProductStatsModal } from "../components/ProductStatsModal.tsx";
 
 const FactoryDetailsPage: React.FC = () => {
   const { factoryId } = useParams();
@@ -14,6 +28,20 @@ const FactoryDetailsPage: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
   );
+  const [factoryStatus, setFactoryStatus] = useState<ConnectionStatus | null>(
+    null
+  );
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
+  const [selectedProductName, setSelectedProductName] = useState<
+    string | undefined
+  >(undefined);
+  const [selectedProductId, setSelectedProductId] = useState<number>(0);
+
+  const [productsPage, setProductsPage] =
+    useState<PagedResponse<FactoryProductListItemDto> | null>(null);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     const loadFactory = async () => {
@@ -33,12 +61,53 @@ const FactoryDetailsPage: React.FC = () => {
     loadFactory();
   }, [factoryId]);
 
+  useEffect(() => {
+    if (factory) {
+      loadProducts(page, size);
+    }
+  }, [factory, page, size]);
+
+  const loadProducts = async (page: number = 0, size: number = 10) => {
+    if (!factoryId) return;
+    setProductsLoading(true);
+    try {
+      const data = await factoryService.getProductsByFactory(
+        Number(factoryId),
+        page,
+        size
+      );
+      setProductsPage(data);
+    } catch (err) {
+      console.error("Failed to load products", err);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
+
+  useFactoryPolling({
+    factoryId,
+    onStatusUpdate: setFactoryStatus,
+    enabled: !!factory,
+  });
+
   const openImageModal = (index: number) => {
     setSelectedImageIndex(index);
   };
 
   const closeImageModal = () => {
     setSelectedImageIndex(null);
+  };
+
+  const openStatsModal = (productName: string, productId: number) => {
+    setSelectedProductName(productName);
+    setStatsModalOpen(true);
+    setSelectedProductId(productId);
+  };
+
+  const closeStatsModal = () => {
+    setStatsModalOpen(false);
+    setSelectedProductName(undefined);
+    setSelectedProductId(0);
   };
 
   const goToPreviousImage = () => {
@@ -92,7 +161,7 @@ const FactoryDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div className="p-6 space-y-6 bg-gradient-to-br from-indigo-50 to-teal-100 min-h-screen">
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
@@ -106,7 +175,26 @@ const FactoryDetailsPage: React.FC = () => {
           <Factory size={40} className="text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">{factory.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">{factory.name}</h1>
+            {factoryStatus && (
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 ${
+                  factoryStatus.online
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    factoryStatus.online ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                />
+                {factoryStatus.online ? "Online" : "Offline"}
+              </span>
+            )}
+          </div>
+
           <p className="text-gray-600">{factory.address}</p>
           <p className="text-gray-600">
             {factory.city.name}, {factory.country.name}
@@ -201,6 +289,103 @@ const FactoryDetailsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Products Table */}
+      <div className="bg-white rounded-2xl shadow p-6 space-y-4">
+        <h2 className="text-lg font-semibold mb-4">Products Produced</h2>
+
+        {productsLoading ? (
+          <div className="flex justify-center py-6">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : productsPage && productsPage.content.length > 0 ? (
+          <>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-2 px-4 font-medium text-gray-700">
+                    Product Name
+                  </th>
+                  <th className="py-2 px-4 font-medium text-gray-700">
+                    Category
+                  </th>
+                  <th className="py-2 px-4 font-medium text-gray-700 text-center">
+                    Statistics
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {productsPage.content.map((prod) => (
+                  <tr
+                    key={prod.productId}
+                    className="border-b hover:bg-gray-50"
+                  >
+                    <td
+                      className="py-2 px-4 text-blue-600 cursor-pointer hover:underline"
+                      onClick={() => navigate(`/products/${prod.productId}`)}
+                    >
+                      {prod.productName}
+                    </td>
+                    <td className="py-2 px-4">{prod.categoryName}</td>
+                    <td className="py-2 px-4 text-center">
+                      <button
+                        className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+                        onClick={() =>
+                          openStatsModal(prod.productName, prod.productId)
+                        }
+                        title="View Stats"
+                      >
+                        <ChartBar size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="flex justify-end items-center gap-4 mt-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={page === 0}
+                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                  onClick={() => setPage((prev) => prev - 1)}
+                >
+                  Prev
+                </button>
+                <button
+                  disabled={page + 1 >= productsPage.totalPages}
+                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                  onClick={() => setPage((prev) => prev + 1)}
+                >
+                  Next
+                </button>
+                <span className="text-gray-700 ml-2">
+                  Page {page + 1} of {productsPage.totalPages}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-gray-600 text-sm">Items per page:</label>
+                <select
+                  value={size}
+                  onChange={(e) => setSize(Number(e.target.value))}
+                  className="border rounded px-2 py-1"
+                >
+                  {[5, 10, 20, 50].map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </>
+        ) : (
+          <p className="text-gray-500 py-4">
+            No products found for this factory.
+          </p>
+        )}
+      </div>
+
       <div className="bg-white rounded-2xl shadow p-6 space-y-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <MapPin size={18} /> Factory Location
@@ -221,6 +406,15 @@ const FactoryDetailsPage: React.FC = () => {
           onClose={closeImageModal}
           onPrevious={goToPreviousImage}
           onNext={goToNextImage}
+        />
+      </div>
+      <div className="p-0 space-y-0">
+        <ProductStatsModal
+          open={statsModalOpen}
+          onClose={closeStatsModal}
+          productName={selectedProductName}
+          productId={selectedProductId}
+          factoryId={factory.id}
         />
       </div>
     </div>

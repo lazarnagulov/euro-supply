@@ -4,6 +4,8 @@ import com.nvt.eurosupply.product.models.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "productions")
 @Getter

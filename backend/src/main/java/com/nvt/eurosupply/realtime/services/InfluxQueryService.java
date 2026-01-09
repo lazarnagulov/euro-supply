@@ -16,9 +16,6 @@ public class InfluxQueryService {
 
     private final InfluxDBClient influxDbClient;
 
-    @Value("${influxdb.bucket}")
-    private String bucket;
-
     public <T> Stream<T> query(String fluxQuery, Function<FluxRecord, T> mapper) {
         QueryApi queryApi = influxDbClient.getQueryApi();
         return queryApi.query(fluxQuery)

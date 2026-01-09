@@ -13,6 +13,7 @@ import com.nvt.eurosupply.factory.specifications.FactorySpecification;
 import com.nvt.eurosupply.product.models.Product;
 import com.nvt.eurosupply.product.services.ProductService;
 import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
+import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -24,19 +25,25 @@ import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Slf4j
 public class FactoryService {
 
     private final FactoryRepository repository;
@@ -46,6 +53,7 @@ public class FactoryService {
     private final CountryService countryService;
     private final FileService fileService;
     private final ProductService productService;
+    private final ProductFactoryCleanupService cleanupService;
 
     private final FactoryMapper mapper;
     private final FileMapper fileMapper;
@@ -54,6 +62,7 @@ public class FactoryService {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Factory not found"));
     }
 
+    @Transactional
     public FactoryResponseDto createFactory(CreateFactoryRequestDto request) {
         Factory factory = mapper.fromRequest(request);
         factory.setIsOnline(false);
@@ -65,6 +74,7 @@ public class FactoryService {
         return mapper.toResponse(repository.save(factory));
     }
 
+    @Transactional
     public List<FileResponseDto> uploadFiles(Long id, List<MultipartFile> images) {
         Factory factory = find(id);
         List<StoredFile> stored = fileService.uploadFiles(FileFolder.FACTORY, id, images);
@@ -76,6 +86,7 @@ public class FactoryService {
                 .toList();
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public FactoryResponseDto updateFactory(Long id, UpdateFactoryRequestDto request) {
         Factory factory = find(id);
 
@@ -106,7 +117,7 @@ public class FactoryService {
         return mapper.toPagedResponse(repository.findAll(pageable));
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteImages(Long factoryId, List<Long> imageIds) {
         Factory factory = find(factoryId);
 
@@ -126,6 +137,8 @@ public class FactoryService {
         repository.saveAndFlush(factory);
 
         deleteImagesInternal(factory, imageIds);
+
+        cleanupService.deleteByFactoryId(id);
         repository.delete(factory);
     }
 
@@ -147,6 +160,7 @@ public class FactoryService {
                 .toList();
     }
 
+    @Transactional
     public void saveProductions(ProductionReportMessage report) {
         Factory factory = find(report.getFactoryId());
 
@@ -159,5 +173,29 @@ public class FactoryService {
                 .toList();
 
         productionRepository.saveAll(productions);
+    }
+
+    public ConnectionStatusDto getFactoryStatus(Long id) {
+        Factory factory = find(id);
+        return new ConnectionStatusDto(factory.getIsOnline());
+    }
+
+    @Scheduled(fixedRate = 5 * 60 * 1000)
+    @Transactional
+    public void markFactoriesOffline() {
+        Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
+
+        int updated = repository.markOffline(cutoff);
+
+        if (updated > 0)
+            log.info("Marked {} factories as offline", updated);
+    }
+
+    @Transactional
+    public void applyHeartbeat(Long factoryId, Instant timestamp) {
+        int updated = repository.applyHeartbeat(factoryId, timestamp);
+
+        if (updated == 0)
+            throw new EntityNotFoundException("Factory not found: " + factoryId);
     }
 }

@@ -8,7 +8,9 @@ INSERT INTO files (path, filename, content_type, type, created_at) VALUES
 ('product/3', 'product_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
 ('factory/1', 'factory_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
 ('factory/2', 'factory_2.png', 'image/png', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
-('factory/3', 'factory_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
+('factory/3', 'factory_3.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('warehouse/1', 'warehouse_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01'),
+('warehouse/2', 'warehouse_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:39:02.306783+01');
 
 INSERT INTO countries (id, name) VALUES
     (1,'Albania'),
@@ -303,15 +305,13 @@ INSERT INTO factories (
     is_online
 )
 VALUES
--- Country 1 / City 1001
 ('EuroSteel Plant',
  'Industrijska zona 1',
- 1001, 1,
+ 1118, 40,
  44.8167, 20.4667,
  now(), now(),
  now(), 0, false),
 
--- Country 2 / City 1005
 ('NordChem Factory',
  'Chemical Park 12',
  1005, 2,
@@ -319,7 +319,6 @@ VALUES
  now(), now(),
  now(), 0, false),
 
--- Country 3 / City 1008
 ('Adriatic Food Processing',
  'Port Area bb',
  1008, 3,
@@ -377,11 +376,20 @@ insert into product_factory (product_id, factory_id) values
  (2, 1), (2, 2), (2, 3),
  (3, 1), (3, 2), (3, 3);
 
+
 INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (1,1),
     (2,2),
     (3,3),
     (4,4);
+
+INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude) VALUES
+     ('Central Warehouse', 'Kralja Milana 6, Beograd', 40, 1118, 16020, 454545),
+     ('Belgrade Warehouse', 'Lamartinova 52, Vracar', 40, 1118, 16520, 454545);
+
+INSERT INTO warehouses_images (images_id, warehouse_id) VALUES
+                                                        (11, 1),
+                                                        (12, 2);
 
 INSERT INTO factories_images (images_id, factory_id) VALUES
     (8,1),

@@ -4,6 +4,7 @@ import type {
     FactorySearchParams
 } from "../../features/factory/types/factory.types.ts";
 import type { FileResponse } from "../../types/file.types.ts";
+import type { ConnectionStatus } from "../../types/status.types.ts";
 import apiClient from "../client.ts";
 
 export const factoryService = {
@@ -23,8 +24,26 @@ export const factoryService = {
         return response.data;
     },
 
+    getFactoryStatus: async (factoryId: number) => {
+        const response = await apiClient.get<ConnectionStatus>(
+            `/factories/${factoryId}/status`
+        );
+        return response.data;
+    },
+
     getFactoriesByProductId: async (productId: number) => {
         const response = await apiClient.get(`/factories/producing-product/${productId}`);
+        return response.data;
+    },
+
+    getProductsByFactory: async (
+        factoryId: number,
+        page: number,
+        size: number) => {
+        const response = await apiClient.get(
+            `/factories/${factoryId}/products`,
+            { params: { page, size } }
+        );
         return response.data;
     },
 

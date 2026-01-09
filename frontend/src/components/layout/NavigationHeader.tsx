@@ -8,6 +8,7 @@ import {
   X,
   Truck,
   Package,
+  Warehouse,
   Factory,
 } from "lucide-react";
 
@@ -24,6 +25,7 @@ const NavigationHeader: React.FC = () => {
     },
     { path: "/company-review", label: "Review Companies", icon: FileCheck },
     { path: "/vehicle-management", label: "Vehicle Management", icon: Truck },
+    { path: "/warehouse-management", label: "Warehouse Management", icon: Warehouse},
     {
       path: "/product-management",
       label: "Product Management",
