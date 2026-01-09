@@ -255,31 +255,44 @@ INSERT INTO vehicle_brands_models (vehicle_brand_id, models_id) VALUES
 
 
 INSERT INTO vehicles (
-    is_online, latitude, longitude, max_load_kg,
-    brand_id, created_at, last_heartbeat,
+    max_load_kg,
+    brand_id, created_at,
     model_id, updated_at, registration_number, version
 ) VALUES
       (
-          FALSE, NULL, NULL, 20000,
-          16, '2025-12-08 16:42:07.714908+01', NULL,
+    20000,
+          16, '2025-12-08 16:42:07.714908+01',
           48, '2025-12-08 16:42:07.714908+01', 'BG-123-AB', 0
       ),
       (
-          FALSE, NULL, NULL, 19000,
-          14, '2025-12-08 16:44:19.99891+01', NULL,
+        19000,
+          14, '2025-12-08 16:44:19.99891+01',
           41, '2025-12-08 16:42:07.714908+01', 'NS-456-CD', 0
       ),
       (
-          FALSE, NULL, NULL, 18500,
-          3, '2025-12-08 16:45:28.130303+01', NULL,
+        18500,
+          3, '2025-12-08 16:45:28.130303+01',
           8, '2025-12-08 16:42:07.714908+01', 'BG-789-EF', 0
       ),
       (
-          FALSE, NULL, NULL, 18000,
-          6, '2025-12-08 16:39:02.306783+01', NULL,
+        18000,
+          6, '2025-12-08 16:39:02.306783+01',
           17, '2025-12-08 16:42:07.714908+01', 'NS-012-GH', 0
       );
 
+INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
+VALUES
+    (1, true, NOW() - INTERVAL '2 minutes'),
+    (2, false, NOW() - INTERVAL '15 minutes'),
+    (3, true, NOW() - INTERVAL '1 minute'),
+    (4, false, NOW() - INTERVAL '1 hour');
+
+INSERT INTO vehicle_locations (vehicle_id, latitude, longitude, updated_at)
+VALUES
+    (1, 44.816410, 20.460150, NOW() - INTERVAL '2 minutes'),
+    (2, 45.255820, 19.845420, NOW() - INTERVAL '15 minutes'),
+    (3, 44.803280, 20.426940, NOW() - INTERVAL '1 minute'),
+    (4, 45.267136, 19.833549, NOW() - INTERVAL '1 hour');
 
 INSERT INTO factories (
     name, address,

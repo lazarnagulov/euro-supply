@@ -10,14 +10,18 @@ import com.nvt.eurosupply.vehicle.dtos.VehicleModelDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
 import com.nvt.eurosupply.vehicle.models.Vehicle;
 import com.nvt.eurosupply.vehicle.models.VehicleBrand;
+import com.nvt.eurosupply.vehicle.models.VehicleLocation;
 import com.nvt.eurosupply.vehicle.models.VehicleModel;
+import com.nvt.eurosupply.vehicle.models.VehicleStatus;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -35,9 +39,20 @@ public class VehicleMapper {
     }
 
     public VehicleResponseDto toResponse(Vehicle vehicle) {
+        return toResponse(vehicle, null, null);
+    }
+
+    public VehicleResponseDto toResponse(Vehicle vehicle, VehicleLocation location, VehicleStatus status) {
         VehicleResponseDto response = modelMapper.map(vehicle, VehicleResponseDto.class);
-        if(vehicle.getLastLocation() != null)
-            response.setLastLocation(locationMapper.toResponse(vehicle.getLastLocation()));
+
+        if (location != null && location.getLocation() != null) {
+            response.setLastLocation(locationMapper.toResponse(location.getLocation()));
+        }
+
+        if (status != null) {
+            response.setOnline(status.getIsOnline());
+        }
+
         response.setImageUrls(
                 Optional.ofNullable(vehicle.getImages())
                         .orElseGet(List::of)
@@ -50,7 +65,6 @@ public class VehicleMapper {
         return response;
     }
 
-
     public VehicleBrandDto toResponse(VehicleBrand brand) {
         return modelMapper.map(brand, VehicleBrandDto.class);
     }
@@ -61,7 +75,33 @@ public class VehicleMapper {
 
     public PagedResponse<VehicleResponseDto> toPagedResponse(Page<Vehicle> page) {
         return new PagedResponse<>(
-                page.getContent().stream().map(this::toResponse).toList(),
+                page.getContent().stream()
+                        .map(this::toResponse)
+                        .toList(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
+    }
+
+    public PagedResponse<VehicleResponseDto> toPagedResponse(
+            Page<Vehicle> page,
+            List<VehicleLocation> locations,
+            List<VehicleStatus> statuses
+    ) {
+        Map<Long, VehicleLocation> locationMap = locations.stream()
+                .collect(Collectors.toMap(VehicleLocation::getVehicleId, loc -> loc));
+
+        Map<Long, VehicleStatus> statusMap = statuses.stream()
+                .collect(Collectors.toMap(VehicleStatus::getVehicleId, stat -> stat));
+
+        return new PagedResponse<>(
+                page.getContent().stream()
+                        .map(vehicle -> toResponse(
+                                vehicle,
+                                locationMap.get(vehicle.getId()),
+                                statusMap.get(vehicle.getId())
+                        ))
+                        .toList(),
                 page.getTotalPages(),
                 page.getTotalElements()
         );

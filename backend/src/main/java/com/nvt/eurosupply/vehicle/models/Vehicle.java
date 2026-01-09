@@ -1,6 +1,5 @@
 package com.nvt.eurosupply.vehicle.models;
 
-import com.nvt.eurosupply.shared.models.Location;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,16 +34,8 @@ public class Vehicle {
     @ManyToOne(optional = false)
     private VehicleModel model;
 
-    @Column(nullable = false)
-    private Boolean isOnline = false;
-
-    private Instant lastHeartbeat;
-
     @OneToMany
     private List<StoredFile> images;
-
-    @Embedded
-    private Location lastLocation;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
