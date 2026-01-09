@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.config;
+package com.nvt.eurosupply.realtime.config;
 
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
