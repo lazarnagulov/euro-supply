@@ -3,6 +3,7 @@ import {AlertCircle, Building2, CheckCircle, FileText, Image, MapPin, X, XCircle
 import {type CompanyResponse, RequestStatus} from "../types/company.types.ts";
 import {companyService} from "../../../api/services/companyService.ts";
 import {InteractiveMap} from "../../../components/map/InteractiveMap.tsx";
+import toast from "react-hot-toast";
 
 interface CompanyReviewModelProps {
     company: CompanyResponse;
@@ -36,6 +37,11 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
         setLoading(true);
         try {
             await companyService.updateStatus(company.id, { status: selectedStatus, rejectionReason: rejectionReason });
+            if(selectedStatus == RequestStatus.APPROVED) {
+                toast.success("The company registration has been approved.")
+            } else {
+                toast.success("The company registration has been rejected.")
+            }
             onSuccess();
         } catch (err) {
             setError('Failed to submit review. Please try again.');
