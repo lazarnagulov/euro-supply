@@ -282,6 +282,46 @@ INSERT INTO vehicles (
           17, '2025-12-08 16:42:07.714908+01', 'NS-012-GH', 0
       );
 
+WITH brand_models AS (
+    SELECT
+        vbm.vehicle_brand_id AS brand_id,
+        vbm.models_id AS model_id,
+        ROW_NUMBER() OVER () AS rn
+    FROM vehicle_brands_models vbm
+),
+     series AS (
+         SELECT
+             generate_series(1, 100000) AS seq,
+             (generate_series(1, 100000) - 1)
+    % (SELECT COUNT(*) FROM brand_models) + 1 AS bm_index
+    )
+INSERT INTO vehicles (
+    max_load_kg,
+    brand_id,
+    model_id,
+    registration_number,
+    created_at,
+    updated_at,
+    version
+)
+SELECT
+    (7000 + floor(random() * 25000))::int AS max_load_kg,
+    bm.brand_id,
+    bm.model_id,
+    CONCAT(
+            chr(65 + (random() * 26)::int),
+            chr(65 + (random() * 26)::int),
+            '-',
+            lpad(s.seq::text, 6, '0')
+    ) AS registration_number,
+    NOW() - (random() * INTERVAL '24 months') AS created_at,
+    NOW() - (random() * INTERVAL '24 months') AS updated_at,
+    0 AS version
+FROM series s
+         JOIN brand_models bm
+              ON bm.rn = s.bm_index
+ORDER BY random();
+
 INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
 VALUES
     (1, true, NOW() - INTERVAL '2 minutes'),
@@ -289,12 +329,34 @@ VALUES
     (3, true, NOW() - INTERVAL '1 minute'),
     (4, false, NOW() - INTERVAL '1 hour');
 
+INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
+SELECT
+    id,
+    random() > 0.3,
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM vehicles
+WHERE id > 4;
+
 INSERT INTO vehicle_locations (vehicle_id, latitude, longitude, updated_at)
 VALUES
     (1, 44.816410, 20.460150, NOW() - INTERVAL '2 minutes'),
     (2, 45.255820, 19.845420, NOW() - INTERVAL '15 minutes'),
     (3, 44.803280, 20.426940, NOW() - INTERVAL '1 minute'),
     (4, 45.267136, 19.833549, NOW() - INTERVAL '1 hour');
+
+INSERT INTO vehicle_locations (
+    vehicle_id,
+    latitude,
+    longitude,
+    updated_at
+)
+SELECT
+    id,
+    44.75 + random() * 0.6,   -- Serbia latitude range
+    19.6  + random() * 1.2,   -- Serbia longitude range
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM vehicles
+WHERE id > 4;
 
 INSERT INTO factories (
     name, address,
