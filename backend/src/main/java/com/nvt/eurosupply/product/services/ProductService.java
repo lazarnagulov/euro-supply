@@ -50,6 +50,10 @@ public class ProductService {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product not found"));
     }
 
+    public List<Product> findAllByIds(List<Long> ids) {
+        return repository.findAllById(ids);
+    }
+
     @Transactional
     public ProductResponseDto createProduct(CreateProductRequestDto request) {
         Product product = mapper.fromCreateRequest(request);

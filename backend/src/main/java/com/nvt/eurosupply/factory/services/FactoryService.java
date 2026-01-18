@@ -14,6 +14,7 @@ import com.nvt.eurosupply.factory.repositories.ProductionRepository;
 import com.nvt.eurosupply.factory.specifications.FactorySpecification;
 import com.nvt.eurosupply.product.models.Product;
 import com.nvt.eurosupply.product.services.ProductService;
+import com.nvt.eurosupply.realtime.messages.ProductionItemMessage;
 import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
 import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
@@ -43,7 +44,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -186,16 +189,26 @@ public class FactoryService {
     public void saveProductions(ProductionReportMessage report) {
         Factory factory = find(report.getFactoryId());
 
+        List<Long> productIds = report.getItems().stream()
+                .map(ProductionItemMessage::getProductId)
+                .distinct()
+                .toList();
+
+        Map<Long, Product> productsById =
+                productService.findAllByIds(productIds).stream()
+                        .collect(Collectors.toMap(Product::getId, p -> p));
+
         List<Production> productions = report.getItems().stream()
                 .map(item -> Production.builder()
                         .factory(factory)
-                        .product(productService.find(item.getProductId()))
+                        .product(productsById.get(item.getProductId()))
                         .quantity(item.getQuantity())
                         .build())
                 .toList();
 
         productionRepository.saveAll(productions);
     }
+
 
     @Cacheable(value = "factoryStatus", key = "#id")
     public ConnectionStatusDto getFactoryStatus(Long id) {
