@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.config;
+package com.nvt.eurosupply.shared.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

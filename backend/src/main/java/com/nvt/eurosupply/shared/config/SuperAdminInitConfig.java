@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.config;
+package com.nvt.eurosupply.shared.config;
 
 import com.nvt.eurosupply.user.enums.Role;
 import com.nvt.eurosupply.user.models.User;

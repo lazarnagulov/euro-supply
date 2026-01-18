@@ -38,7 +38,6 @@ public class VehicleRealTimeService {
 
     public List<VehicleDistanceDto> getDistances(Long id, VehicleDistanceRequestDto request) {
         vehicleService.find(id);
-
         Instant start = request.getStart();
         Instant end = request.getEnd();
         String window = timeWindowCalculator.calculateWindowDuration(start, end);
