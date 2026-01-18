@@ -18,13 +18,16 @@ import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -32,6 +35,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductRepository repository;
@@ -54,6 +58,8 @@ public class ProductService {
         return mapper.toResponse(repository.save(product));
     }
 
+    @Transactional
+    @CacheEvict(value = "product", key = "#id")
     public FileResponseDto uploadImage(Long id, MultipartFile image) {
         Product product = find(id);
         StoredFile file = fileService.saveFile(FileFolder.PRODUCT, id, image);
@@ -67,10 +73,13 @@ public class ProductService {
         return mapper.toPagedResponse(repository.findAll(pageable));
     }
 
+    @Cacheable(value = "product", key = "#id")
     public ProductResponseDto getProduct(Long id) {
         return mapper.toResponse(find(id));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "product", key = "#id")
     public ProductResponseDto updateProduct(Long id, UpdateProductRequestDto request) {
         Product product = find(id);
 
@@ -95,8 +104,12 @@ public class ProductService {
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "product", key = "#id")
     public void deleteProduct(Long id) {
-        repository.delete(find(id));
+        Product product = find(id);
+        repository.delete(product);
+        fileService.deleteFiles(List.of(product.getImage().getId()));
     }
 
     public PagedResponse<FactoryProductListItemDto> getProductsByFactoryId(Long factoryId, Pageable pageable) {
