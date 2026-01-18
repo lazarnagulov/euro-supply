@@ -3,6 +3,7 @@ package com.nvt.eurosupply.factory.mappers;
 import com.nvt.eurosupply.factory.dtos.CreateFactoryRequestDto;
 import com.nvt.eurosupply.factory.dtos.FactoryResponseDto;
 import com.nvt.eurosupply.factory.models.Factory;
+import com.nvt.eurosupply.factory.models.FactoryStatus;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.CityMapper;
 import com.nvt.eurosupply.shared.mappers.CountryMapper;
@@ -34,7 +35,7 @@ public class FactoryMapper {
                 .build();
     }
 
-    public FactoryResponseDto toResponse(Factory factory) {
+    public FactoryResponseDto toResponse(Factory factory, FactoryStatus status) {
         FactoryResponseDto response =
                 modelMapper.map(factory, FactoryResponseDto.class);
 
@@ -46,6 +47,9 @@ public class FactoryMapper {
                                 FileFolder.FACTORY, factory.getId(), f))
                         .toList()
         );
+
+        if (status != null)
+            response.setOnline(status.getIsOnline());
 
         response.setCity(cityMapper.toResponse(factory.getCity()));
         response.setCountry(countryMapper.toResponse(factory.getCountry()));
@@ -59,5 +63,9 @@ public class FactoryMapper {
                 page.getTotalPages(),
                 page.getTotalElements()
         );
+    }
+
+    public FactoryResponseDto toResponse(Factory factory) {
+        return toResponse(factory, null);
     }
 }
