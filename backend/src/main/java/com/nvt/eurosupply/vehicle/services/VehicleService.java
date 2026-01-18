@@ -167,7 +167,6 @@ public class VehicleService {
 
     private void deleteImagesInternal(Vehicle vehicle, List<Long> imageIds) {
         vehicle.getImages().clear();
-        repository.saveAndFlush(vehicle);
         fileService.deleteFiles(imageIds);
     }
 

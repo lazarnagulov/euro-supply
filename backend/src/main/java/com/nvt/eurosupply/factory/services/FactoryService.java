@@ -163,13 +163,13 @@ public class FactoryService {
 
         deleteImagesInternal(factory, imageIds);
 
+        statusRepository.deleteById(id);
         cleanupService.deleteByFactoryId(id);
         repository.delete(factory);
     }
 
     private void deleteImagesInternal(Factory factory, List<Long> imageIds) {
         factory.getImages().clear();
-        repository.saveAndFlush(factory);
         fileService.deleteFiles(imageIds);
     }
 
