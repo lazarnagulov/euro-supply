@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.shared.handlers;
 
+import com.nvt.eurosupply.shared.exceptions.BadRequestException;
 import com.nvt.eurosupply.shared.exceptions.CustomRangeTooLargeException;
 import com.nvt.eurosupply.shared.exceptions.FileDeleteException;
 import com.nvt.eurosupply.shared.exceptions.FileUploadException;
@@ -33,6 +34,22 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ExceptionResponse> handleBadRequestException(
+            BadRequestException ex,
+            HttpServletRequest request) {
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error("Bad Request")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)

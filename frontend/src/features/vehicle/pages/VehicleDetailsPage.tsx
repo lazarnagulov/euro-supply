@@ -17,8 +17,6 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { useNavigate, useParams } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-
 import { InteractiveMap } from "../../../components/map/InteractiveMap";
 import { PeriodSelector } from "../../../components/common/PeriodSelector";
 import { useVehicleData } from "../hooks/useVehicleData";
@@ -26,6 +24,7 @@ import { useDistanceData } from "../hooks/useDistanceData";
 import { usePeriodSelector } from "../../../hooks/common/usePeriodSelector";
 import { ImageModal } from "../../../components/modal/ImageModal";
 import { useVehiclePolling } from "../hooks/useVehiclePolling";
+import AppToaster from "../../../components/common/AppToaster.tsx";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
@@ -142,32 +141,7 @@ const VehicleDetailsPage: React.FC = () => {
 
     return (
         <div className="p-6 space-y-6 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-            <Toaster
-                position="top-right"
-                toastOptions={{
-                    duration: 4000,
-                    style: {
-                        background: "#fff",
-                        color: "#363636",
-                        borderRadius: "12px",
-                        padding: "16px",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                    },
-                    success: {
-                        iconTheme: {
-                            primary: "#10b981",
-                            secondary: "#fff",
-                        },
-                    },
-                    error: {
-                        iconTheme: {
-                            primary: "#ef4444",
-                            secondary: "#fff",
-                        },
-                    },
-                }}
-            />
-
+            <AppToaster />
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
