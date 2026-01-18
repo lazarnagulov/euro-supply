@@ -362,32 +362,32 @@ INSERT INTO factories (
     name, address,
     city_id, country_id,
     latitude, longitude,
-    created_at, updated_at,
-    last_heartbeat, version,
-    is_online
+    created_at, updated_at, version
 )
 VALUES
 ('EuroSteel Plant',
  'Industrijska zona 1',
  1118, 40,
  44.8167, 20.4667,
- now(), now(),
- now(), 0, false),
+ now(), now(),0),
 
 ('NordChem Factory',
  'Chemical Park 12',
  1005, 2,
  52.5200, 13.4050,
- now(), now(),
- now(), 0, false),
+ now(), now(),0),
 
 ('Adriatic Food Processing',
  'Port Area bb',
  1008, 3,
  43.5081, 16.4402,
- now(), now(),
- now(), 0, false);
+ now(), now(), 0);
 
+INSERT INTO factory_status (factory_id, is_online, last_heartbeat_at)
+VALUES
+    (1, true, NOW() - INTERVAL '2 minutes'),
+    (2, false, NOW() - INTERVAL '15 minutes'),
+    (3, true, NOW() - INTERVAL '1 minute');
 
 INSERT INTO products
 (name, description,

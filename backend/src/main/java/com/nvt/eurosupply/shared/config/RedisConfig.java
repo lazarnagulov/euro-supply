@@ -62,10 +62,16 @@ public class RedisConfig {
                 Map.entry("categories", baseConfig(listSerializer, Duration.ofHours(12))),
                 Map.entry("cities", baseConfig(listSerializer, Duration.ofHours(12))),
 
+
                 Map.entry("vehicle", baseConfig(objectSerializer, Duration.ofMinutes(30))),
                 Map.entry("vehicleLocation", baseConfig(objectSerializer, Duration.ofSeconds(30))),
-                Map.entry("vehicleStatus", baseConfig(objectSerializer, Duration.ofSeconds(30)))
-        );
+                Map.entry("vehicleStatus", baseConfig(objectSerializer, Duration.ofSeconds(30))),
+
+                Map.entry("factory", baseConfig(objectSerializer, Duration.ofMinutes(30))),
+                Map.entry("factoryStatus", baseConfig(objectSerializer, Duration.ofSeconds(30))),
+
+                Map.entry("product", baseConfig(objectSerializer, Duration.ofMinutes(30)))
+                );
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
