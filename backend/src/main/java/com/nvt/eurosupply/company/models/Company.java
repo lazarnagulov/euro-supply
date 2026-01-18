@@ -44,7 +44,7 @@ public class Company {
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
-    @Column(length = 50)
+    @Column(length = 200)
     private String rejectionReason;
 
     @ManyToOne

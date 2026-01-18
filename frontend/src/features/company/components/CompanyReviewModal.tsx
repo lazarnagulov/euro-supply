@@ -34,6 +34,11 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
             return;
         }
 
+        if (selectedStatus === 'REJECTED' && rejectionReason.trim().length > 200) {
+            setError('Rejection reason must not exceed 200 characters');
+            return;
+        }
+
         setLoading(true);
         try {
             await companyService.updateStatus(company.id, { status: selectedStatus, rejectionReason: rejectionReason });
@@ -243,6 +248,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                                 <textarea
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
+                                    maxLength={200}
                                     rows={4}
                                     placeholder="Please provide a detailed reason for rejection. This will be sent to the customer via email."
                                     className="w-full px-4 py-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
