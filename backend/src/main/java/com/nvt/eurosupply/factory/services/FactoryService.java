@@ -159,7 +159,6 @@ public class FactoryService {
         List<Long> imageIds = factory.getImages().stream()
                 .map(StoredFile::getId)
                 .toList();
-        repository.saveAndFlush(factory);
 
         deleteImagesInternal(factory, imageIds);
 
@@ -170,6 +169,7 @@ public class FactoryService {
 
     private void deleteImagesInternal(Factory factory, List<Long> imageIds) {
         factory.getImages().clear();
+        repository.saveAndFlush(factory);
         fileService.deleteFiles(imageIds);
     }
 
