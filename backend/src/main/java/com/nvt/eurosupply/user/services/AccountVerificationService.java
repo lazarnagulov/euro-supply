@@ -33,8 +33,8 @@ public class AccountVerificationService {
 
         EmailRequest request = EmailRequest.builder()
                 .to(user.getEmail())
-                .subject(EmailTemplate.ACCOUNT_ACTIVATION.getDefaultSubject())
-                .templateName(EmailTemplate.ACCOUNT_ACTIVATION.getTemplatePath())
+                .subject(EmailTemplate.ACCOUNT_VERIFICATION.getDefaultSubject())
+                .templateName(EmailTemplate.ACCOUNT_VERIFICATION.getTemplatePath())
                 .templateVariables(variables)
                 .build();
 
