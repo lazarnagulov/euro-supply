@@ -12,13 +12,14 @@ import FactoryDetailsPage from "./features/factory/pages/FactoryDetailsPage.tsx"
 import FactoryManagementPage from "./features/factory/pages/FactoryManagementPage.tsx";
 import LoginPage from "./features/auth/pages/LoginPage.tsx";
 import RegistrationPage from "./features/auth/pages/RegistrationPage.tsx";
+import WelcomePage from "./features/home/pages/WelcomePage.tsx";
 
 function App() {
   return (
     <>
       <NavigationHeader />
       <Routes>
-        <Route path="/" element={<p> Home Page </p>} />
+        <Route path="/" element={ <WelcomePage />} />
         <Route
           path="/company-registration"
           element={<CompanyRegistrationPage />}
