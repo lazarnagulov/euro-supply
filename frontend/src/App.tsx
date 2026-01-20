@@ -13,6 +13,7 @@ import FactoryManagementPage from "./features/factory/pages/FactoryManagementPag
 import LoginPage from "./features/auth/pages/LoginPage.tsx";
 import RegistrationPage from "./features/auth/pages/RegistrationPage.tsx";
 import WelcomePage from "./features/home/pages/WelcomePage.tsx";
+import AccountVerificationPage from "./features/auth/pages/AccountVerificationPage.tsx";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
         <Route path="/factory-management" element={<FactoryManagementPage />} />
         <Route path="/factories/:factoryId" element={<FactoryDetailsPage />} />
+        <Route path="/account-verification/:id" element={<AccountVerificationPage/>} />
         <Route path="/login" element={<LoginPage/>} />
         <Route path="/registration" element={<RegistrationPage/>} />
       </Routes>
