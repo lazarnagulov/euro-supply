@@ -10,31 +10,56 @@ import {
   Package,
   Warehouse,
   Factory,
+  LogIn,
+  UserPlus,
+  type LucideIcon,
 } from "lucide-react";
+import { getRoleFromToken } from "../../utils/jwt";
 
-const NavigationHeader: React.FC = () => {
+const   NavigationHeader: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    { path: "/", label: "Home", icon: Home },
+  const role: string = getRoleFromToken();
+  
+  interface NavItem {
+    path: string;
+    label: string;
+    icon: LucideIcon;
+    roles: string[]; 
+  }
+
+  // TODO: add roles
+  const navItems : NavItem[] = [
+    { path: "/", label: "Home", icon: Home, roles: [] },
+    { path: "login", label: "Login", icon: LogIn,  roles: ["GUEST"]},
+    { path: "registration", label: "Registration", icon: UserPlus, roles: ["GUEST"]},
     {
       path: "/company-registration",
       label: "Register Company",
       icon: Building2,
+      roles: ["ROLE_CUSTOMER"]
     },
-    { path: "/company-review", label: "Review Companies", icon: FileCheck },
-    { path: "/vehicle-management", label: "Vehicle Management", icon: Truck },
-    { path: "/warehouse-management", label: "Warehouse Management", icon: Warehouse},
+    { path: "/company-review", label: "Review Companies", icon: FileCheck, roles: ["ROLE_MANAGER", "ROLE_ADMIN"] },
+    { path: "/vehicle-management", label: "Vehicle Management", icon: Truck, roles: ["ROLE_MANAGER", "ROLE_ADMIN"]},
+    { path: "/warehouse-management", label: "Warehouse Management", icon: Warehouse, roles: ["ROLE_MANAGER", "ROLE_ADMIN"]},
     {
       path: "/product-management",
       label: "Product Management",
       icon: Package,
+      roles: ["ROLE_MANAGER", "ROLE_ADMIN"]
     },
-    { path: "/factory-management", label: "Factory Management", icon: Factory },
+    { path: "/factory-management", label: "Factory Management", icon: Factory, roles: ["ROLE_MANAGER", "ROLE_ADMIN"]},
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const visibleNavItems = navItems.filter(item => {
+    if (!role)
+      return item.roles.includes("GUEST")
+    
+    return role !== undefined && item.roles.includes(role);
+  });
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-40">
@@ -49,7 +74,7 @@ const NavigationHeader: React.FC = () => {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-2">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
 
@@ -70,6 +95,22 @@ const NavigationHeader: React.FC = () => {
             })}
           </nav>
 
+        {role !== "GUEST" && (
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              window.location.reload();
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg
+                      bg-gradient-to-r from-indigo-600 to-purple-600
+                      text-white font-medium shadow-md
+                      hover:from-indigo-700 hover:to-purple-700
+                      transition-all">
+            <LogIn className="w-4 h-4" />
+            Logout
+          </button>
+        )}
+   
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
