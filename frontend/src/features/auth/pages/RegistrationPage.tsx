@@ -1,8 +1,12 @@
 import { Upload, UserPlus, X } from "lucide-react"
 import { useForm } from "react-hook-form";
-import type { RegistrationFormValues } from "../schema/authSchema";
+import { registrationSchema, type RegistrationFormValues } from "../schema/authSchema";
 import { authService } from "../../../api/services/authService";
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import AppToaster from "../../../components/common/AppToaster";
 
 
 const RegistrationPage = () => {
@@ -12,6 +16,7 @@ const RegistrationPage = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<RegistrationFormValues>({
+    resolver: zodResolver(registrationSchema),
     defaultValues: {
       firstname: "",
       lastname: "",
@@ -26,8 +31,10 @@ const RegistrationPage = () => {
   const [imageError, setImageError] = useState<string | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate()
 
-  const onSubmit = (data: RegistrationFormValues) => {
+  const onSubmit = async (data: RegistrationFormValues) => {
     const { username, email, password, passwordConfirmation, firstname, lastname, phoneNumber } = data;
 
     if (!image) {
@@ -35,18 +42,27 @@ const RegistrationPage = () => {
         return;
     }
 
-    authService.register({
-      username,
-      email,
-      password,
-      passwordConfirmation,
-      person: {
-        firstname,
-        lastname,
-        phoneNumber,
-      },
-    }, image);
-    };
+    try {
+      const response = await authService.register({
+        username,
+        email,
+        password,
+        passwordConfirmation,
+        person: {
+          firstname,
+          lastname,
+          phoneNumber,
+        },
+      }, image);
+      
+      toast.success("User registered successfully. Please check your email to verify your account.");
+      setTimeout(() => navigate("/"), 1500);
+    } catch (err: any) {
+      console.log(err)
+      const errorMessage = err.response?.data?.message ?? "Registration failed. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    }};
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -73,6 +89,7 @@ const RegistrationPage = () => {
 
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 max-w-md mx-auto mt-10">
+      <AppToaster/>
       <div className="center mb-6">
         <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
           <UserPlus className="w-5 h-5" />
@@ -220,6 +237,10 @@ const RegistrationPage = () => {
             <p className="mt-2 text-sm text-red-600">{imageError}</p>
           )}
         </div>
+
+        {error && (
+            <p className="mt-2 text-sm text-red-600">{error}</p>
+        )}
       
         <div className="flex gap-3 pt-2">
           <button
@@ -233,4 +254,4 @@ const RegistrationPage = () => {
   );
 };
 
-export default RegistrationPage
+export default RegistrationPage;
