@@ -55,6 +55,7 @@ const RegistrationPage = () => {
         },
       }, image);
       
+      console.log(response)
       toast.success("User registered successfully. Please check your email to verify your account.");
       setTimeout(() => navigate("/"), 1500);
     } catch (err: any) {
@@ -139,7 +140,7 @@ const RegistrationPage = () => {
 
         <div>
           <input
-            type="tel"
+            type="number"
             placeholder="Phone number"
             {...register("phoneNumber")}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg

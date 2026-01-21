@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Building2,
   Home,
@@ -19,7 +19,7 @@ import { getRoleFromToken } from "../../utils/jwt";
 const   NavigationHeader: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   const role: string = getRoleFromToken();
   
   interface NavItem {
@@ -99,7 +99,7 @@ const   NavigationHeader: React.FC = () => {
           <button
             onClick={() => {
               localStorage.removeItem("token");
-              window.location.reload();
+              navigate('/')
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg
                       bg-gradient-to-r from-indigo-600 to-purple-600
