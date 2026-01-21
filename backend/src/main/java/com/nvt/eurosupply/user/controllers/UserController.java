@@ -12,11 +12,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -36,13 +37,12 @@ public class UserController {
             @ApiResponse(responseCode = "201", description = "User registered successfully"),
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "409", description = "User with this username or email already exists"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = "/registration", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody AuthRequestDto request) {
-        return new ResponseEntity<>(service.register(request), HttpStatus.CREATED);
+        AuthResponseDto response = service.register(request);
+        return ResponseEntity.created(URI.create("/api/v1/users" + response.getId())).body(response);
     }
-
 
     @Operation(
             summary = "Verifies user account",
@@ -51,7 +51,6 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Account verified successfully"),
             @ApiResponse(responseCode = "404", description = "User not found or hash is invalid"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PatchMapping("/verification")
     public ResponseEntity<String> verifyAccount(@RequestBody @Valid AccountVerificationRequestDto request) {
@@ -67,7 +66,6 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "400", description = "Invalid image data"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/{id}/image")
     public ResponseEntity<FileResponseDto> uploadImage(@PathVariable Long id, @Valid @RequestBody MultipartFile image) {

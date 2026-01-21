@@ -38,7 +38,6 @@ public class CompanyController {
             @ApiResponse(responseCode = "201", description = "Company created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "404", description = "Country or City does not exist"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
     public ResponseEntity<CompanyResponseDto> registerCompany(@Valid @RequestBody RegisterCompanyRequestDto request) {

@@ -19,6 +19,4 @@ public class PersonRequestDto {
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^(\\+)?\\d{9,15}$", message = "Invalid phone number format")
     private String phoneNumber;
-
-    private String profilePhoto;
 }
