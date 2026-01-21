@@ -457,3 +457,7 @@ INSERT INTO factories_images (images_id, factory_id) VALUES
     (8,1),
     (9,2),
     (10,3);
+
+INSERT INTO users (email, username, password, role, is_verified, is_suspended, must_change_password, hash) VALUES
+             ('customer@gmail.com', 'customer','$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W', 'CUSTOMER', true,false, false, '123'),
+             ('manager@gmail.com', 'manager','$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W', 'MANAGER', true,false, false, '12345');

@@ -1,11 +1,12 @@
 package com.nvt.eurosupply.shared.models;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.Instant;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class ExceptionResponse {
     private String error;

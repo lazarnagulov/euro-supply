@@ -10,13 +10,17 @@ import VehicleDetailsPage from "./features/vehicle/pages/VehicleDetailsPage.tsx"
 import WarehouseManagementPage from "./features/warehouse/pages/WarehouseManagementPage.tsx";
 import FactoryDetailsPage from "./features/factory/pages/FactoryDetailsPage.tsx";
 import FactoryManagementPage from "./features/factory/pages/FactoryManagementPage.tsx";
+import LoginPage from "./features/auth/pages/LoginPage.tsx";
+import RegistrationPage from "./features/auth/pages/RegistrationPage.tsx";
+import WelcomePage from "./features/home/pages/WelcomePage.tsx";
+import AccountVerificationPage from "./features/auth/pages/AccountVerificationPage.tsx";
 
 function App() {
   return (
     <>
       <NavigationHeader />
       <Routes>
-        <Route path="/" element={<p> Home Page </p>} />
+        <Route path="/" element={ <WelcomePage />} />
         <Route
           path="/company-registration"
           element={<CompanyRegistrationPage />}
@@ -29,6 +33,9 @@ function App() {
         <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
         <Route path="/factory-management" element={<FactoryManagementPage />} />
         <Route path="/factories/:factoryId" element={<FactoryDetailsPage />} />
+        <Route path="/account-verification/:id" element={<AccountVerificationPage/>} />
+        <Route path="/login" element={<LoginPage/>} />
+        <Route path="/registration" element={<RegistrationPage/>} />
       </Routes>
     </>
   );

@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -24,10 +25,8 @@ public class SuperAdminInitConfig {
             PasswordEncoder passwordEncoder
     ) {
         return args -> {
-            User existingAdmin = userRepository.findByUsername("admin");
-
-            if (existingAdmin != null) {
-                if (existingAdmin.getRole() != Role.ADMIN) {
+            userRepository.findByUsername("admin").ifPresent(user -> {
+                if (user.getRole() != Role.ADMIN) {
                     log.error("User 'admin' already exists but is NOT a super admin! " +
                             "Please fix manually before starting the application.");
                     throw new IllegalStateException("User 'admin' exists but is not a super admin!");
@@ -35,7 +34,7 @@ public class SuperAdminInitConfig {
 
                 log.info("Super admin already exists, skipping creation.");
                 return;
-            }
+            });
 
             String rawPassword = UUID.randomUUID().toString();
             Path filePath = Paths.get("first-password.txt");
@@ -46,6 +45,8 @@ public class SuperAdminInitConfig {
                     .email("admin@eurosupply.com")
                     .password(passwordEncoder.encode(rawPassword))
                     .role(Role.ADMIN)
+                    .isVerified(true)
+                    .isSuspended(false)
                     .mustChangePassword(true)
                     .build();
 
