@@ -1,12 +1,9 @@
 package com.nvt.eurosupply.product.controllers;
 
-import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
-import com.nvt.eurosupply.product.dtos.ProductResponseDto;
-import com.nvt.eurosupply.product.dtos.UpdateProductRequestDto;
+import com.nvt.eurosupply.product.dtos.*;
 import com.nvt.eurosupply.product.services.ProductService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
-import com.nvt.eurosupply.product.dtos.ProductSearchRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -171,4 +168,20 @@ public class ProductController {
     public ResponseEntity<PagedResponse<ProductResponseDto>> getAvailableProducts(Pageable pageable) {
         return ResponseEntity.ok(service.getAvailableProducts(pageable));
     }
+
+    @Operation(
+            summary = "Order a product",
+            description = "Creates an order for a specific product by a company with the specified quantity."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Order placed successfully"),
+            @ApiResponse(responseCode = "400", description = "Insufficient stock"),
+            @ApiResponse(responseCode = "404", description = "Product or company not found"),
+            @ApiResponse(responseCode = "403", description = "Unauthorized to order for this company")
+    })
+    @PostMapping("/order")
+    public ResponseEntity<OrderResponseDto> orderProduct(@Valid @RequestBody OrderRequestDto orderRequest) {
+        return ResponseEntity.ok(service.orderProduct(orderRequest));
+    }
+
 }

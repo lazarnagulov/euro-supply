@@ -1,5 +1,5 @@
 import apiClient from "../client";
-import type { OrderRequest, Product, ProductRequest, ProductSearchParams, ProductWithImage } from "../../features/product/types/product.types";
+import type { OrderRequest, OrderResponse, Product, ProductRequest, ProductSearchParams, ProductWithImage } from "../../features/product/types/product.types";
 
 export const productService = {
 
@@ -55,6 +55,7 @@ export const productService = {
   },
 
   order: async (request: OrderRequest) => {
-    console.log(request);
+    const response = await apiClient.post<OrderResponse>('/products/order', request);
+    return response.data;
   }
 };

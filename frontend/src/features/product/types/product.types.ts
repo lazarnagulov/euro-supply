@@ -44,5 +44,10 @@ export interface ProductSearchParams {
 
 export interface OrderRequest {
     companyId: number;
+    productId: number;
     quantity: number;
+}
+
+export interface OrderResponse {
+    id: number;
 }

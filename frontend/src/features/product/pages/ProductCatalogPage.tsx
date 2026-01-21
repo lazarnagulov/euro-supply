@@ -24,14 +24,12 @@ const ProductCatalogPage = () => {
 
   const pageSize = 9;
 
-  // Load regular products with pagination
   useEffect(() => {
     if (!searchKeyword) {
       loadProducts();
     }
   }, [currentPage]);
 
-  // Search products when keyword changes
   useEffect(() => {
     if (searchKeyword) {
       searchProducts();
@@ -108,10 +106,12 @@ const ProductCatalogPage = () => {
 
   const handleOrder = async (companyId: number, quantity: number) => {
     try {
-      await productService.order({ companyId, quantity });
-      toast.success("Order placed successfully!");
-      setShowModal(false);
-      setSelectedProduct(null);
+        if (companyId && selectedProduct?.id) {
+        await productService.order({ companyId, quantity, productId: selectedProduct?.id });
+        toast.success("Order placed successfully!");
+        setShowModal(false);
+        setSelectedProduct(null);
+    }
     } catch (err: any) {
       console.log(err);
       const errorMessage =
