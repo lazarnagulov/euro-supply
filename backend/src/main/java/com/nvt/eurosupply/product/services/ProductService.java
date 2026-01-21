@@ -120,4 +120,14 @@ public class ProductService {
         Page<Product> page = repository.findAllByProducingFactories_Id(factoryId, pageable);
         return mapper.toFactoryProductListItemPagedResponse(page);
     }
+
+    public PagedResponse<ProductResponseDto> getAvailableProducts(Pageable pageable) {
+        Page<Product> page = repository.findAllByOnSaleTrue(pageable);
+        return mapper.toPagedResponse(page);
+    }
+
+    public PagedResponse<ProductResponseDto> searchAvailableProducts(String keyword, Pageable pageable) {
+        Page<Product> page = repository.findAllByOnSaleTrueAndNameContaining(keyword, pageable);
+        return mapper.toPagedResponse(page);
+    }
 }

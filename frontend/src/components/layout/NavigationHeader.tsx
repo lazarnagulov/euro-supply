@@ -13,6 +13,7 @@ import {
   LogIn,
   UserPlus,
   type LucideIcon,
+  Box,
 } from "lucide-react";
 import { getRoleFromToken } from "../../utils/jwt";
 
@@ -43,6 +44,7 @@ const   NavigationHeader: React.FC = () => {
     { path: "/company-review", label: "Review Companies", icon: FileCheck, roles: ["ROLE_MANAGER", "ROLE_ADMIN"] },
     { path: "/vehicle-management", label: "Vehicle Management", icon: Truck, roles: ["ROLE_MANAGER", "ROLE_ADMIN"]},
     { path: "/warehouse-management", label: "Warehouse Management", icon: Warehouse, roles: ["ROLE_MANAGER", "ROLE_ADMIN"]},
+    { path: "/products-catalog", label: "Products Catalog", icon: Box, roles: ["ROLE_CUSTOMER"]},
     {
       path: "/product-management",
       label: "Product Management",

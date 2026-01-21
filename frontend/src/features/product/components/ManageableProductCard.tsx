@@ -3,13 +3,13 @@ import { Edit2, Trash2, Package, ArrowRight } from "lucide-react";
 import type { ProductWithImage } from "../types/product.types";
 import { useNavigate } from "react-router-dom";
 
-interface ManageableProductProps {
+interface ManageableProductCardProps {
   product: ProductWithImage;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-const ManageableProductCard: React.FC<ProductCardProps> = ({
+const ManageableProductCard: React.FC<ManageableProductCardProps> = ({
   product,
   onEdit,
   onDelete,

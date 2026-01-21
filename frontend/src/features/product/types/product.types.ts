@@ -41,3 +41,8 @@ export interface ProductSearchParams {
   onSale?: boolean;
   categoryId?: number;
 }
+
+export interface OrderRequest {
+    companyId: number;
+    quantity: number;
+}

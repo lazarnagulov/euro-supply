@@ -137,6 +137,14 @@ public class ProductController {
         return ResponseEntity.ok(service.searchProducts(request, pageable));
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Products retrieved successfully"),
+    })
+    @GetMapping("/on-sale/search")
+    public ResponseEntity<PagedResponse<ProductResponseDto>> searchAvailableProducts(@Parameter String keyword, Pageable pageable) {
+        return ResponseEntity.ok(service.searchAvailableProducts(keyword, pageable));
+    }
+
     @Operation(
             summary = "Delete product",
             description = "Deletes a product by its ID."
@@ -149,5 +157,18 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         service.deleteProduct(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Get available products",
+            description = "Returns a paginated list of products that are currently available (on sale or in stock)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved available products"),
+            @ApiResponse(responseCode = "400", description = "Invalid paging parameters")
+    })
+    @GetMapping("/available")
+    public ResponseEntity<PagedResponse<ProductResponseDto>> getAvailableProducts(Pageable pageable) {
+        return ResponseEntity.ok(service.getAvailableProducts(pageable));
     }
 }
