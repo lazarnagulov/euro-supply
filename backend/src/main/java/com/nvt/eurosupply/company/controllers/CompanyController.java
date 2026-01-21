@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.company.controllers;
 
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
+import com.nvt.eurosupply.company.dtos.CompanySummaryResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.dtos.ReviewCompanyRequestDto;
 import com.nvt.eurosupply.company.services.CompanyService;
@@ -100,4 +101,20 @@ public class CompanyController {
         return ResponseEntity.ok(service.reviewCompany(id, request));
     }
 
+    @Operation(
+            summary = "Get my companies",
+            description = """ 
+                    Returns a list of companies owned by the currently authenticated user.
+                    The response contains only basic company information (id and name)."""
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Companies successfully retrieved"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+    })
+    @GetMapping("/my")
+    public ResponseEntity<List<CompanySummaryResponseDto>> getMyCompanies() {
+        List<CompanySummaryResponseDto> companies = service.getCompaniesForCurrentUser();
+        return ResponseEntity.ok(companies);
+    }
 }

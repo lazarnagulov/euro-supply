@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.company.services;
 
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
+import com.nvt.eurosupply.company.dtos.CompanySummaryResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.dtos.ReviewCompanyRequestDto;
 import com.nvt.eurosupply.company.enums.RequestStatus;
@@ -21,6 +22,7 @@ import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.user.models.User;
+import com.nvt.eurosupply.user.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +30,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +49,7 @@ public class CompanyService {
 
     private final CompanyMapper mapper;
     private final FileMapper fileMapper;
+    private final UserService userService;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -57,7 +59,7 @@ public class CompanyService {
         Country country = countryService.find(request.getCountryId());
         company.setCity(city);
         company.setCountry(country);
-        // TODO: set owner (logged in user)
+        company.setOwner(userService.getCurrentUser());
         User mockUser = new User();
         mockUser.setId(1L);
         company.setOwner(mockUser);
@@ -86,8 +88,7 @@ public class CompanyService {
 
         company.setStatus(request.getStatus());
         company.setRejectionReason(request.getRejectionReason());
-        // TODO: set reviewer (logged in user)
-        // company.setReviewedBy();
+         company.setReviewedBy(userService.getCurrentUser());
         Company saved = repository.save(company);
         eventPublisher.publishEvent(
                 new CompanyReviewedEvent(
@@ -119,4 +120,9 @@ public class CompanyService {
         return mapper.toPagedResponse(repository.findByStatus(RequestStatus.PENDING, pageable));
     }
 
+    public List<CompanySummaryResponseDto> getCompaniesForCurrentUser() {
+        User currentUser = userService.getCurrentUser();
+        List<Company> companies = repository.findByOwnerId(currentUser.getId());
+        return companies.stream().map(mapper::toSummaryResponse).toList();
+    }
 }
