@@ -27,7 +27,6 @@ public class EmailService {
     @Value("${app.email.from:noreply@eurosupply.com}")
     private String fromEmail;
 
-    @Async
     public void sendEmail(EmailRequest emailRequest) {
         try {
             log.info("Sending email to: {} with template: {}",

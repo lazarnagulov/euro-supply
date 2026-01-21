@@ -6,12 +6,15 @@ import com.nvt.eurosupply.factory.dtos.FactorySearchRequestDto;
 import com.nvt.eurosupply.factory.dtos.UpdateFactoryRequestDto;
 import com.nvt.eurosupply.factory.mappers.FactoryMapper;
 import com.nvt.eurosupply.factory.models.Factory;
+import com.nvt.eurosupply.factory.models.FactoryStatus;
 import com.nvt.eurosupply.factory.models.Production;
 import com.nvt.eurosupply.factory.repositories.FactoryRepository;
+import com.nvt.eurosupply.factory.repositories.FactoryStatusRepository;
 import com.nvt.eurosupply.factory.repositories.ProductionRepository;
 import com.nvt.eurosupply.factory.specifications.FactorySpecification;
 import com.nvt.eurosupply.product.models.Product;
 import com.nvt.eurosupply.product.services.ProductService;
+import com.nvt.eurosupply.realtime.messages.ProductionItemMessage;
 import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
 import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
@@ -27,6 +30,9 @@ import com.nvt.eurosupply.shared.services.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,7 +44,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,11 +56,13 @@ public class FactoryService {
 
     private final FactoryRepository repository;
     private final ProductionRepository productionRepository;
+    private final FactoryStatusRepository statusRepository;
 
     private final CityService cityService;
     private final CountryService countryService;
     private final FileService fileService;
     private final ProductService productService;
+    private final ProductFactoryCleanupService cleanupService;
 
     private final FactoryMapper mapper;
     private final FileMapper fileMapper;
@@ -64,16 +74,25 @@ public class FactoryService {
     @Transactional
     public FactoryResponseDto createFactory(CreateFactoryRequestDto request) {
         Factory factory = mapper.fromRequest(request);
-        factory.setIsOnline(false);
+
         City city = cityService.find(request.getCityId());
         Country country = countryService.find(request.getCountryId());
         factory.setCity(city);
         factory.setCountry(country);
 
-        return mapper.toResponse(repository.save(factory));
+        factory = repository.save(factory);
+
+        FactoryStatus status = new FactoryStatus();
+        status.setFactoryId(factory.getId());
+        status.setFactory(factory);
+        status.setIsOnline(false);
+        statusRepository.save(status);
+
+        return mapper.toResponse(factory, status);
     }
 
     @Transactional
+    @CacheEvict(value = "factory", key = "#id")
     public List<FileResponseDto> uploadFiles(Long id, List<MultipartFile> images) {
         Factory factory = find(id);
         List<StoredFile> stored = fileService.uploadFiles(FileFolder.FACTORY, id, images);
@@ -86,6 +105,7 @@ public class FactoryService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "factory", key = "#id")
     public FactoryResponseDto updateFactory(Long id, UpdateFactoryRequestDto request) {
         Factory factory = find(id);
 
@@ -108,6 +128,7 @@ public class FactoryService {
         return mapper.toResponse(repository.save(factory));
     }
 
+    @Cacheable(value = "factory", key = "#id")
     public FactoryResponseDto getFactory(Long id) {
         return mapper.toResponse(find(id));
     }
@@ -117,6 +138,7 @@ public class FactoryService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "factory", key = "#factoryId")
     public void deleteImages(Long factoryId, List<Long> imageIds) {
         Factory factory = find(factoryId);
 
@@ -127,15 +149,21 @@ public class FactoryService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "factory", key = "#id"),
+            @CacheEvict(value = "factoryStatus", key = "#id"),
+    })
     public void deleteFactory(Long id) {
         Factory factory = find(id);
 
         List<Long> imageIds = factory.getImages().stream()
                 .map(StoredFile::getId)
                 .toList();
-        repository.saveAndFlush(factory);
 
         deleteImagesInternal(factory, imageIds);
+
+        statusRepository.deleteById(id);
+        cleanupService.deleteByFactoryId(id);
         repository.delete(factory);
     }
 
@@ -161,10 +189,19 @@ public class FactoryService {
     public void saveProductions(ProductionReportMessage report) {
         Factory factory = find(report.getFactoryId());
 
+        List<Long> productIds = report.getItems().stream()
+                .map(ProductionItemMessage::getProductId)
+                .distinct()
+                .toList();
+
+        Map<Long, Product> productsById =
+                productService.findAllByIds(productIds).stream()
+                        .collect(Collectors.toMap(Product::getId, p -> p));
+
         List<Production> productions = report.getItems().stream()
                 .map(item -> Production.builder()
                         .factory(factory)
-                        .product(productService.find(item.getProductId()))
+                        .product(productsById.get(item.getProductId()))
                         .quantity(item.getQuantity())
                         .build())
                 .toList();
@@ -172,25 +209,30 @@ public class FactoryService {
         productionRepository.saveAll(productions);
     }
 
+
+    @Cacheable(value = "factoryStatus", key = "#id")
     public ConnectionStatusDto getFactoryStatus(Long id) {
-        Factory factory = find(id);
-        return new ConnectionStatusDto(factory.getIsOnline());
+        FactoryStatus status = statusRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Factory status not found"));
+        return new ConnectionStatusDto(status.getIsOnline());
     }
 
     @Scheduled(fixedRate = 5 * 60 * 1000)
     @Transactional
+    @CacheEvict(value = "factoryStatus", allEntries = true)
     public void markFactoriesOffline() {
         Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
 
-        int updated = repository.markOffline(cutoff);
+        int updated = statusRepository.markOffline(cutoff);
 
         if (updated > 0)
             log.info("Marked {} factories as offline", updated);
     }
 
     @Transactional
+    @CacheEvict(value = "factoryStatus", key = "#factoryId")
     public void applyHeartbeat(Long factoryId, Instant timestamp) {
-        int updated = repository.applyHeartbeat(factoryId, timestamp);
+        int updated = statusRepository.applyHeartbeat(factoryId, timestamp);
 
         if (updated == 0)
             throw new EntityNotFoundException("Factory not found: " + factoryId);

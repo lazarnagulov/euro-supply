@@ -42,11 +42,6 @@ public class Factory {
     @Column(nullable = false)
     private Double longitude;
 
-    @Column(nullable = false)
-    private Boolean isOnline = false;
-
-    private Instant lastHeartbeat;
-
     @OneToMany
     private List<StoredFile> images;
 

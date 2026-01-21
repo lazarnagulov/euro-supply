@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.config;
+package com.nvt.eurosupply.shared.config;
 
 import com.nvt.eurosupply.security.auth.CustomAccessDeniedHandler;
 import com.nvt.eurosupply.security.auth.JwtRequestFilter;
