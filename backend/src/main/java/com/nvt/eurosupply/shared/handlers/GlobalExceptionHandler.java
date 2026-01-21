@@ -1,9 +1,6 @@
 package com.nvt.eurosupply.shared.handlers;
 
-import com.nvt.eurosupply.shared.exceptions.BadRequestException;
-import com.nvt.eurosupply.shared.exceptions.CustomRangeTooLargeException;
-import com.nvt.eurosupply.shared.exceptions.FileDeleteException;
-import com.nvt.eurosupply.shared.exceptions.FileUploadException;
+import com.nvt.eurosupply.shared.exceptions.*;
 import com.nvt.eurosupply.shared.models.ExceptionResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,8 +11,10 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -174,6 +173,22 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(PdfGenerationException.class)
+    public ResponseEntity<ExceptionResponse> handlePdfGenerationException(
+            PdfGenerationException e, WebRequest request) {
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message(e.getMessage())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
     }
 }
 
