@@ -57,6 +57,9 @@ public class User implements UserDetails {
     @Column(name = "hash", unique = true)
     private String hash;
 
+    @Embedded
+    private Person person;
+
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

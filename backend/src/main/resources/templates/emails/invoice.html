@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333333;
+        }
+        p {
+            color: #555555;
+            line-height: 1.5;
+        }
+        .total {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999999;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #1e88e5;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Invoice</h2>
+    <p>Dear <span th:text="${customerName}">Customer</span>,</p>
+    <p>Thank you for your order. Please find your invoice attached.</p>
+    <p class="total">Total Amount: <span th:text="${totalPrice}">0.00</span></p>
+    <p>If you have any questions, feel free to contact us.</p>
+    <a href="#" class="btn">Visit EuroSupply</a>
+    <div class="footer">
+        &copy; 2026 EuroSupply. All rights reserved.
+    </div>
+</div>
+</body>
+</html>
