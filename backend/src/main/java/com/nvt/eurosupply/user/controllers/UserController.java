@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.user.controllers;
 
+import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.user.dtos.AccountVerificationRequestDto;
 import com.nvt.eurosupply.user.dtos.AuthRequestDto;
 import com.nvt.eurosupply.user.dtos.AuthResponseDto;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -55,5 +57,20 @@ public class UserController {
     public ResponseEntity<String> verifyAccount(@RequestBody @Valid AccountVerificationRequestDto request) {
         accountVerificationService.verifyAccount(request);
         return ResponseEntity.ok("Account successfully activated!");
+    }
+
+    @Operation(
+            summary = "Upload users image",
+            description = "Uploads one image for registered user."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid image data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/{id}/image")
+    public ResponseEntity<FileResponseDto> uploadImage(@PathVariable Long id, @Valid @RequestBody MultipartFile image) {
+        return ResponseEntity.ok(service.uploadImage(id, image));
     }
 }

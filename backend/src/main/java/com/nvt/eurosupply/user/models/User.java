@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.user.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.user.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -49,6 +50,9 @@ public class User implements UserDetails {
 
     @Transient
     private String jwt;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private StoredFile image;
 
     @Column(name = "hash", unique = true)
     private String hash;

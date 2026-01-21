@@ -8,8 +8,13 @@ export const authService = {
         return response.data;
     },
 
-    register: async (data: RegistrationRequest) : Promise<AuthResponse> => {
+    register: async (data: RegistrationRequest, image: File) : Promise<AuthResponse> => {
         const response = await apiClient.post<AuthResponse>('/users/registration', data);
+
+        const formData = new FormData();
+        formData.append("image", image);
+        await apiClient.post(`/users/${response.data.id}/image`, formData, { headers: { "Content-Type": "multipart/form-data" }});
+
         return response.data;
     },
 

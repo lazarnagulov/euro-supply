@@ -1,7 +1,8 @@
-import { UserPlus } from "lucide-react"
+import { Upload, UserPlus, X } from "lucide-react"
 import { useForm } from "react-hook-form";
 import type { RegistrationFormValues } from "../schema/authSchema";
 import { authService } from "../../../api/services/authService";
+import { useState } from "react";
 
 
 const RegistrationPage = () => {
@@ -22,21 +23,53 @@ const RegistrationPage = () => {
     },
   });
 
-const onSubmit = (data: RegistrationFormValues) => {
-  const { username, email, password, passwordConfirmation, firstname, lastname, phoneNumber } = data;
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [image, setImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  authService.register({
-    username,
-    email,
-    password,
-    passwordConfirmation,
-    person: {
-      firstname,
-      lastname,
-      phoneNumber,
-    },
-  });
-  };
+  const onSubmit = (data: RegistrationFormValues) => {
+    const { username, email, password, passwordConfirmation, firstname, lastname, phoneNumber } = data;
+
+    if (!image) {
+        setImageError("User image is required");
+        return;
+    }
+
+    authService.register({
+      username,
+      email,
+      password,
+      passwordConfirmation,
+      person: {
+        firstname,
+        lastname,
+        phoneNumber,
+      },
+    }, image);
+    };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+  
+      if (!file.type.startsWith("image/")) {
+        setImageError("Only image files are allowed");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setImageError("Image must be less than 10MB");
+        return;
+      }
+  
+      setImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setImageError(null);
+    };
+
+    const removeImage = () => {
+      setImage(null);
+      setPreviewUrl(null);
+    };
 
   return (
     <div className="bg-white rounded-xl shadow-xl p-6 max-w-md mx-auto mt-10">
@@ -139,12 +172,59 @@ const onSubmit = (data: RegistrationFormValues) => {
           )}
         </div>
 
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            User Image 
+          </label>
+          <div
+            className={`border-2 border-dashed rounded-lg p-6 text-center ${
+              imageError ? "border-red-500" : "border-gray-300"
+            }`}
+          >
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+              id="product-image"
+            />
+            <label htmlFor="product-image" className="cursor-pointer">
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600">
+                Click to upload user image
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                PNG, JPG up to 10MB
+              </p>
+            </label>
+          </div>
+
+          {previewUrl && (
+            <div className="mt-4 relative w-40">
+              <img
+                src={previewUrl}
+                alt="Product preview"
+                className="w-full h-24 object-cover rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={removeImage}
+                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
+          {imageError && (
+            <p className="mt-2 text-sm text-red-600">{imageError}</p>
+          )}
+        </div>
+      
         <div className="flex gap-3 pt-2">
           <button
             type="submit"
-            className="flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg
-                       hover:bg-indigo-700 transition-colors font-medium"
-          >
+            className="flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
             Register
           </button>
         </div>
