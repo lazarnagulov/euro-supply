@@ -149,7 +149,7 @@ public class ProductService {
 
         int totalAvailable = productions.stream().mapToInt(Production::getQuantity).sum();
         if (totalAvailable < request.getQuantity())
-            throw new InsufficientStockException("Insufficient stock. Total available: %d".formatted(totalAvailable));
+            throw new InsufficientStockException("Insufficient stock. Available quantity: %d".formatted(totalAvailable));
 
         int remainingToDeduct = request.getQuantity();
 
