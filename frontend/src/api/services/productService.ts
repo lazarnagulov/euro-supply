@@ -1,5 +1,5 @@
 import apiClient from "../client";
-import type { Product, ProductRequest, ProductSearchParams, ProductWithImage } from "../../features/product/types/product.types";
+import type { OrderRequest, OrderResponse, Product, ProductRequest, ProductSearchParams, ProductWithImage } from "../../features/product/types/product.types";
 
 export const productService = {
 
@@ -12,8 +12,13 @@ export const productService = {
     return response.data;
   },
 
+  getAvailableProducts: async (page: number, size: number) => {
+    const response = await apiClient.get("/products/available", { params: { page, size } });
+    return response.data;
+  },
+
   getProduct: async (id: number) => {
-        const response = await  apiClient.get(
+        const response = await  apiClient.get(  
             `/products/${id}`
         );
         return response.data;
@@ -42,5 +47,15 @@ export const productService = {
 
   deleteProduct: async (id: number): Promise<void> => {
     await apiClient.delete(`/products/${id}`);
+  },
+
+  searchProducts: async (keyword: string, page: number, size: number) => {
+    const response = await apiClient.get("/products/on-sale/search", { params: { keyword, page, size } });
+    return response.data;
+  },
+
+  order: async (request: OrderRequest) => {
+    const response = await apiClient.post<OrderResponse>('/products/order', request);
+    return response.data;
   }
 };

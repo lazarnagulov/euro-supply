@@ -9,4 +9,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     Page<Product> findAllByProducingFactories_Id(Long factoryId, Pageable pageable);
+    Page<Product> findAllByOnSaleTrue(Pageable pageable);
+    Page<Product> findAllByOnSaleTrueAndNameContaining(String keyword, Pageable pageable);
 }

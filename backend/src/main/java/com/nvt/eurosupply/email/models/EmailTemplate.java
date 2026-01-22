@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum EmailTemplate {
     COMPANY_APPROVAL("emails/company-approval", "Company Registration Approved"),
     COMPANY_REJECTION("emails/company-rejection", "Company Registration Update"),
-    ACCOUNT_VERIFICATION("emails/account-verification", "Account Verification");
+    ACCOUNT_VERIFICATION("emails/account-verification", "Account Verification"),
+    ORDER_INVOICE("emails/invoice", "Invoice for your order");
 
     private final String templatePath;
     private final String defaultSubject;

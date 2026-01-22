@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.company.mappers;
 
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
+import com.nvt.eurosupply.company.dtos.CompanySummaryResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.enums.RequestStatus;
@@ -58,5 +59,9 @@ public class CompanyMapper {
                 page.getTotalPages(),
                 page.getTotalElements()
         );
+    }
+
+    public CompanySummaryResponseDto toSummaryResponse(Company company) {
+        return modelMapper.map(company, CompanySummaryResponseDto.class);
     }
 }

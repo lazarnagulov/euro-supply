@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.shared.config;
 
 import com.nvt.eurosupply.user.enums.Role;
+import com.nvt.eurosupply.user.models.Person;
 import com.nvt.eurosupply.user.models.User;
 import com.nvt.eurosupply.user.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -40,6 +40,12 @@ public class SuperAdminInitConfig {
             Path filePath = Paths.get("first-password.txt");
             Files.writeString(filePath, rawPassword);
 
+            Person person = Person.builder()
+                    .firstname("admin")
+                    .lastname("admin")
+                    .phoneNumber("5476578454")
+                    .build();
+
             User admin = User.builder()
                     .username("admin")
                     .email("admin@eurosupply.com")
@@ -48,6 +54,7 @@ public class SuperAdminInitConfig {
                     .isVerified(true)
                     .isSuspended(false)
                     .mustChangePassword(true)
+                    .person(person)
                     .build();
 
             userRepository.save(admin);

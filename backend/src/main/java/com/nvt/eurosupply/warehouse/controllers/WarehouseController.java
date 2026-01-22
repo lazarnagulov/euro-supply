@@ -73,7 +73,6 @@ public class WarehouseController {
             @ApiResponse(responseCode = "201", description = "Warehouse created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation error"),
             @ApiResponse(responseCode = "404", description = "Country or City does not exist"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
     public ResponseEntity<WarehouseResponseDto> createWarehouse(@Valid @RequestBody CreateWarehouseRequestDto request) {
@@ -86,7 +85,6 @@ public class WarehouseController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Warehouse successfully updated"),
             @ApiResponse(responseCode = "404", description = "Warehouse not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}")
     public ResponseEntity<WarehouseResponseDto> updateWarehouse(@PathVariable Long id,
@@ -101,7 +99,6 @@ public class WarehouseController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Warehouse successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Warehouse not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWarehouse(@PathVariable Long id) {

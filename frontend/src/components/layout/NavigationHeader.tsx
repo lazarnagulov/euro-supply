@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Building2,
   Home,
@@ -13,13 +13,14 @@ import {
   LogIn,
   UserPlus,
   type LucideIcon,
+  Box,
 } from "lucide-react";
 import { getRoleFromToken } from "../../utils/jwt";
 
 const   NavigationHeader: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   const role: string = getRoleFromToken();
   
   interface NavItem {
@@ -43,6 +44,7 @@ const   NavigationHeader: React.FC = () => {
     { path: "/company-review", label: "Review Companies", icon: FileCheck, roles: ["ROLE_MANAGER", "ROLE_ADMIN"] },
     { path: "/vehicle-management", label: "Vehicle Management", icon: Truck, roles: ["ROLE_MANAGER", "ROLE_ADMIN"]},
     { path: "/warehouse-management", label: "Warehouse Management", icon: Warehouse, roles: ["ROLE_MANAGER", "ROLE_ADMIN"]},
+    { path: "/products-catalog", label: "Products Catalog", icon: Box, roles: ["ROLE_CUSTOMER"]},
     {
       path: "/product-management",
       label: "Product Management",
@@ -99,7 +101,12 @@ const   NavigationHeader: React.FC = () => {
           <button
             onClick={() => {
               localStorage.removeItem("token");
-              window.location.reload();
+
+              if (location.pathname === "/")
+                window.location.reload();
+              else 
+                navigate("/");
+              
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg
                       bg-gradient-to-r from-indigo-600 to-purple-600

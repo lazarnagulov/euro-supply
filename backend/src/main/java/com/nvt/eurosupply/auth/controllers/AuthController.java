@@ -29,7 +29,6 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Invalid username or password"),
             @ApiResponse(responseCode = "403", description = "Account is not verified"),
             @ApiResponse(responseCode = "423", description = "Account is suspended"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserTokenState> createAuthenticationToken(@Valid @RequestBody LoginRequestDto request) {

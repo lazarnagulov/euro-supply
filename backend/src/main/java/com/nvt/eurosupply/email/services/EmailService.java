@@ -7,9 +7,9 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -29,8 +29,7 @@ public class EmailService {
 
     public void sendEmail(EmailRequest emailRequest) {
         try {
-            log.info("Sending email to: {} with template: {}",
-                    emailRequest.getTo(), emailRequest.getTemplateName());
+            log.info("Sending email to: {} with template: {}", emailRequest.getTo(), emailRequest.getTemplateName());
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -41,13 +40,17 @@ public class EmailService {
 
             String htmlContent = processTemplate(emailRequest.getTemplateName(), emailRequest.getTemplateVariables());
             helper.setText(htmlContent, true);
-            mailSender.send(message);
 
+            if (emailRequest.getAttachmentBytes() != null && emailRequest.getAttachmentBytes().length > 0) {
+                helper.addAttachment(emailRequest.getAttachmentFilename(),
+                        new ByteArrayResource(emailRequest.getAttachmentBytes()));
+            }
+
+            mailSender.send(message);
             log.info("Email sent successfully to: {}", emailRequest.getTo());
 
         } catch (MessagingException e) {
-            log.error("Failed to send email to: {} - Error: {}",
-                    emailRequest.getTo(), e.getMessage());
+            log.error("Failed to send email to: {} - Error: {}", emailRequest.getTo(), e.getMessage());
             throw new EmailException("Failed to send email", e);
         }
     }
@@ -55,9 +58,6 @@ public class EmailService {
     private String processTemplate(String templateName, Map<String, Object> templateVariables) {
         Context context = new Context();
         context.setVariables(templateVariables);
-        return templateEngine.process(
-                templateName,
-                context
-        );
+        return templateEngine.process(templateName, context);
     }
 }

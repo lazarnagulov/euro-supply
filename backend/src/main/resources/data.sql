@@ -400,7 +400,7 @@ VALUES
         'Structural steel beam for construction and industrial use',
         120.50,
         18.75,
-        false,
+        true,
         3,
         now(),
         now(),
@@ -458,6 +458,17 @@ INSERT INTO factories_images (images_id, factory_id) VALUES
     (9,2),
     (10,3);
 
-INSERT INTO users (email, username, password, role, is_verified, is_suspended, must_change_password, hash) VALUES
-             ('customer@gmail.com', 'customer','$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W', 'CUSTOMER', true,false, false, '123'),
-             ('manager@gmail.com', 'manager','$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W', 'MANAGER', true,false, false, '12345');
+INSERT INTO users (email, username, password, role, is_verified, is_suspended, must_change_password, hash, firstname, lastname, phone_number) VALUES
+             ('customer@gmail.com', 'customer','$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W', 'CUSTOMER', true,false, false, '123', 'customer', 'customer', 8567459852),
+             ('manager@gmail.com', 'manager','$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W', 'MANAGER', true,false, false, '12345','manager', 'manager', 58521465524);
+
+
+INSERT INTO companies (name, address, city_id, country_id, latitude, longitude, status, rejection_reason, reviewed_by_id, owner_id, created_at, version) VALUES (
+             'Euro Supply Ltd','Nemanjina 12', 1118, 1, 44.8125, 20.4612, 'APPROVED', NULL, NULL, 1, NOW(), 0);
+
+INSERT INTO productions (factory_id, product_id, quantity) VALUES
+(1, 1, 100),
+(1, 2, 50),
+(2, 1, 200),
+(2, 3, 75),
+(3, 2, 120);

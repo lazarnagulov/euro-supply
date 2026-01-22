@@ -1,14 +1,20 @@
 package com.nvt.eurosupply.product.services;
 
+import com.nvt.eurosupply.company.models.Company;
+import com.nvt.eurosupply.company.services.CompanyService;
+import com.nvt.eurosupply.email.services.ProductEmailService;
 import com.nvt.eurosupply.factory.dtos.FactoryProductListItemDto;
+import com.nvt.eurosupply.factory.models.Production;
 import com.nvt.eurosupply.factory.repositories.FactoryRepository;
-import com.nvt.eurosupply.product.dtos.CreateProductRequestDto;
-import com.nvt.eurosupply.product.dtos.ProductResponseDto;
-import com.nvt.eurosupply.product.dtos.ProductSearchRequestDto;
-import com.nvt.eurosupply.product.dtos.UpdateProductRequestDto;
+import com.nvt.eurosupply.factory.repositories.ProductionRepository;
+import com.nvt.eurosupply.product.dtos.*;
+import com.nvt.eurosupply.product.exceptions.InsufficientStockException;
+import com.nvt.eurosupply.product.mappers.OrderMapper;
 import com.nvt.eurosupply.product.mappers.ProductMapper;
 import com.nvt.eurosupply.product.models.Category;
+import com.nvt.eurosupply.product.models.Order;
 import com.nvt.eurosupply.product.models.Product;
+import com.nvt.eurosupply.product.repositories.OrderRepository;
 import com.nvt.eurosupply.product.repositories.ProductRepository;
 import com.nvt.eurosupply.product.specifications.ProductSpecification;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
@@ -45,6 +51,11 @@ public class ProductService {
     private final FileService fileService;
     private final FileMapper fileMapper;
     private final FactoryRepository factoryRepository;
+    private final ProductionRepository productionRepository;
+    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
+    private final CompanyService companyService;
+    private final ProductEmailService productEmailService;
 
     public Product find(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product not found"));
@@ -119,5 +130,50 @@ public class ProductService {
     public PagedResponse<FactoryProductListItemDto> getProductsByFactoryId(Long factoryId, Pageable pageable) {
         Page<Product> page = repository.findAllByProducingFactories_Id(factoryId, pageable);
         return mapper.toFactoryProductListItemPagedResponse(page);
+    }
+
+    public PagedResponse<ProductResponseDto> getAvailableProducts(Pageable pageable) {
+        Page<Product> page = repository.findAllByOnSaleTrue(pageable);
+        return mapper.toPagedResponse(page);
+    }
+
+    public PagedResponse<ProductResponseDto> searchAvailableProducts(String keyword, Pageable pageable) {
+        Page<Product> page = repository.findAllByOnSaleTrueAndNameContaining(keyword, pageable);
+        return mapper.toPagedResponse(page);
+    }
+
+    @Transactional
+    public OrderResponseDto orderProduct(OrderRequestDto request) {
+        Order order = fromRequest(request);
+        List<Production> productions = productionRepository.findByProduct_IdOrderByQuantityDesc(request.getProductId());
+
+        int totalAvailable = productions.stream().mapToInt(Production::getQuantity).sum();
+        if (totalAvailable < request.getQuantity())
+            throw new InsufficientStockException("Insufficient stock. Available quantity: %d".formatted(totalAvailable));
+
+        int remainingToDeduct = request.getQuantity();
+
+        for (Production p : productions) {
+            if (remainingToDeduct <= 0) break;
+
+            int currentQty = p.getQuantity();
+            if (currentQty <= remainingToDeduct) {
+                remainingToDeduct -= currentQty;
+                p.setQuantity(0);
+            } else {
+                p.setQuantity(currentQty - remainingToDeduct);
+                remainingToDeduct = 0;
+            }
+        }
+        productionRepository.saveAll(productions);
+        Order createdOrder = orderRepository.save(order);
+        productEmailService.sendInvoice(createdOrder);
+        return OrderResponseDto.builder().id(createdOrder.getId()).build();
+    }
+
+    private Order fromRequest (OrderRequestDto request) {
+        Company company = companyService.find(request.getCompanyId());
+        Product product = find(request.getProductId());
+        return orderMapper.fromRequest(product, company, request.getQuantity());
     }
 }

@@ -4,7 +4,7 @@ import type {
   ProductSearchParams,
   ProductWithImage,
 } from "../types/product.types";
-import ProductCard from "../components/ProductCard";
+import ManageableProductCard from "../components/ManageableProductCard.tsx";
 import { Filter, Plus, Package } from "lucide-react";
 import ProductModal from "../components/ProductModal";
 import DeleteConfirmationModal from "../../../components/modal/DeleteConfirmationModal";
@@ -27,8 +27,7 @@ const ProductManagementPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
-  const [selectedProduct, setSelectedProduct] =
-    useState<ProductWithImage | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithImage | null>(null);
 
   const pageSize = 9;
 
@@ -180,7 +179,7 @@ const ProductManagementPage = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
               {products.map((product) => (
-                <ProductCard
+                <ManageableProductCard
                   key={product.id}
                   product={product}
                   onEdit={() => handleEdit(product)}

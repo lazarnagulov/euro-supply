@@ -1,6 +1,7 @@
 import apiClient from '../client';
 import type {
     Company, CompanyResponse,
+    CompanySummaryResponse,
     RegisterCompanyRequest,
     ReviewCompanyRequest
 } from "../../features/company/types/company.types.ts";
@@ -46,4 +47,8 @@ export const companyService = {
         return response.data;
     },
 
+    getMyCompanies: async () => {
+        const response = await apiClient.get<CompanySummaryResponse[]>('/companies/my');
+        return response.data;
+    }
 };

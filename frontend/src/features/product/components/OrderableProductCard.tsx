@@ -1,23 +1,18 @@
 import React from "react";
-import { Edit2, Trash2, Package, ArrowRight } from "lucide-react";
+import { Package } from "lucide-react";
 import type { ProductWithImage } from "../types/product.types";
-import { useNavigate } from "react-router-dom";
 
-interface ProductCardProps {
+interface OrderableProductCardProps {
   product: ProductWithImage;
-  onEdit: () => void;
-  onDelete: () => void;
+  onOrder: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({
+const OrderableProductCard: React.FC<OrderableProductCardProps> = ({
   product,
-  onEdit,
-  onDelete,
+  onOrder,
 }) => {
-  const navigate = useNavigate();
   return (
     <div className="bg-white rounded-xl shadow hover:shadow-xl transition-all overflow-hidden">
-      {/* IMAGE */}
       <div className="relative h-48 bg-gray-200">
         {product.imageUrl?.url ? (
           <img
@@ -39,7 +34,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </span>
       </div>
 
-      {/* CONTENT */}
       <div className="p-4">
         <h3 className="text-xl font-bold text-gray-800 mb-2">{product.name}</h3>
 
@@ -49,42 +43,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {product.category?.name || "N/A"}
           </p>
           <p>
-            <span className="font-semibold">Price:</span> €
-            {product.price.toFixed(2)}
+            <span className="font-semibold">Price:</span> €{product.price.toFixed(2)}
           </p>
           <p>
             <span className="font-semibold">Weight:</span> {product.weight} kg
           </p>
         </div>
 
-        {/* ACTIONS */}
         <button
-          onClick={() => navigate(`/products/${product.id}`)}
-          className="w-full mb-3 flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
-        >
-          View details
-          <ArrowRight size={16} />
+          onClick={onOrder}
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Order
         </button>
-
-        <div className="flex gap-2">
-          <button
-            onClick={onEdit}
-            className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
-          >
-            <Edit2 className="w-4 h-4" />
-            Edit
-          </button>
-
-          <button
-            onClick={onDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
       </div>
     </div>
   );
 };
 
-export default ProductCard;
+export default OrderableProductCard;
