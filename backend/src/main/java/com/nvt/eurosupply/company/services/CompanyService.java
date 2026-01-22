@@ -122,7 +122,7 @@ public class CompanyService {
 
     public List<CompanySummaryResponseDto> getCompaniesForCurrentUser() {
         User currentUser = userService.getCurrentUser();
-        List<Company> companies = repository.findByOwnerId(currentUser.getId());
+        List<Company> companies = repository.findByOwnerIdAndStatus(currentUser.getId(), RequestStatus.APPROVED);
         return companies.stream().map(mapper::toSummaryResponse).toList();
     }
 }

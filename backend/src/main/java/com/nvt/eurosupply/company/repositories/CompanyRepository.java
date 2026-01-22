@@ -11,5 +11,5 @@ import java.util.List;
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     Page<Company> findByStatus(RequestStatus status, Pageable pageable);
-    List<Company> findByOwnerId(Long ownerId);
+    List<Company> findByOwnerIdAndStatus(Long ownerId, RequestStatus status);
 }
