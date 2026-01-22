@@ -3,10 +3,12 @@ package com.nvt.eurosupply.user.services;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
+import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.user.dtos.AuthRequestDto;
 import com.nvt.eurosupply.user.dtos.AuthResponseDto;
+import com.nvt.eurosupply.user.dtos.ManagerResponseDto;
 import com.nvt.eurosupply.user.enums.Role;
 import com.nvt.eurosupply.user.exceptions.UserAlreadyExistsException;
 import com.nvt.eurosupply.user.mappers.UserMapper;
@@ -17,6 +19,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,7 +39,7 @@ public class UserService {
     private final FileService fileService;
     private final FileMapper fileMapper;
 
-    public AuthResponseDto register(@Valid AuthRequestDto request) {
+    public AuthResponseDto register(AuthRequestDto request) {
         validateUniqueUserData(request);
         User user = mapper.fromRequest(request);
         user.setHash(HashUtils.generateHash());
@@ -45,6 +48,17 @@ public class UserService {
         User createdUser = repository.save(user);
         accountActivationService.sendActivationEmail(createdUser);
         return AuthResponseDto.builder().id(createdUser.getId()).build();
+    }
+
+    public AuthResponseDto registerManager(AuthRequestDto request) {
+        validateUniqueUserData(request);
+        User manager = mapper.fromRequest(request);
+        manager.setPassword(passwordEncoder.encode(request.getPassword()));
+        manager.setRole(Role.MANAGER);
+        manager.setMustChangePassword(true);
+        manager.setIsSuspended(false);
+        User created = repository.save(manager);
+        return new AuthResponseDto(created.getId());
     }
 
     private void validateUniqueUserData(AuthRequestDto request) {
@@ -80,5 +94,9 @@ public class UserService {
 
     private User find(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
+    public PagedResponse<ManagerResponseDto> getManagers(Pageable pageable) {
+        return mapper.toPagedResponse(repository.findAllByRoleAndIsSuspendedFalse(pageable, Role.MANAGER));
     }
 }

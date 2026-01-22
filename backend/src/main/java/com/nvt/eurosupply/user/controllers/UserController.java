@@ -1,9 +1,11 @@
 package com.nvt.eurosupply.user.controllers;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
+import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.user.dtos.AccountVerificationRequestDto;
 import com.nvt.eurosupply.user.dtos.AuthRequestDto;
 import com.nvt.eurosupply.user.dtos.AuthResponseDto;
+import com.nvt.eurosupply.user.dtos.ManagerResponseDto;
 import com.nvt.eurosupply.user.services.AccountVerificationService;
 import com.nvt.eurosupply.user.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,8 +14,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,6 +63,30 @@ public class UserController {
     }
 
     @Operation(
+            summary = "Create manager (admin only)",
+            description = "Creates a new manager account by admin. " +
+                    "Manager must change password on first login. " +
+                    "Email activation is skipped."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Manager created successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "409", description = "Manager with this username or email already exists"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = "/managers")
+    public ResponseEntity<AuthResponseDto> createManager(
+            @Valid @RequestBody AuthRequestDto request
+    ) {
+        AuthResponseDto response = service.registerManager(request);
+
+        return ResponseEntity
+                .created(URI.create("/api/v1/users/managers/" + response.getId()))
+                .body(response);
+    }
+
+    @Operation(
             summary = "Upload users image",
             description = "Uploads one image for registered user."
     )
@@ -71,4 +99,18 @@ public class UserController {
     public ResponseEntity<FileResponseDto> uploadImage(@PathVariable Long id, @Valid @RequestBody MultipartFile image) {
         return ResponseEntity.ok(service.uploadImage(id, image));
     }
+
+    @Operation(
+            summary = "Get all managers",
+            description = "Retrieves a paginated list of all managers."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Managers retrieved successfully")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/managers")
+    public ResponseEntity<PagedResponse<ManagerResponseDto>> getManagers(Pageable pageable) {
+        return ResponseEntity.ok(service.getManagers(pageable));
+    }
+
 }

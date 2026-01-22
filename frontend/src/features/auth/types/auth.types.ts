@@ -1,3 +1,5 @@
+import type { StoredFile } from "../../../types/file.types";
+
 export interface LoginRequest {
     username: string;
     password: string;
@@ -24,5 +26,5 @@ export interface PersonRequest {
     firstname: string;
     lastname: string;
     phoneNumber: string;
-    // TODO: add photo
+    imageUrl?: StoredFile;
 }
