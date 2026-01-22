@@ -113,4 +113,19 @@ public class UserController {
         return ResponseEntity.ok(service.getManagers(pageable));
     }
 
+    @Operation(
+            summary = "Suspend user",
+            description = "Suspends a user by their ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User suspended successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PatchMapping("/{userId}/suspension")
+    public ResponseEntity<Void> suspendUser(@PathVariable Long userId) {
+        service.suspendUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
 }

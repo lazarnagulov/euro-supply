@@ -10,12 +10,11 @@ export const managerService = {
         isSearch ? "/users/managers/search" : "/users/managers",
         { params: { page, size, ...params } }
       );
-      console.log("ManagerService - getManagers response:", response.data);
       return response.data;
     },
 
     suspendManager: async (id: number): Promise<void> => {
-        await apiClient.post(`/managers/${id}/suspend`);
+        await apiClient.patch(`/users/${id}/suspension`);
     },
 
     async createManager(
@@ -23,7 +22,6 @@ export const managerService = {
         profileImage: File
     ): Promise<{ manager: any; imageUploaded: boolean }> {
         try {
-            // basic info
             const managerData = {
                 username: data.username,
                 email: data.email,
@@ -35,19 +33,14 @@ export const managerService = {
                     phoneNumber: data.person.phoneNumber,
                 },
             };
-            console.log("Creating manager with data:", managerData);
 
             const response = await apiClient.post("users/managers", managerData);
             const createdManager = response.data;
 
-            console.log("Manager created:", createdManager);
-
-            // upload profile image
             try {
                 await this.uploadManagerImage(createdManager.id, profileImage);
                 return { manager: createdManager, imageUploaded: true };
             } catch (imageError) {
-                // TODO: propagte error properly
                 console.error("Image upload failed:", imageError);
                 return { manager: createdManager, imageUploaded: false };
             }

@@ -99,4 +99,10 @@ public class UserService {
     public PagedResponse<ManagerResponseDto> getManagers(Pageable pageable) {
         return mapper.toPagedResponse(repository.findAllByRoleAndIsSuspendedFalse(pageable, Role.MANAGER));
     }
+
+    public void suspendUser(Long id) {
+        User user = find(id);
+        user.setIsSuspended(true);
+        repository.save(user);
+    }
 }
