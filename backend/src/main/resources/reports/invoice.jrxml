@@ -14,6 +14,7 @@
 
     <parameter name="customerName" class="java.lang.String"/>
     <parameter name="companyName" class="java.lang.String"/>
+    <parameter name="productName" class="java.lang.String"/>
     <parameter name="totalPrice" class="java.lang.Double"/>
 
     <title>
@@ -29,20 +30,27 @@
     </title>
 
     <pageHeader>
-        <band height="80">
+        <band height="100">
 
             <textField>
                 <reportElement x="0" y="0" width="400" height="20"/>
                 <textFieldExpression><![CDATA[
-                    "Customer: " + $P{customerName}
-                ]]></textFieldExpression>
+                "Customer: " + $P{customerName}
+            ]]></textFieldExpression>
             </textField>
 
             <textField>
                 <reportElement x="0" y="25" width="400" height="20"/>
                 <textFieldExpression><![CDATA[
-                    "Company: " + $P{companyName}
-                ]]></textFieldExpression>
+                "Company: " + $P{companyName}
+            ]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="0" y="50" width="400" height="20"/>
+                <textFieldExpression><![CDATA[
+                "Product: " + $P{productName}
+            ]]></textFieldExpression>
             </textField>
 
         </band>

@@ -101,7 +101,12 @@ const   NavigationHeader: React.FC = () => {
           <button
             onClick={() => {
               localStorage.removeItem("token");
-              navigate('/')
+
+              if (location.pathname === "/")
+                window.location.reload();
+              else 
+                navigate("/");
+              
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg
                       bg-gradient-to-r from-indigo-600 to-purple-600

@@ -184,6 +184,7 @@ public class ProductService {
         User loggedIn = userService.getCurrentUser();
 
         Map<String, Object> reportParams = new HashMap<>();
+        reportParams.put("productName", order.getProduct().getName());
         reportParams.put("customerName", loggedIn.getPerson().getFirstname());
         reportParams.put("companyName", order.getCompany().getName());
         reportParams.put("totalPrice", order.getQuantity() * order.getProduct().getPrice());
