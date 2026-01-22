@@ -88,7 +88,7 @@ public class CompanyService {
 
         company.setStatus(request.getStatus());
         company.setRejectionReason(request.getRejectionReason());
-         company.setReviewedBy(userService.getCurrentUser());
+        company.setReviewedBy(userService.getCurrentUser());
         Company saved = repository.save(company);
         eventPublisher.publishEvent(
                 new CompanyReviewedEvent(
