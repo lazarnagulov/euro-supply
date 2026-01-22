@@ -12,13 +12,11 @@
               topMargin="40"
               bottomMargin="40">
 
-    <!-- PARAMETERS -->
-    <parameter name="customerName" class="java.lang.String"/>
-    <parameter name="companyName" class="java.lang.String"/>
-    <parameter name="productName" class="java.lang.String"/>
+    <parameter name="customerName"/>
+    <parameter name="companyName"/>
+    <parameter name="productName"/>
     <parameter name="totalPrice" class="java.lang.Double"/>
 
-    <!-- BACKGROUND -->
     <background>
         <band height="762">
             <rectangle>
@@ -30,11 +28,9 @@
         </band>
     </background>
 
-    <!-- HEADER -->
     <title>
         <band height="100">
 
-            <!-- Main container card -->
             <rectangle>
                 <reportElement x="0" y="0" width="515" height="100" backcolor="#FFFFFF" mode="Opaque"/>
                 <graphicElement>
@@ -42,7 +38,6 @@
                 </graphicElement>
             </rectangle>
 
-            <!-- Invoice title -->
             <staticText>
                 <reportElement x="20" y="30" width="475" height="35"/>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -54,11 +49,9 @@
         </band>
     </title>
 
-    <!-- CONTENT -->
     <pageHeader>
         <band height="280">
 
-            <!-- Main content card (same white background) -->
             <rectangle>
                 <reportElement x="0" y="0" width="515" height="280" backcolor="#FFFFFF" mode="Opaque"/>
                 <graphicElement>
@@ -66,7 +59,6 @@
                 </graphicElement>
             </rectangle>
 
-            <!-- Greeting -->
             <staticText>
                 <reportElement x="20" y="20" width="60" height="20"/>
                 <textElement>
@@ -83,7 +75,6 @@
                 <textFieldExpression><![CDATA[$P{customerName} + ","]]></textFieldExpression>
             </textField>
 
-            <!-- Thank you message -->
             <staticText>
                 <reportElement x="20" y="50" width="475" height="40"/>
                 <textElement>
@@ -92,7 +83,6 @@
                 <text><![CDATA[Thank you for your order. Please find your invoice details below.]]></text>
             </staticText>
 
-            <!-- Separator line -->
             <line>
                 <reportElement x="20" y="100" width="475" height="1"/>
                 <graphicElement>
@@ -100,7 +90,6 @@
                 </graphicElement>
             </line>
 
-            <!-- Invoice Details Section -->
             <staticText>
                 <reportElement x="20" y="120" width="200" height="20"/>
                 <textElement>
@@ -149,7 +138,6 @@
                 <textFieldExpression><![CDATA[$P{productName}]]></textFieldExpression>
             </textField>
 
-            <!-- Separator line -->
             <line>
                 <reportElement x="20" y="220" width="475" height="1"/>
                 <graphicElement>
@@ -157,7 +145,6 @@
                 </graphicElement>
             </line>
 
-            <!-- Total Amount -->
             <staticText>
                 <reportElement x="20" y="240" width="200" height="25"/>
                 <textElement>
@@ -177,11 +164,9 @@
         </band>
     </pageHeader>
 
-    <!-- SUMMARY -->
     <summary>
         <band height="140">
 
-            <!-- White background continuation -->
             <rectangle>
                 <reportElement x="0" y="0" width="515" height="80" backcolor="#FFFFFF" mode="Opaque"/>
                 <graphicElement>
@@ -189,7 +174,6 @@
                 </graphicElement>
             </rectangle>
 
-            <!-- Contact message -->
             <staticText>
                 <reportElement x="20" y="10" width="475" height="30"/>
                 <textElement>
@@ -198,7 +182,6 @@
                 <text><![CDATA[If you have any questions, feel free to contact us.]]></text>
             </staticText>
 
-            <!-- Footer -->
             <staticText>
                 <reportElement x="20" y="100" width="475" height="30"/>
                 <textElement textAlignment="Center">
