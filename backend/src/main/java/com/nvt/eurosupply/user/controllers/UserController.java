@@ -100,19 +100,6 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Get all managers",
-            description = "Retrieves a paginated list of all managers."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Managers retrieved successfully")
-    })
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping("/managers")
-    public ResponseEntity<PagedResponse<ManagerResponseDto>> getManagers(Pageable pageable) {
-        return ResponseEntity.ok(service.getManagers(pageable));
-    }
-
-    @Operation(
             summary = "Suspend user",
             description = "Suspends a user by their ID."
     )
@@ -127,10 +114,37 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+            summary = "Change user password",
+            description = "Changes the password for a user." +
+                    " Validates old password, password confirmation," +
+                    " and ensures the new password is different from the old one."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found or password validation failed")
+    })
     @PatchMapping("/password")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         service.changePassword(request);
         return ResponseEntity.ok().build();
     }
+
+        @Operation(
+                summary = "Search managers",
+                description = "Searches managers using an optional keyword and returns a paginated list of matching results."
+        )
+        @ApiResponses({
+                @ApiResponse(responseCode = "200", description = "Managers retrieved successfully")
+        })
+        @PreAuthorize("hasRole('ROLE_ADMIN')")
+        @GetMapping("/managers")
+        public ResponseEntity<PagedResponse<ManagerResponseDto>> getManagers(
+                Pageable pageable,
+                @RequestParam(required = false) String keyword
+        ) {
+            return ResponseEntity.ok(service.searchManagers(pageable, keyword));
+        }
+
 
 }

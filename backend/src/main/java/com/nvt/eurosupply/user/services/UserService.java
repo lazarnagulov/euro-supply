@@ -101,8 +101,8 @@ public class UserService {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
-    public PagedResponse<ManagerResponseDto> getManagers(Pageable pageable) {
-        return mapper.toPagedResponse(repository.findAllByRoleAndIsSuspendedFalse(pageable, Role.MANAGER));
+    public PagedResponse<ManagerResponseDto> searchManagers(Pageable pageable, String keyword) {
+        return mapper.toPagedResponse(repository.searchManagers(keyword, pageable));
     }
 
     public void suspendUser(Long id) {

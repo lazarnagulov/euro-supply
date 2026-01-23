@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { managerService } from "../../../api/services/managerService";
-import type {
-  ManagerResponse,
-  ManagerSearchParams,
-} from "../types/manager.types";
-import { Users, Plus, Ban, Mail, Phone } from "lucide-react";
+import type { ManagerResponse } from "../types/manager.types";
+import { Users, Plus, Ban, Mail, Phone, Search, X } from "lucide-react";
 import { FaUserCircle } from "react-icons/fa";
 import ManagerModal from "../components/ManagerModal";
 import SuspendConfirmationModal from "../components/SuspendConfirmationModal.tsx";
@@ -19,9 +16,8 @@ const ManagerManagementPage = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [searchParams /*, setSearchParams*/] = useState<ManagerSearchParams>(
-    {},
-  );
+
+  const [keyword, setKeyword] = useState<string>("");
 
   const [showModal, setShowModal] = useState(false);
   const [showSuspendModal, setShowSuspendModal] = useState(false);
@@ -33,7 +29,7 @@ const ManagerManagementPage = () => {
 
   useEffect(() => {
     loadManagers();
-  }, [currentPage, searchParams]);
+  }, [currentPage, keyword]);
 
   const loadManagers = async () => {
     setLoading(true);
@@ -41,7 +37,7 @@ const ManagerManagementPage = () => {
       const data = await managerService.getManagers(
         currentPage,
         pageSize,
-        searchParams,
+        keyword,
       );
       setManagers(data.content);
       setTotalPages(data.totalPages);
@@ -87,6 +83,19 @@ const ManagerManagementPage = () => {
     setShowModal(false);
   };
 
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setCurrentPage(0);
+      loadManagers();
+    }
+  };
+
+  const handleClearSearch = () => {
+    setKeyword("");
+    setCurrentPage(0);
+    loadManagers();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-7xl mx-auto">
@@ -103,13 +112,34 @@ const ManagerManagementPage = () => {
               </div>
             </div>
 
-            <button
-              onClick={handleCreate}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 font-medium"
-            >
-              <Plus className="w-5 h-5" />
-              Add Manager
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Search managers..."
+                  className="pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+                {keyword && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    <X className="w-4 h-4 text-gray-500" />
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={handleCreate}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 font-medium"
+              >
+                <Plus className="w-5 h-5" />
+                Add Manager
+              </button>
+            </div>
           </div>
         </div>
 

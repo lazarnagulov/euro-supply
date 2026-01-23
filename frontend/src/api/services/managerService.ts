@@ -1,16 +1,17 @@
 import type { RegistrationRequest } from "../../features/auth/types/auth.types.ts";
-import type { ManagerSearchParams } from "../../features/manager/types/manager.types.ts";
 import apiClient from "../client";
 
 export const managerService = {
 
-    getManagers: async (page: number, size: number, params: ManagerSearchParams) => {
-      const isSearch = params && Object.keys(params).length !== 0;
-      const response = await apiClient.get(
-        isSearch ? "/users/managers/search" : "/users/managers",
-        { params: { page, size, ...params } }
-      );
-      return response.data;
+    getManagers: async (page: number, size: number, keyword?: string) => {
+        const params = {
+            page,
+            size,
+            ...(keyword?.trim() ? { keyword: keyword.trim() } : ""),
+        };
+
+        const response = await apiClient.get("/users/managers", { params });
+        return response.data;
     },
 
     suspendManager: async (id: number): Promise<void> => {
