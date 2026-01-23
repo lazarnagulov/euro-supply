@@ -2,9 +2,7 @@ package com.nvt.eurosupply.product.services;
 
 import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.services.CompanyService;
-import com.nvt.eurosupply.email.models.EmailRequest;
-import com.nvt.eurosupply.email.models.EmailTemplate;
-import com.nvt.eurosupply.email.services.EmailService;
+import com.nvt.eurosupply.email.services.ProductEmailService;
 import com.nvt.eurosupply.factory.dtos.FactoryProductListItemDto;
 import com.nvt.eurosupply.factory.models.Production;
 import com.nvt.eurosupply.factory.repositories.FactoryRepository;
@@ -25,9 +23,6 @@ import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
-import com.nvt.eurosupply.shared.services.PdfService;
-import com.nvt.eurosupply.user.models.User;
-import com.nvt.eurosupply.user.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -41,9 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -62,9 +55,7 @@ public class ProductService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final CompanyService companyService;
-    private final PdfService pdfService;
-    private final UserService userService;
-    private final EmailService emailService;
+    private final ProductEmailService productEmailService;
 
     public Product find(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product not found"));
@@ -158,7 +149,7 @@ public class ProductService {
 
         int totalAvailable = productions.stream().mapToInt(Production::getQuantity).sum();
         if (totalAvailable < request.getQuantity())
-            throw new InsufficientStockException("Insufficient stock. Total available: %d".formatted(totalAvailable));
+            throw new InsufficientStockException("Insufficient stock. Available quantity: %d".formatted(totalAvailable));
 
         int remainingToDeduct = request.getQuantity();
 
@@ -176,36 +167,8 @@ public class ProductService {
         }
         productionRepository.saveAll(productions);
         Order createdOrder = orderRepository.save(order);
-        sendPdfToMail(createdOrder);
+        productEmailService.sendInvoice(createdOrder);
         return OrderResponseDto.builder().id(createdOrder.getId()).build();
-    }
-
-    private void sendPdfToMail(Order order) {
-        User loggedIn = userService.getCurrentUser();
-
-        Map<String, Object> reportParams = new HashMap<>();
-        reportParams.put("customerName", loggedIn.getPerson().getFirstname());
-        reportParams.put("companyName", order.getCompany().getName());
-        reportParams.put("totalPrice", order.getQuantity() * order.getProduct().getPrice());
-
-
-        List<Order> dataSource = List.of(order);
-        byte[] pdfBytes = pdfService.generate("/reports/invoice.jrxml", dataSource, reportParams);
-
-        Map<String, Object> templateVars = new HashMap<>();
-        templateVars.put("customerName", loggedIn.getPerson().getFirstname());
-        templateVars.put("totalPrice", order.getQuantity() * order.getProduct().getPrice());
-
-        emailService.sendEmail(
-                EmailRequest.builder()
-                        .to(loggedIn.getEmail())
-                        .subject(EmailTemplate.ORDER_INVOICE.getDefaultSubject())
-                        .templateName(EmailTemplate.ORDER_INVOICE.getTemplatePath())
-                        .templateVariables(templateVars)
-                        .attachmentBytes(pdfBytes)
-                        .attachmentFilename("invoice.pdf")
-                        .build()
-        );
     }
 
     private Order fromRequest (OrderRequestDto request) {

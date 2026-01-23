@@ -8,6 +8,7 @@ import OrderModal from "../components/OrderProductModal";
 import { companyService } from "../../../api/services/companyService";
 import { type CompanySummaryResponse } from "../../company/types/company.types";
 import toast from "react-hot-toast";
+import AppToaster from "../../../components/common/AppToaster";
 
 const ProductCatalogPage = () => {
   const [products, setProducts] = useState<ProductWithImage[]>([]);
@@ -108,20 +109,20 @@ const ProductCatalogPage = () => {
     try {
         if (companyId && selectedProduct?.id) {
         await productService.order({ companyId, quantity, productId: selectedProduct?.id });
-        toast.success("Order placed successfully!");
         setShowModal(false);
+        toast.success("Order placed successfully!");
         setSelectedProduct(null);
     }
     } catch (err: any) {
       console.log(err);
-      const errorMessage =
-        err.response?.data?.message ?? "Order failed. Please try again.";
+      const errorMessage = err?.message ?? "Order failed. Please try again.";
       toast.error(errorMessage);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+    <AppToaster/>
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
           <div className="flex justify-between items-center">

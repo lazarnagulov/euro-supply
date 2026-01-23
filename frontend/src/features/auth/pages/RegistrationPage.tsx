@@ -60,7 +60,7 @@ const RegistrationPage = () => {
       setTimeout(() => navigate("/"), 1500);
     } catch (err: any) {
       console.log(err)
-      const errorMessage = err.response?.data?.message ?? "Registration failed. Please try again.";
+      const errorMessage = err?.message ?? "Registration failed. Please try again.";
       setError(errorMessage);
       toast.error(errorMessage);
     }};

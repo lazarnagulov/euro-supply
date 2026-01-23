@@ -6,68 +6,189 @@
               name="invoice"
               pageWidth="595"
               pageHeight="842"
-              columnWidth="555"
-              leftMargin="20"
-              rightMargin="20"
-              topMargin="20"
-              bottomMargin="20">
+              columnWidth="515"
+              leftMargin="40"
+              rightMargin="40"
+              topMargin="40"
+              bottomMargin="40">
 
-    <parameter name="customerName" class="java.lang.String"/>
-    <parameter name="companyName" class="java.lang.String"/>
+    <parameter name="customerName"/>
+    <parameter name="companyName"/>
+    <parameter name="productName"/>
     <parameter name="totalPrice" class="java.lang.Double"/>
 
+    <background>
+        <band height="762">
+            <rectangle>
+                <reportElement x="0" y="0" width="515" height="762" backcolor="#F7F7F7" mode="Opaque"/>
+                <graphicElement>
+                    <pen lineWidth="0"/>
+                </graphicElement>
+            </rectangle>
+        </band>
+    </background>
+
     <title>
-        <band height="60">
+        <band height="100">
+
+            <rectangle>
+                <reportElement x="0" y="0" width="515" height="100" backcolor="#FFFFFF" mode="Opaque"/>
+                <graphicElement>
+                    <pen lineWidth="0"/>
+                </graphicElement>
+            </rectangle>
+
             <staticText>
-                <reportElement x="0" y="0" width="555" height="30"/>
-                <textElement textAlignment="Center">
-                    <font size="18" isBold="true"/>
+                <reportElement x="20" y="30" width="475" height="35"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="24" isBold="false" pdfFontName="Helvetica"/>
                 </textElement>
-                <text><![CDATA[INVOICE]]></text>
+                <text><![CDATA[Invoice]]></text>
             </staticText>
+
         </band>
     </title>
 
     <pageHeader>
-        <band height="80">
+        <band height="280">
+
+            <rectangle>
+                <reportElement x="0" y="0" width="515" height="280" backcolor="#FFFFFF" mode="Opaque"/>
+                <graphicElement>
+                    <pen lineWidth="0"/>
+                </graphicElement>
+            </rectangle>
+
+            <staticText>
+                <reportElement x="20" y="20" width="60" height="20"/>
+                <textElement>
+                    <font size="11"/>
+                </textElement>
+                <text><![CDATA[Dear ]]></text>
+            </staticText>
 
             <textField>
-                <reportElement x="0" y="0" width="400" height="20"/>
-                <textFieldExpression><![CDATA[
-                    "Customer: " + $P{customerName}
-                ]]></textFieldExpression>
+                <reportElement x="80" y="20" width="415" height="20"/>
+                <textElement>
+                    <font size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{customerName} + ","]]></textFieldExpression>
             </textField>
 
+            <staticText>
+                <reportElement x="20" y="50" width="475" height="40"/>
+                <textElement>
+                    <font size="11"/>
+                </textElement>
+                <text><![CDATA[Thank you for your order. Please find your invoice details below.]]></text>
+            </staticText>
+
+            <line>
+                <reportElement x="20" y="100" width="475" height="1"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#E0E0E0"/>
+                </graphicElement>
+            </line>
+
+            <staticText>
+                <reportElement x="20" y="120" width="200" height="20"/>
+                <textElement>
+                    <font size="10" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Customer:]]></text>
+            </staticText>
+
             <textField>
-                <reportElement x="0" y="25" width="400" height="20"/>
-                <textFieldExpression><![CDATA[
-                    "Company: " + $P{companyName}
-                ]]></textFieldExpression>
+                <reportElement x="140" y="120" width="355" height="20"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{customerName}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="20" y="150" width="200" height="20"/>
+                <textElement>
+                    <font size="10" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Company:]]></text>
+            </staticText>
+
+            <textField>
+                <reportElement x="140" y="150" width="355" height="20"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{companyName}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="20" y="180" width="200" height="20"/>
+                <textElement>
+                    <font size="10" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Product:]]></text>
+            </staticText>
+
+            <textField>
+                <reportElement x="140" y="180" width="355" height="20"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{productName}]]></textFieldExpression>
+            </textField>
+
+            <line>
+                <reportElement x="20" y="220" width="475" height="1"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#E0E0E0"/>
+                </graphicElement>
+            </line>
+
+            <staticText>
+                <reportElement x="20" y="240" width="200" height="25"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total Amount:]]></text>
+            </staticText>
+
+            <textField>
+                <reportElement x="140" y="240" width="355" height="25"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["€ " + String.format("%.2f", $P{totalPrice})]]></textFieldExpression>
             </textField>
 
         </band>
     </pageHeader>
 
     <summary>
-        <band height="60">
+        <band height="140">
+
+            <rectangle>
+                <reportElement x="0" y="0" width="515" height="80" backcolor="#FFFFFF" mode="Opaque"/>
+                <graphicElement>
+                    <pen lineWidth="0"/>
+                </graphicElement>
+            </rectangle>
 
             <staticText>
-                <reportElement x="350" y="10" width="90" height="20"/>
-                <textElement textAlignment="Right">
-                    <font isBold="true"/>
+                <reportElement x="20" y="10" width="475" height="30"/>
+                <textElement>
+                    <font size="11"/>
                 </textElement>
-                <text><![CDATA[Total:]]></text>
+                <text><![CDATA[If you have any questions, feel free to contact us.]]></text>
             </staticText>
 
-            <textField>
-                <reportElement x="450" y="10" width="105" height="20"/>
-                <textElement textAlignment="Right">
-                    <font isBold="true"/>
+            <staticText>
+                <reportElement x="20" y="100" width="475" height="30"/>
+                <textElement textAlignment="Center">
+                    <font size="9"/>
                 </textElement>
-                <textFieldExpression><![CDATA[
-                    $P{totalPrice}
-                ]]></textFieldExpression>
-            </textField>
+                <text><![CDATA[© 2026 EuroSupply. All rights reserved.]]></text>
+            </staticText>
 
         </band>
     </summary>

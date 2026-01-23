@@ -88,7 +88,7 @@ public class CompanyService {
 
         company.setStatus(request.getStatus());
         company.setRejectionReason(request.getRejectionReason());
-         company.setReviewedBy(userService.getCurrentUser());
+        company.setReviewedBy(userService.getCurrentUser());
         Company saved = repository.save(company);
         eventPublisher.publishEvent(
                 new CompanyReviewedEvent(
@@ -122,7 +122,7 @@ public class CompanyService {
 
     public List<CompanySummaryResponseDto> getCompaniesForCurrentUser() {
         User currentUser = userService.getCurrentUser();
-        List<Company> companies = repository.findByOwnerId(currentUser.getId());
+        List<Company> companies = repository.findByOwnerIdAndStatus(currentUser.getId(), RequestStatus.APPROVED);
         return companies.stream().map(mapper::toSummaryResponse).toList();
     }
 }
