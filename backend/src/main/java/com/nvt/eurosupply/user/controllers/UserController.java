@@ -31,7 +31,6 @@ public class UserController {
 
     private final UserService service;
     private final AccountVerificationService accountVerificationService;
-    private final AuthService authService;
 
     @Operation(
             summary = "User registration",
