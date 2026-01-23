@@ -90,6 +90,10 @@ const NavigationHeader: React.FC = () => {
     },
   ];
 
+  if (location.pathname === "/change-password") {
+    return null;
+  }
+
   const isActive = (path: string) => location.pathname === path;
 
   const visibleNavItems = navItems.filter((item) => {

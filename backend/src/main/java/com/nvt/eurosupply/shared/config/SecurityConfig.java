@@ -2,6 +2,7 @@ package com.nvt.eurosupply.shared.config;
 
 import com.nvt.eurosupply.security.auth.CustomAccessDeniedHandler;
 import com.nvt.eurosupply.security.auth.JwtRequestFilter;
+import com.nvt.eurosupply.security.auth.PasswordChangeFilter;
 import com.nvt.eurosupply.security.auth.RestAuthenticationEntryPoint;
 import com.nvt.eurosupply.security.utils.JwtTokenUtil;
 import com.nvt.eurosupply.user.services.CustomUserDetailsService;
@@ -27,6 +28,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final PasswordChangeFilter passwordChangeFilter;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -64,7 +66,8 @@ public class SecurityConfig {
                         .requestMatchers("/**").permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtRequestFilter(jwtTokenUtil, userDetailsService()), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtRequestFilter(jwtTokenUtil, userDetailsService()), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(passwordChangeFilter, JwtRequestFilter.class);
         http.authenticationProvider(authenticationProvider());
         return http.build();
     }

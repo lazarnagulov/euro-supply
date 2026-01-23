@@ -1,11 +1,9 @@
 package com.nvt.eurosupply.user.controllers;
 
+import com.nvt.eurosupply.auth.services.AuthService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
-import com.nvt.eurosupply.user.dtos.AccountVerificationRequestDto;
-import com.nvt.eurosupply.user.dtos.AuthRequestDto;
-import com.nvt.eurosupply.user.dtos.AuthResponseDto;
-import com.nvt.eurosupply.user.dtos.ManagerResponseDto;
+import com.nvt.eurosupply.user.dtos.*;
 import com.nvt.eurosupply.user.services.AccountVerificationService;
 import com.nvt.eurosupply.user.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +30,7 @@ public class UserController {
 
     private final UserService service;
     private final AccountVerificationService accountVerificationService;
+    private final AuthService authService;
 
     @Operation(
             summary = "User registration",
@@ -125,6 +124,12 @@ public class UserController {
     @PatchMapping("/{userId}/suspension")
     public ResponseEntity<Void> suspendUser(@PathVariable Long userId) {
         service.suspendUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        service.changePassword(request);
         return ResponseEntity.ok().build();
     }
 

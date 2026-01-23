@@ -19,8 +19,7 @@ public class JwtTokenUtil {
     private String secret;
 
     @Value("${jwt.access-token.expiration:900000}") // 15 minutes default
-    public
-    long accessTokenExpiration;
+    public long accessTokenExpiration;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());

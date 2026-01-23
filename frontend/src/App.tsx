@@ -16,6 +16,7 @@ import WelcomePage from "./features/home/pages/WelcomePage.tsx";
 import AccountVerificationPage from "./features/auth/pages/AccountVerificationPage.tsx";
 import ProductCatalogPage from "./features/product/pages/ProductCatalogPage.tsx";
 import ManagerManagementPage from "./features/manager/pages/ManagerManagementPage.tsx";
+import ChangePasswordPage from "./features/auth/pages/ChangePasswordPage.tsx";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <NavigationHeader />
       <Routes>
         <Route path="/" element={<WelcomePage />} />
+        <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route
           path="/company-registration"
           element={<CompanyRegistrationPage />}

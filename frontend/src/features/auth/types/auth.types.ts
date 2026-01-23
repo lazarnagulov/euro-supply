@@ -6,8 +6,10 @@ export interface LoginRequest {
 }
 
 export interface UserStateResponse {
+    userId: number;
     token: string;
     expiresIn: string;
+    mustChangePassword: boolean;
 }
 
 export interface RegistrationRequest {

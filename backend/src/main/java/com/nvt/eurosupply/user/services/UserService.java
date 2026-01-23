@@ -8,8 +8,12 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.user.dtos.AuthRequestDto;
 import com.nvt.eurosupply.user.dtos.AuthResponseDto;
+import com.nvt.eurosupply.user.dtos.ChangePasswordRequest;
 import com.nvt.eurosupply.user.dtos.ManagerResponseDto;
 import com.nvt.eurosupply.user.enums.Role;
+import com.nvt.eurosupply.user.exceptions.InvalidOldPasswordException;
+import com.nvt.eurosupply.user.exceptions.PasswordConfirmationMismatchException;
+import com.nvt.eurosupply.user.exceptions.PasswordNotChangedException;
 import com.nvt.eurosupply.user.exceptions.UserAlreadyExistsException;
 import com.nvt.eurosupply.user.mappers.UserMapper;
 import com.nvt.eurosupply.user.models.User;
@@ -57,6 +61,7 @@ public class UserService {
         manager.setRole(Role.MANAGER);
         manager.setMustChangePassword(true);
         manager.setIsSuspended(false);
+        manager.setIsVerified(true);
         User created = repository.save(manager);
         return new AuthResponseDto(created.getId());
     }
@@ -105,4 +110,24 @@ public class UserService {
         user.setIsSuspended(true);
         repository.save(user);
     }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        User user = find(request.getUserId());
+
+        if (!request.getNewPassword().equals(request.getPasswordConfirmation()))
+            throw new PasswordConfirmationMismatchException();
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword()))
+            throw new InvalidOldPasswordException();
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword()))
+            throw new PasswordNotChangedException();
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+
+        repository.save(user);
+    }
+
 }
