@@ -57,7 +57,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(
-    null
+    null,
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -98,7 +98,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
       const loadSelectedFactories = async () => {
         const data = await factoryService.getFactoriesByProductId(product.id);
         setSelectedFactories(
-          data.map((f: FactoryResponse) => ({ label: f.name, value: f.id }))
+          data.map((f: FactoryResponse) => ({ label: f.name, value: f.id })),
         );
       };
       loadSelectedFactories();
@@ -337,7 +337,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
                   />
                   <span className="text-sm font-medium text-gray-700">
-                    Product is on sale
+                    Product is available
                   </span>
                 </label>
               </div>

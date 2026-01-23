@@ -10,6 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserTokenState {
+    private Long userId;
     private String token;
     private Long expiresIn;
+    private Boolean mustChangePassword;
 }
