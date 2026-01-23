@@ -329,6 +329,14 @@ VALUES
     (3, true, NOW() - INTERVAL '1 minute'),
     (4, false, NOW() - INTERVAL '1 hour');
 
+INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat)
+SELECT
+    id,
+    false,
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM vehicles
+WHERE id > 4;
+
 INSERT INTO vehicle_locations (vehicle_id, latitude, longitude, updated_at)
 VALUES
     (1, 44.816410, 20.460150, NOW() - INTERVAL '2 minutes'),

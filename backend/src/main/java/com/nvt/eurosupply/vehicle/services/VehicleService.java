@@ -60,6 +60,8 @@ public class VehicleService {
 
     @Setter
     private Consumer<StatusChangeEvent> statusChangeListener;
+    @Setter
+    private Consumer<List<StatusChangeEvent>> batchStatusChangeListener;
 
     @Transactional
     public VehicleResponseDto createVehicle(CreateVehicleRequestDto request) {
@@ -197,16 +199,16 @@ public class VehicleService {
     public void markVehiclesOffline() {
         log.info("Updating vehicle status");
         Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
-
         List<VehicleStatus> vehiclesToMarkOffline = statusRepository.findOnlineVehiclesOlderThan(cutoff);
 
         int updated = statusRepository.markOffline(cutoff);
-
-        if (updated > 0 && statusChangeListener != null) {
+        log.info("Marked {} vehicles as offline", updated);
+        if (updated > 0 && batchStatusChangeListener != null && !vehiclesToMarkOffline.isEmpty()) {
             Instant now = Instant.now();
-            for (VehicleStatus status : vehiclesToMarkOffline) {
-                statusChangeListener.accept(new StatusChangeEvent(status.getVehicleId(), false, now));
-            }
+            List<StatusChangeEvent> events = vehiclesToMarkOffline.stream()
+                    .map(status -> new StatusChangeEvent(status.getVehicleId(), false, now))
+                    .toList();
+            batchStatusChangeListener.accept(events);
         }
     }
 

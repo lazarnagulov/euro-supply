@@ -8,6 +8,7 @@ import com.nvt.eurosupply.realtime.dtos.VehicleDistanceDto;
 import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
 import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
+import com.nvt.eurosupply.vehicle.events.StatusChangeEvent;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,21 @@ public class VehicleRealTimeService {
         this.service = service;
         this.vehicleService = vehicleService;
         this.timeWindowCalculator = timeWindowCalculator;
+    }
+
+    public void saveStatusChanges(List<StatusChangeEvent> statusChanges) {
+        if (statusChanges == null || statusChanges.isEmpty())
+            return;
+
+        List<Point> points = statusChanges.stream()
+                .map(change -> Point
+                        .measurement("vehicle_status_change")
+                        .addTag("vehicle_id", String.valueOf(change.vehicleId()))
+                        .addField("is_online", change.isOnline())
+                        .time(change.timestamp(), WritePrecision.NS))
+                .toList();
+
+        writeApi.writePoints(points);
     }
 
     public List<VehicleDistanceDto> getDistances(Long id, VehicleDistanceRequestDto request) {

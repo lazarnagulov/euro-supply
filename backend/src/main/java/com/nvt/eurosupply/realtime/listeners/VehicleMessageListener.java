@@ -25,15 +25,19 @@ public class VehicleMessageListener {
 
     @PostConstruct
     public void init() {
-        service.setStatusChangeListener(event -> {
+        service.setStatusChangeListener(event ->
             realTimeService.saveStatusChange(
                     event.vehicleId(),
                     event.isOnline(),
                     event.timestamp()
-            );
-            log.info("Vehicle {} status changed to: {}",
-                    event.vehicleId(),
-                    event.isOnline() ? "ONLINE" : "OFFLINE");
+            )
+        );
+        service.setBatchStatusChangeListener(events -> {
+            if (events.isEmpty()) {
+                return;
+            }
+            realTimeService.saveStatusChanges(events);
+            log.info("Batch saved {} vehicle status changes to InfluxDB", events.size());
         });
     }
 
