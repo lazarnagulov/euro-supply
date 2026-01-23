@@ -202,13 +202,10 @@ public class VehicleService {
 
         int updated = statusRepository.markOffline(cutoff);
 
-        if (updated > 0) {
-            log.info("Marked {} vehicles as offline", updated);
-            if (statusChangeListener != null) {
-                Instant now = Instant.now();
-                for (VehicleStatus status : vehiclesToMarkOffline) {
-                    statusChangeListener.accept(new StatusChangeEvent(status.getVehicleId(), false, now));
-                }
+        if (updated > 0 && statusChangeListener != null) {
+            Instant now = Instant.now();
+            for (VehicleStatus status : vehiclesToMarkOffline) {
+                statusChangeListener.accept(new StatusChangeEvent(status.getVehicleId(), false, now));
             }
         }
     }
