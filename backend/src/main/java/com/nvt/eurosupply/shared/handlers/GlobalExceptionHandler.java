@@ -120,7 +120,7 @@ public class GlobalExceptionHandler {
         String errorMessage = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .map(err -> err.getDefaultMessage())
                 .findFirst()
                 .orElse(ex.getMessage());
 

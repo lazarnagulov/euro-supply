@@ -18,10 +18,10 @@ export const managerService = {
         await apiClient.patch(`/users/${id}/suspension`);
     },
 
-    async createManager(
-        data: RegistrationRequest, 
+    createManager: async (
+        data: RegistrationRequest,
         profileImage: File
-    ): Promise<{ manager: any; imageUploaded: boolean }> {
+    ): Promise<{ manager: any; imageUploaded: boolean }> => {
         try {
             const managerData = {
                 username: data.username,
@@ -35,22 +35,23 @@ export const managerService = {
                 },
             };
 
-            const response = await apiClient.post("users/managers", managerData);
+            const response = await apiClient.post("/users/managers", managerData);
             const createdManager = response.data;
 
             try {
-                await this.uploadManagerImage(createdManager.id, profileImage);
+                await managerService.uploadManagerImage(createdManager.id, profileImage);
                 return { manager: createdManager, imageUploaded: true };
-            } catch (imageError) {
-                console.error("Image upload failed:", imageError);
+            } catch (error) {
+                console.error("Image upload failed:", error);
                 return { manager: createdManager, imageUploaded: false };
             }
         } catch (error: any) {
             throw new Error(
-                error.response?.data?.message || "Failed to create manager"
+                error?.message || "Failed to create manager"
             );
         }
     },
+
 
     uploadManagerImage: async (id: number, image: File): Promise<void> => {
         const formData = new FormData();
