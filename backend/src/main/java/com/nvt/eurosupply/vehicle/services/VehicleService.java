@@ -14,6 +14,7 @@ import com.nvt.eurosupply.vehicle.dtos.CreateVehicleRequestDto;
 import com.nvt.eurosupply.vehicle.dtos.UpdateVehicleRequestDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleSearchRequestDto;
+import com.nvt.eurosupply.vehicle.events.StatusChangeEvent;
 import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
 import com.nvt.eurosupply.vehicle.models.*;
 import com.nvt.eurosupply.vehicle.repositories.VehicleLocationRepository;
@@ -22,6 +23,7 @@ import com.nvt.eurosupply.vehicle.repositories.VehicleStatusRepository;
 import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,6 +40,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +58,9 @@ public class VehicleService {
     private final FileMapper fileMapper;
     private final LocationMapper locationMapper;
 
+    @Setter
+    private Consumer<StatusChangeEvent> statusChangeListener;
+
     @Transactional
     public VehicleResponseDto createVehicle(CreateVehicleRequestDto request) {
         Vehicle vehicle = mapper.fromCreateRequest(request);
@@ -63,18 +69,18 @@ public class VehicleService {
         vehicle.setBrand(brand);
         vehicle.setModel(model);
 
-        vehicle = repository.save(vehicle);
+        Vehicle createdVehicle = repository.save(vehicle);
 
         VehicleLocation location = new VehicleLocation();
-        location.setVehicleId(vehicle.getId());
+        location.setVehicleId(createdVehicle.getId());
         locationRepository.save(location);
 
         VehicleStatus status = new VehicleStatus();
-        status.setVehicleId(vehicle.getId());
+        status.setVehicleId(createdVehicle.getId());
         status.setIsOnline(false);
         statusRepository.save(status);
 
-        return mapper.toResponse(vehicle, location, status);
+        return mapper.toResponse(createdVehicle, location, status);
     }
 
     @Transactional
@@ -192,20 +198,32 @@ public class VehicleService {
         log.info("Updating vehicle status");
         Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
 
+        List<VehicleStatus> vehiclesToMarkOffline = statusRepository.findOnlineVehiclesOlderThan(cutoff);
+
         int updated = statusRepository.markOffline(cutoff);
 
         if (updated > 0) {
             log.info("Marked {} vehicles as offline", updated);
+            if (statusChangeListener != null) {
+                Instant now = Instant.now();
+                for (VehicleStatus status : vehiclesToMarkOffline) {
+                    statusChangeListener.accept(new StatusChangeEvent(status.getVehicleId(), false, now));
+                }
+            }
         }
     }
 
     @Transactional
     @CacheEvict(value = "vehicleStatus", key = "#vehicleId")
     public void applyHeartbeat(Long vehicleId, Instant timestamp) {
-        int updated = statusRepository.applyHeartbeat(vehicleId, timestamp);
+        VehicleStatus status = statusRepository.findById(vehicleId)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle status not found: " + vehicleId));
 
-        if (updated == 0) {
-            throw new EntityNotFoundException("Vehicle status not found: " + vehicleId);
+        boolean wasOffline = !status.getIsOnline();
+        statusRepository.applyHeartbeat(vehicleId, timestamp);
+
+        if (wasOffline && statusChangeListener != null) {
+            statusChangeListener.accept(new StatusChangeEvent(vehicleId, true, timestamp));
         }
     }
 

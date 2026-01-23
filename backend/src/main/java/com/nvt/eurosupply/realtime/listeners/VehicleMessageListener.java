@@ -8,6 +8,7 @@ import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
 import com.nvt.eurosupply.realtime.services.VehicleRealTimeService;
 import com.nvt.eurosupply.shared.models.Location;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -22,11 +23,24 @@ public class VehicleMessageListener {
     private final VehicleRealTimeService realTimeService;
     private final VehicleService service;
 
+    @PostConstruct
+    public void init() {
+        service.setStatusChangeListener(event -> {
+            realTimeService.saveStatusChange(
+                    event.vehicleId(),
+                    event.isOnline(),
+                    event.timestamp()
+            );
+            log.info("Vehicle {} status changed to: {}",
+                    event.vehicleId(),
+                    event.isOnline() ? "ONLINE" : "OFFLINE");
+        });
+    }
+
     @RabbitListener(queues = "vehicle.heartbeat.queue")
     public void receiveHeartbeat(String message) {
         try {
             VehicleHeartbeatMessage heartbeat = mapper.readValue(message, new TypeReference<>() {});
-            realTimeService.saveHearthBeat(heartbeat);
             service.applyHeartbeat(heartbeat.getVehicleId(), heartbeat.getTimestamp());
             log.info("[{}] Received heartbeat from vehicle: {}", heartbeat.getTimestamp(),  heartbeat.getStatus());
         } catch (JsonProcessingException e) {

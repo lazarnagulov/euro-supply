@@ -6,7 +6,6 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import com.nvt.eurosupply.realtime.dtos.VehicleDistanceDto;
 import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
-import com.nvt.eurosupply.realtime.messages.VehicleHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
 import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
@@ -79,12 +78,12 @@ public class VehicleRealTimeService {
         writeApi.writePoint(point);
     }
 
-    public void saveHearthBeat(VehicleHeartbeatMessage heartbeat) {
+    public void saveStatusChange(Long vehicleId, boolean isOnline, Instant timestamp) {
         Point point = Point
-                .measurement("vehicle_availability")
-                .addTag("vehicle_id", String.valueOf(heartbeat.getVehicleId()))
-                .addField("status", heartbeat.getStatus().ordinal())
-                .time(heartbeat.getTimestamp(), WritePrecision.NS);
+                .measurement("vehicle_status_change")
+                .addTag("vehicle_id", String.valueOf(vehicleId))
+                .addField("is_online", isOnline)
+                .time(timestamp, WritePrecision.NS);
 
         writeApi.writePoint(point);
     }
