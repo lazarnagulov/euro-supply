@@ -63,7 +63,17 @@ public class SecurityConfig {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
         );
         http.authorizeHttpRequests(request -> request
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs.yaml"
+                        ).permitAll()
+
+                        .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/users/registration").permitAll()
+                        .requestMatchers("/api/v1/users/password").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
