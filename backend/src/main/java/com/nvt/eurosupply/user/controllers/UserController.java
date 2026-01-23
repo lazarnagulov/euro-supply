@@ -9,6 +9,7 @@ import com.nvt.eurosupply.user.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -65,13 +66,16 @@ public class UserController {
             summary = "Create manager (admin only)",
             description = "Creates a new manager account by admin. " +
                     "Manager must change password on first login. " +
-                    "Email activation is skipped."
+                    "Email activation is skipped.",
+            security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Manager created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
             @ApiResponse(responseCode = "409", description = "Manager with this username or email already exists"),
-            @ApiResponse(responseCode = "403", description = "Access denied")
+
     })
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/managers")
@@ -130,21 +134,21 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-        @Operation(
-                summary = "Search managers",
-                description = "Searches managers using an optional keyword and returns a paginated list of matching results."
-        )
-        @ApiResponses({
-                @ApiResponse(responseCode = "200", description = "Managers retrieved successfully")
-        })
-        @PreAuthorize("hasRole('ROLE_ADMIN')")
-        @GetMapping("/managers")
-        public ResponseEntity<PagedResponse<ManagerResponseDto>> getManagers(
-                Pageable pageable,
-                @RequestParam(required = false) String keyword
-        ) {
-            return ResponseEntity.ok(service.searchManagers(pageable, keyword));
-        }
+    @Operation(
+            summary = "Search managers",
+            description = "Searches managers using an optional keyword and returns a paginated list of matching results."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Managers retrieved successfully")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/managers")
+    public ResponseEntity<PagedResponse<ManagerResponseDto>> getManagers(
+            Pageable pageable,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(service.searchManagers(pageable, keyword));
+    }
 
 
 }
