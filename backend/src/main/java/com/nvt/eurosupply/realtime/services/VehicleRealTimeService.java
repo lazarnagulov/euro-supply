@@ -50,7 +50,7 @@ public class VehicleRealTimeService {
 
         List<Point> points = statusChanges.stream()
                 .map(change -> Point
-                        .measurement("vehicle_status_change")
+                        .measurement("vehicle_availability")
                         .addTag("vehicle_id", String.valueOf(change.vehicleId()))
                         .addField("is_online", change.isOnline())
                         .time(change.timestamp(), WritePrecision.NS))
@@ -95,7 +95,7 @@ public class VehicleRealTimeService {
 
     public void saveStatusChange(Long vehicleId, boolean isOnline, Instant timestamp) {
         Point point = Point
-                .measurement("vehicle_status_change")
+                .measurement("vehicle_availability")
                 .addTag("vehicle_id", String.valueOf(vehicleId))
                 .addField("is_online", isOnline)
                 .time(timestamp, WritePrecision.NS);

@@ -1,12 +1,9 @@
 import React from 'react';
 import {
-    BarChart,
-    Bar,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
-    Legend,
     ResponsiveContainer,
     PieChart,
     Pie,
@@ -16,7 +13,6 @@ import {
 } from 'recharts';
 import { Clock, Wifi, WifiOff } from 'lucide-react';
 import type {AvailabilitySummary} from "../../types/vehicle.types.ts";
-import AvailabilityTooltip from "./AvailabilityTooltip.tsx";
 import {formatMinutes, formatPercentage} from "../../../../utils/dataTransformers.ts";
 
 interface AvailabilityChartsProps {
@@ -55,7 +51,7 @@ const AvailabilityCharts: React.FC<AvailabilityChartsProps> = ({ data, loading }
     return (
         <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-green-500 rounded-lg">
@@ -64,7 +60,9 @@ const AvailabilityCharts: React.FC<AvailabilityChartsProps> = ({ data, loading }
                         <h3 className="font-semibold text-green-900">Online Time</h3>
                     </div>
                     <p className="text-3xl font-bold text-green-700">{formatPercentage(data.onlinePercentage)}</p>
-                    <p className="text-sm text-green-600 mt-1">{formatMinutes(data.totalOnlineMinutes)}</p>
+                    <p className="text-sm text-green-600 mt-1">
+                        <i>approx.</i> {formatMinutes(data.totalOnlineMinutes)}
+                    </p>
                 </div>
 
                 <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200">
@@ -75,59 +73,44 @@ const AvailabilityCharts: React.FC<AvailabilityChartsProps> = ({ data, loading }
                         <h3 className="font-semibold text-red-900">Offline Time</h3>
                     </div>
                     <p className="text-3xl font-bold text-red-700">{formatPercentage(data.offlinePercentage)}</p>
-                    <p className="text-sm text-red-600 mt-1">{formatMinutes(data.totalOfflineMinutes)}</p>
-                </div>
-
-                <div
-                    className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 rounded-xl p-6 border border-blue-200 shadow-sm">
-                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-blue-300/20 rounded-full blur-2xl"/>
-
-                    <div className="relative">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg shadow">
-                                <Clock className="text-white" size={20}/>
-                            </div>
-                            <h3 className="font-semibold text-blue-900 tracking-tight">
-                                Total Time
-                            </h3>
-                        </div>
-
-                        <p className="text-3xl font-bold text-blue-800 leading-tight">
-                            {formatMinutes(
-                                data.totalOnlineMinutes + data.totalOfflineMinutes
-                            )}
-                        </p>
-
-                        <p className="text-sm text-blue-600 mt-1">
-                            Online + Offline combined
-                        </p>
-                    </div>
+                    <p className="text-sm text-red-600 mt-1"><i>approx.</i> {formatMinutes(data.totalOfflineMinutes)}</p>
                 </div>
             </div>
 
             {/* Main Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-white rounded-xl p-6 shadow border border-gray-200">
-                    <h3 className="font-semibold mb-4">Availability Over Time</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={data.dataPoints}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb"/>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Percentage Line Chart */}
+                <div className="bg-white rounded-xl p-6 shadow border border-gray-200">
+                    <h3 className="font-semibold mb-4">Availability Percentage Trend</h3>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <AreaChart data={data.dataPoints}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                             <XAxis
                                 dataKey="label"
-                                tick={{fontSize: 12}}
+                                tick={{ fontSize: 12 }}
                                 angle={-45}
                                 textAnchor="end"
                                 height={80}
                             />
                             <YAxis
-                                label={{value: 'Minutes', angle: -90, position: 'insideLeft'}}
+                                domain={[0, 100]}
+                                label={{ value: 'Online %', angle: -90, position: 'insideLeft' }}
                                 tick={{ fontSize: 12 }}
                             />
-                            <Tooltip content={<AvailabilityTooltip />} />
-                            <Legend />
-                            <Bar dataKey="onlineMinutes" stackId="a" fill={COLORS.online} name="Online" radius={[0, 0, 0, 0]} />
-                            <Bar dataKey="offlineMinutes" stackId="a" fill={COLORS.offline} name="Offline" radius={[4, 4, 0, 0]} />
-                        </BarChart>
+                            <Tooltip
+                                formatter={(value: number) => formatPercentage(value)}
+                                labelStyle={{ fontWeight: 'bold' }}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="onlinePercentage"
+                                stroke={COLORS.online}
+                                fill={COLORS.online}
+                                fillOpacity={0.3}
+                                strokeWidth={2}
+                                name="Online %"
+                            />
+                        </AreaChart>
                     </ResponsiveContainer>
                 </div>
 
@@ -157,41 +140,6 @@ const AvailabilityCharts: React.FC<AvailabilityChartsProps> = ({ data, loading }
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
-            </div>
-
-            {/* Percentage Line Chart */}
-            <div className="bg-white rounded-xl p-6 shadow border border-gray-200">
-                <h3 className="font-semibold mb-4">Availability Percentage Trend</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                    <AreaChart data={data.dataPoints}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                            dataKey="label"
-                            tick={{ fontSize: 12 }}
-                            angle={-45}
-                            textAnchor="end"
-                            height={80}
-                        />
-                        <YAxis
-                            domain={[0, 100]}
-                            label={{ value: 'Online %', angle: -90, position: 'insideLeft' }}
-                            tick={{ fontSize: 12 }}
-                        />
-                        <Tooltip
-                            formatter={(value: number) => formatPercentage(value)}
-                            labelStyle={{ fontWeight: 'bold' }}
-                        />
-                        <Area
-                            type="monotone"
-                            dataKey="onlinePercentage"
-                            stroke={COLORS.online}
-                            fill={COLORS.online}
-                            fillOpacity={0.3}
-                            strokeWidth={2}
-                            name="Online %"
-                        />
-                    </AreaChart>
-                </ResponsiveContainer>
             </div>
         </div>
     );

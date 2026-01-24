@@ -3,20 +3,30 @@ package com.nvt.eurosupply.realtime.queries;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Component
 public class VehicleFlux {
 
-    public String getAggregatedAvailability(
-            Long vehicleId, Instant start, Instant end, String window
-    ) {
+    public String getAggregatedAvailability(Long vehicleId, Instant start, Instant end, String window) {
+        Instant lookBackStart = start.minus(30, ChronoUnit.DAYS);
         return String.format(
                 """
-                from(bucket: "vehicle")
+                lastState = from(bucket: "vehicle")
                   |> range(start: %s, stop: %s)
                   |> filter(fn: (r) => r["_measurement"] == "vehicle_availability")
                   |> filter(fn: (r) => r["vehicle_id"] == "%d")
                   |> filter(fn: (r) => r["_field"] == "is_online")
+                  |> last()
+                  |> map(fn: (r) => ({r with _time: %s}))
+            
+                currentStates = from(bucket: "vehicle")
+                  |> range(start: %s, stop: %s)
+                  |> filter(fn: (r) => r["_measurement"] == "vehicle_availability")
+                  |> filter(fn: (r) => r["vehicle_id"] == "%d")
+                  |> filter(fn: (r) => r["_field"] == "is_online")
+            
+                union(tables: [lastState, currentStates])
                   |> sort(columns: ["_time"])
                   |> elapsed(unit: 1m)
                   |> window(every: %s, createEmpty: false)
@@ -36,7 +46,7 @@ public class VehicleFlux {
                   |> drop(columns: ["_start"])
                   |> yield(name: "availability")
                 """,
-                start, end, vehicleId, window
+                lookBackStart, start, vehicleId, start, start, end, vehicleId, window
         );
     }
 

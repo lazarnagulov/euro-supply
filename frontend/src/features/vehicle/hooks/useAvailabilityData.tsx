@@ -1,12 +1,35 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import type {AvailabilitySummary} from "../types/vehicle.types.ts";
 import {PERIOD_TO_DAYS, type PeriodAggregation} from "../../../types/time.types.ts";
 import {vehicleService} from "../../../api/services/vehicleService.ts";
+import {calculateStartDate} from "../../../utils/dateUtils.ts";
+import toast from "react-hot-toast";
 
-export const useAvailabilityData = (vehicleId: string | undefined) => {
+export const useAvailabilityData = (vehicleId: string | undefined, initialPeriod: PeriodAggregation = "12h") => {
     const [availabilityData, setAvailabilityData] = useState<AvailabilitySummary | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!vehicleId) return;
+
+        const loadInitialData = async () => {
+            try {
+                setLoading(true);
+                const start = calculateStartDate(initialPeriod);
+                const end = new Date().toISOString();
+                const availabilities = await vehicleService.getAvailability(+vehicleId, { start, end });
+                setAvailabilityData(availabilities);
+            } catch (err) {
+                console.error("Failed to load initial availability data:", err);
+                toast.error("Failed to load availability data");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadInitialData();
+    }, [vehicleId, initialPeriod]);
 
     const loadPeriod = async (period: PeriodAggregation) => {
         if (!vehicleId) return;

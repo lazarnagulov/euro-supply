@@ -1,25 +1,10 @@
 import React from "react";
-import type {PeriodAggregation} from "../../types/time.types.ts";
-
-type PeriodMode = "availability" | "distance";
-
-const AVAILABILITY_PERIODS: { label: string; value: PeriodAggregation }[] = [
-    { label: "Last 1 hour", value: "1h" },
-    { label: "Last 12 hours", value: "12h" },
-    { label: "Last 24 hours", value: "24h" },
-    { label: "Last 7 days", value: "7d" },
-    { label: "Last month", value: "30d" },
-    { label: "Last 3 months", value: "90d" },
-    { label: "Last year", value: "365d" },
-];
-
-const DISTANCE_PERIODS: { label: string; value: PeriodAggregation }[] = [
-    { label: "Last 7 days", value: "7d" },
-    { label: "Last month", value: "30d" },
-    { label: "Last 3 months", value: "90d" },
-    { label: "Last 6 months", value: "180d" },
-    { label: "Last year", value: "365d" },
-];
+import {
+    AVAILABILITY_PERIODS,
+    DISTANCE_PERIODS,
+    type PeriodAggregation,
+    type PeriodMode
+} from "../../types/time.types.ts";
 
 interface PeriodSelectorProps {
     selectedPeriod: PeriodAggregation | null;
@@ -57,19 +42,39 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
     return (
         <div className="space-y-4">
             <div className="flex flex-wrap gap-3">
-                {periods.map((p) => (
-                    <button
-                        key={p.value}
-                        onClick={() => onSelectPeriod(p.value)}
-                        className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                            selectedPeriod === p.value && !useCustomRange
-                                ? "bg-blue-600 text-white border-2 border-blue-700"
-                                : "bg-gray-100 text-black hover:bg-gray-200"
-                        }`}
-                    >
-                        {p.label}
-                    </button>
-                ))}
+                {periods.map((p) => {
+                    const isSelected = selectedPeriod === p.value && !useCustomRange;
+
+                    return (
+                        <button
+                            key={p.value}
+                            onClick={() => onSelectPeriod(p.value)}
+                            className={`relative px-4 py-2 rounded-xl text-sm transition-all
+                                ${isSelected ? "bg-blue-600 text-white border-2 border-blue-700"
+                                             : "bg-gray-100 text-black hover:bg-gray-200"}
+                                ${p.realtime && !isSelected ? "ring-1 ring-blue-400" : ""}
+                            `}>
+                            <span className="flex items-center gap-2">
+                                {p.label}
+                                {p.realtime && (
+                                    <span
+                                        className={`text-[10px] px-2 py-0.5 rounded-full font-semibold
+                                            ${isSelected
+                                            ? "bg-white/20 text-white"
+                                            : "bg-blue-100 text-blue-700"
+                                        }`}
+                                    >
+                                        LIVE
+                                    </span>
+                                )}
+                            </span>
+                            {p.realtime && !isSelected && (
+                                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                            )}
+                        </button>
+                    );
+                })}
+
 
                 <button
                     className={`px-4 py-2 rounded-xl text-sm transition-all ${

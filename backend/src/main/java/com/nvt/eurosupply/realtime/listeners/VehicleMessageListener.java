@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nvt.eurosupply.realtime.messages.VehicleHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
 import com.nvt.eurosupply.realtime.services.VehicleRealTimeService;
+import com.nvt.eurosupply.realtime.services.VehicleSubscriptionService;
 import com.nvt.eurosupply.shared.models.Location;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
 import jakarta.annotation.PostConstruct;
@@ -20,24 +21,28 @@ import org.springframework.stereotype.Component;
 public class VehicleMessageListener {
 
     private final ObjectMapper mapper;
+    private final VehicleSubscriptionService subscriptionService;
     private final VehicleRealTimeService realTimeService;
     private final VehicleService service;
 
     @PostConstruct
     public void init() {
-        service.setStatusChangeListener(event ->
+        service.setStatusChangeListener(event -> {
             realTimeService.saveStatusChange(
                     event.vehicleId(),
                     event.isOnline(),
                     event.timestamp()
-            )
-        );
+            );
+            subscriptionService.triggerUpdate(event.vehicleId());
+        });
+
         service.setBatchStatusChangeListener(events -> {
             if (events.isEmpty()) {
                 return;
             }
             realTimeService.saveStatusChanges(events);
             log.info("Batch saved {} vehicle status changes to InfluxDB", events.size());
+            events.forEach(event -> subscriptionService.triggerUpdate(event.vehicleId()));
         });
     }
 

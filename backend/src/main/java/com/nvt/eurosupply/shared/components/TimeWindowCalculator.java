@@ -15,13 +15,16 @@ public class TimeWindowCalculator {
         long hours = d.toHours();
         long days = d.toDays();
 
-        if (hours < 1) return "1m";
-        if (hours <= 6) return "5m";
-        if (hours <= 24) return "15m";
-        if (days <= 7) return "1h";
-        if (days <= 30) return "6h";
-        if (days <= 90) return "1d";
-        if (days <= 365) return "1w";
+        if (hours <= 3) return "15m";
+        if (hours <= 6) return "30m";
+        if (hours <= 12) return "1h";
+        if (hours <= 24) return "2h";
+        if (days <= 3) return "3h";
+        if (days <= 7) return "6h";
+        if (days <= 30) return "1d";
+        if (days <= 90) return "3d";
+        if (days <= 180) return "1w";
+        if (days <= 365) return "2w";
 
         return "1mo";
     }
