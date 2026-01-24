@@ -393,7 +393,7 @@ INSERT INTO products
 (name, description,
  price, weight, on_sale,
  category_id, created_at,
- updated_at, version, image_id)
+ updated_at, version, image_id, quantity)
 VALUES
     (
         'Steel Beam S235',
@@ -405,7 +405,8 @@ VALUES
         now(),
         now(),
         0,
-     5
+     5,
+     300
     ),
     (
         'Industrial Lubricant XL',
@@ -417,7 +418,8 @@ VALUES
         now(),
         now(),
         0,
-     6
+     6,
+     170
     ),
     (
         'Electronic Control Unit',
@@ -429,7 +431,8 @@ VALUES
         now(),
         now(),
         0,
-     7
+     7,
+     75
     );
 
 
@@ -465,10 +468,3 @@ INSERT INTO users (email, username, password, role, is_verified, is_suspended, m
 
 INSERT INTO companies (name, address, city_id, country_id, latitude, longitude, status, rejection_reason, reviewed_by_id, owner_id, created_at, version) VALUES (
              'Euro Supply Ltd','Nemanjina 12', 1118, 1, 44.8125, 20.4612, 'APPROVED', NULL, NULL, 1, NOW(), 0);
-
-INSERT INTO productions (factory_id, product_id, quantity) VALUES
-(1, 1, 100),
-(1, 2, 50),
-(2, 1, 200),
-(2, 3, 75),
-(3, 2, 120);

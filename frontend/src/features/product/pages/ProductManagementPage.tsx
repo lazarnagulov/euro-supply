@@ -10,6 +10,7 @@ import ProductModal from "../components/ProductModal";
 import DeleteConfirmationModal from "../../../components/modal/DeleteConfirmationModal";
 import SearchFilters from "../components/SearchFilter";
 import Pagination from "../../../components/common/Pagination.tsx";
+import toast from "react-hot-toast";
 
 const ProductManagementPage = () => {
   const [products, setProducts] = useState<ProductWithImage[]>([]);
@@ -27,7 +28,8 @@ const ProductManagementPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 
-  const [selectedProduct, setSelectedProduct] = useState<ProductWithImage | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductWithImage | null>(null);
 
   const pageSize = 9;
 
@@ -41,13 +43,13 @@ const ProductManagementPage = () => {
       const data = await productService.getProducts(
         currentPage,
         pageSize,
-        searchParams
+        searchParams,
       );
       setProducts(data.content);
       setTotalPages(data.totalPages);
       setTotalElements(data.totalElements);
     } catch (error) {
-      console.error("Failed to load products:", error);
+      toast.error("Failed to load products. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ const ProductManagementPage = () => {
       setSelectedProduct(null);
       await loadProducts();
     } catch (error) {
-      console.error("Failed to delete product:", error);
+      toast.error("Failed to delete product: " + error);
     } finally {
       setDeleting(false);
     }

@@ -1,19 +1,22 @@
 package com.nvt.eurosupply.user.controllers;
 
+import com.nvt.eurosupply.auth.services.AuthService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
-import com.nvt.eurosupply.user.dtos.AccountVerificationRequestDto;
-import com.nvt.eurosupply.user.dtos.AuthRequestDto;
-import com.nvt.eurosupply.user.dtos.AuthResponseDto;
+import com.nvt.eurosupply.shared.models.PagedResponse;
+import com.nvt.eurosupply.user.dtos.*;
 import com.nvt.eurosupply.user.services.AccountVerificationService;
 import com.nvt.eurosupply.user.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,6 +62,33 @@ public class UserController {
     }
 
     @Operation(
+            summary = "Create manager (admin only)",
+            description = "Creates a new manager account by admin. " +
+                    "Manager must change password on first login. " +
+                    "Email activation is skipped.",
+            security = { @SecurityRequirement(name = "bearerAuth") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Manager created successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "409", description = "Manager with this username or email already exists"),
+
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = "/managers")
+    public ResponseEntity<AuthResponseDto> createManager(
+            @Valid @RequestBody AuthRequestDto request
+    ) {
+        AuthResponseDto response = service.registerManager(request);
+
+        return ResponseEntity
+                .created(URI.create("/api/v1/users/managers/" + response.getId()))
+                .body(response);
+    }
+
+    @Operation(
             summary = "Upload users image",
             description = "Uploads one image for registered user."
     )
@@ -71,4 +101,53 @@ public class UserController {
     public ResponseEntity<FileResponseDto> uploadImage(@PathVariable Long id, @Valid @RequestBody MultipartFile image) {
         return ResponseEntity.ok(service.uploadImage(id, image));
     }
+
+    @Operation(
+            summary = "Suspend user",
+            description = "Suspends a user by their ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User suspended successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PatchMapping("/{userId}/suspension")
+    public ResponseEntity<Void> suspendUser(@PathVariable Long userId) {
+        service.suspendUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Change user password",
+            description = "Changes the password for a user." +
+                    " Validates old password, password confirmation," +
+                    " and ensures the new password is different from the old one."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found or password validation failed")
+    })
+    @PatchMapping("/password")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        service.changePassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Search managers",
+            description = "Searches managers using an optional keyword and returns a paginated list of matching results."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Managers retrieved successfully")
+    })
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/managers")
+    public ResponseEntity<PagedResponse<ManagerResponseDto>> getManagers(
+            Pageable pageable,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(service.searchManagers(pageable, keyword));
+    }
+
+
 }
