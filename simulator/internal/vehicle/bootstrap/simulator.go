@@ -4,7 +4,6 @@ import (
 	"context"
 	internalConfig "eurosupply/simulator/internal/vehicle/config"
 	"eurosupply/simulator/internal/vehicle/domain"
-	"eurosupply/simulator/internal/vehicle/generator"
 	"eurosupply/simulator/internal/vehicle/simulator"
 	sharedConfig "eurosupply/simulator/shared/config"
 	"eurosupply/simulator/shared/messaging"
@@ -15,17 +14,6 @@ import (
 
 	"github.com/spf13/pflag"
 )
-
-func LoadGeneratorConfig() *generator.Config {
-	configPath := pflag.String("config", "", "Optional path to configuration file (YAML/JSON)")
-	pflag.Parse()
-
-	cfg, err := generator.Load(*configPath)
-	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
-	}
-	return cfg
-}
 
 func LoadConfig() *internalConfig.Config {
 	internalConfig.RegisterFlags()
