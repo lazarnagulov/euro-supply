@@ -4,9 +4,7 @@ import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.services.CompanyService;
 import com.nvt.eurosupply.email.services.ProductEmailService;
 import com.nvt.eurosupply.factory.dtos.FactoryProductListItemDto;
-import com.nvt.eurosupply.factory.models.Production;
 import com.nvt.eurosupply.factory.repositories.FactoryRepository;
-import com.nvt.eurosupply.factory.repositories.ProductionRepository;
 import com.nvt.eurosupply.product.dtos.*;
 import com.nvt.eurosupply.product.exceptions.InsufficientStockException;
 import com.nvt.eurosupply.product.mappers.OrderMapper;
@@ -17,6 +15,8 @@ import com.nvt.eurosupply.product.models.Product;
 import com.nvt.eurosupply.product.repositories.OrderRepository;
 import com.nvt.eurosupply.product.repositories.ProductRepository;
 import com.nvt.eurosupply.product.specifications.ProductSpecification;
+import com.nvt.eurosupply.realtime.messages.ProductionItemMessage;
+import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -37,7 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,6 @@ public class ProductService {
     private final FileService fileService;
     private final FileMapper fileMapper;
     private final FactoryRepository factoryRepository;
-    private final ProductionRepository productionRepository;
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final CompanyService companyService;
@@ -59,10 +60,6 @@ public class ProductService {
 
     public Product find(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Product not found"));
-    }
-
-    public List<Product> findAllByIds(List<Long> ids) {
-        return repository.findAllById(ids);
     }
 
     @Transactional
@@ -145,35 +142,54 @@ public class ProductService {
     @Transactional
     public OrderResponseDto orderProduct(OrderRequestDto request) {
         Order order = fromRequest(request);
-        List<Production> productions = productionRepository.findByProduct_IdOrderByQuantityDesc(request.getProductId());
+        Product product = find(request.getProductId());
 
-        int totalAvailable = productions.stream().mapToInt(Production::getQuantity).sum();
-        if (totalAvailable < request.getQuantity())
-            throw new InsufficientStockException("Insufficient stock. Available quantity: %d".formatted(totalAvailable));
+        if (product.getQuantity() < request.getQuantity())
+            throw new InsufficientStockException(
+                    "Insufficient stock. Available quantity: %d".formatted(product.getQuantity())
+            );
 
-        int remainingToDeduct = request.getQuantity();
+        product.setQuantity(product.getQuantity() - request.getQuantity());
+        repository.save(product);
 
-        for (Production p : productions) {
-            if (remainingToDeduct <= 0) break;
-
-            int currentQty = p.getQuantity();
-            if (currentQty <= remainingToDeduct) {
-                remainingToDeduct -= currentQty;
-                p.setQuantity(0);
-            } else {
-                p.setQuantity(currentQty - remainingToDeduct);
-                remainingToDeduct = 0;
-            }
-        }
-        productionRepository.saveAll(productions);
         Order createdOrder = orderRepository.save(order);
         productEmailService.sendInvoice(createdOrder);
-        return OrderResponseDto.builder().id(createdOrder.getId()).build();
+
+        return OrderResponseDto.builder()
+                .id(createdOrder.getId())
+                .build();
     }
 
-    private Order fromRequest (OrderRequestDto request) {
+    private Order fromRequest(OrderRequestDto request) {
         Company company = companyService.find(request.getCompanyId());
         Product product = find(request.getProductId());
         return orderMapper.fromRequest(product, company, request.getQuantity());
     }
+
+    @Transactional
+    public void applyProductionReport(ProductionReportMessage report) {
+        if (report.getItems() == null || report.getItems().isEmpty())
+            return;
+
+        List<Long> productIds = report.getItems().stream()
+                .map(ProductionItemMessage::getProductId)
+                .distinct()
+                .toList();
+
+        Map<Long, Product> productsById = repository.findAllById(productIds)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
+        for (ProductionItemMessage item : report.getItems()) {
+            Product product = productsById.get(item.getProductId());
+
+            if (product == null)
+                throw new EntityNotFoundException("Product not found: " + item.getProductId());
+
+            product.setQuantity(product.getQuantity() + item.getQuantity());
+        }
+
+        repository.saveAll(productsById.values());
+    }
+
 }

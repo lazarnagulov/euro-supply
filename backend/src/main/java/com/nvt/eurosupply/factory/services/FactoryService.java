@@ -7,15 +7,11 @@ import com.nvt.eurosupply.factory.dtos.UpdateFactoryRequestDto;
 import com.nvt.eurosupply.factory.mappers.FactoryMapper;
 import com.nvt.eurosupply.factory.models.Factory;
 import com.nvt.eurosupply.factory.models.FactoryStatus;
-import com.nvt.eurosupply.factory.models.Production;
 import com.nvt.eurosupply.factory.repositories.FactoryRepository;
 import com.nvt.eurosupply.factory.repositories.FactoryStatusRepository;
-import com.nvt.eurosupply.factory.repositories.ProductionRepository;
 import com.nvt.eurosupply.factory.specifications.FactorySpecification;
 import com.nvt.eurosupply.product.models.Product;
 import com.nvt.eurosupply.product.services.ProductService;
-import com.nvt.eurosupply.realtime.messages.ProductionItemMessage;
-import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
 import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
@@ -55,7 +51,6 @@ import java.util.stream.Collectors;
 public class FactoryService {
 
     private final FactoryRepository repository;
-    private final ProductionRepository productionRepository;
     private final FactoryStatusRepository statusRepository;
 
     private final CityService cityService;
@@ -184,31 +179,6 @@ public class FactoryService {
                 .map(mapper::toResponse)
                 .toList();
     }
-
-    @Transactional
-    public void saveProductions(ProductionReportMessage report) {
-        Factory factory = find(report.getFactoryId());
-
-        List<Long> productIds = report.getItems().stream()
-                .map(ProductionItemMessage::getProductId)
-                .distinct()
-                .toList();
-
-        Map<Long, Product> productsById =
-                productService.findAllByIds(productIds).stream()
-                        .collect(Collectors.toMap(Product::getId, p -> p));
-
-        List<Production> productions = report.getItems().stream()
-                .map(item -> Production.builder()
-                        .factory(factory)
-                        .product(productsById.get(item.getProductId()))
-                        .quantity(item.getQuantity())
-                        .build())
-                .toList();
-
-        productionRepository.saveAll(productions);
-    }
-
 
     @Cacheable(value = "factoryStatus", key = "#id")
     public ConnectionStatusDto getFactoryStatus(Long id) {
