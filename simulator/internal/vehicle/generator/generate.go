@@ -37,9 +37,9 @@ func GenerateHistoricData(ctx context.Context, client influxdb2.Client, cfg *Con
 	startTime := endTime.AddDate(-cfg.Vehicle.YearsOfHistory, 0, 0)
 	var wg sync.WaitGroup
 	vehicleChan := make(chan domain.Vehicle, len(vehicles))
-	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < cfg.Vehicle.Workers; i++ {
 		wg.Add(1)
+		rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 		go worker(ctx, i, client, cfg, vehicleChan, &wg, startTime, endTime, rng)
 	}
 
