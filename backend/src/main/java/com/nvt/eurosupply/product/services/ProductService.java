@@ -140,6 +140,7 @@ public class ProductService {
     }
 
     @Transactional
+    @CacheEvict(value = "product", key = "#request.productId")
     public OrderResponseDto orderProduct(OrderRequestDto request) {
         Order order = fromRequest(request);
 
@@ -174,6 +175,7 @@ public class ProductService {
     }
 
     @Transactional
+    @CacheEvict(value = "product", allEntries = true)
     public void applyProductionReport(ProductionReportMessage report) {
         if (report.getItems() == null || report.getItems().isEmpty())
             return;

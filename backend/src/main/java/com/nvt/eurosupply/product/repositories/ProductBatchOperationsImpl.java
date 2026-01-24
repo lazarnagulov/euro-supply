@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.product.repositories;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -11,13 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
+@RequiredArgsConstructor
 public class ProductBatchOperationsImpl implements ProductBatchOperations {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public ProductBatchOperationsImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public int[] batchIncrementQuantity(Map<Long, Integer> updates) {
