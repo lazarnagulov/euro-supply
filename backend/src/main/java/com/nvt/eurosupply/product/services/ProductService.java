@@ -142,15 +142,22 @@ public class ProductService {
     @Transactional
     public OrderResponseDto orderProduct(OrderRequestDto request) {
         Order order = fromRequest(request);
-        Product product = find(request.getProductId());
 
-        if (product.getQuantity() < request.getQuantity())
+        int updated = repository.decrementQuantity(
+                request.getProductId(),
+                request.getQuantity()
+        );
+
+        if (updated == 0) {
+            Product product = repository.findById(request.getProductId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Product not found: " + request.getProductId()
+                    ));
+
             throw new InsufficientStockException(
                     "Insufficient stock. Available quantity: %d".formatted(product.getQuantity())
             );
-
-        product.setQuantity(product.getQuantity() - request.getQuantity());
-        repository.save(product);
+        }
 
         Order createdOrder = orderRepository.save(order);
         productEmailService.sendInvoice(createdOrder);
@@ -171,25 +178,19 @@ public class ProductService {
         if (report.getItems() == null || report.getItems().isEmpty())
             return;
 
-        List<Long> productIds = report.getItems().stream()
-                .map(ProductionItemMessage::getProductId)
-                .distinct()
-                .toList();
+        Map<Long, Integer> updates = report.getItems().stream()
+                .collect(Collectors.groupingBy(
+                        ProductionItemMessage::getProductId,
+                        Collectors.summingInt(ProductionItemMessage::getQuantity)
+                ));
 
-        Map<Long, Product> productsById = repository.findAllById(productIds)
-                .stream()
-                .collect(Collectors.toMap(Product::getId, p -> p));
+        int[] results = repository.batchIncrementQuantity(updates);
 
-        for (ProductionItemMessage item : report.getItems()) {
-            Product product = productsById.get(item.getProductId());
-
-            if (product == null)
-                throw new EntityNotFoundException("Product not found: " + item.getProductId());
-
-            product.setQuantity(product.getQuantity() + item.getQuantity());
+        int i = 0;
+        for (Long productId : updates.keySet()) {
+            if (results[i++] == 0)
+                throw new EntityNotFoundException("Product not found: " + productId);
         }
-
-        repository.saveAll(productsById.values());
     }
 
 }
