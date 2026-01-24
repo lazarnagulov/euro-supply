@@ -6,6 +6,7 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import com.nvt.eurosupply.realtime.dtos.vehicle.*;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
+import com.nvt.eurosupply.realtime.queries.VehicleFlux;
 import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
 import com.nvt.eurosupply.vehicle.events.StatusChangeEvent;
 import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
@@ -14,9 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -28,19 +27,21 @@ public class VehicleRealTimeService {
     private final TimeWindowCalculator timeWindowCalculator;
     private final InfluxQueryService influxQueryService;
     private final VehicleMapper vehicleMapper;
+    private final VehicleFlux vehicleFlux;
 
     public VehicleRealTimeService(
             @Qualifier("vehicleInfluxClient") InfluxDBClient influxDBClient,
             InfluxQueryService service,
             VehicleService vehicleService,
             TimeWindowCalculator timeWindowCalculator,
-            InfluxQueryService influxQueryService, VehicleMapper vehicleMapper) {
+            InfluxQueryService influxQueryService, VehicleMapper vehicleMapper, VehicleFlux vehicleFlux) {
         this.writeApi = influxDBClient.getWriteApiBlocking();
         this.service = service;
         this.vehicleService = vehicleService;
         this.timeWindowCalculator = timeWindowCalculator;
         this.influxQueryService = influxQueryService;
         this.vehicleMapper = vehicleMapper;
+        this.vehicleFlux = vehicleFlux;
     }
 
     public void saveStatusChanges(List<StatusChangeEvent> statusChanges) {
@@ -64,27 +65,8 @@ public class VehicleRealTimeService {
         Instant end = request.getEnd();
         String window = timeWindowCalculator.calculateWindowDuration(start, end);
 
-        String query = String.format(
-                """
-                from(bucket: "vehicle")
-                |> range(start: %s, stop: %s)
-                |> filter(fn: (r) => r["vehicle_id"] == "%d")
-                |> filter(fn: (r) => r["_measurement"] == "vehicle_location")
-                |> filter(fn: (r) => r["_field"] == "distance_traveled")
-                |> aggregateWindow(every: %s, fn: sum, createEmpty: false)
-                |> yield()
-                """,
-                start, end, id, window
-        );
-
-        return service.query(query, fluxRecord -> {
-            VehicleDistanceDto dto = new VehicleDistanceDto();
-            dto.setTime(fluxRecord.getTime());
-            dto.setDistanceTraveled(
-                    fluxRecord.getValue() == null ? null : ((Number) fluxRecord.getValue()).doubleValue()
-            );
-            return dto;
-        }).toList();
+        String query = vehicleFlux.getDistances(id, start, end, window);
+        return service.query(query, vehicleMapper::fromFluxRecord).toList();
     }
 
     public VehicleAvailabilitySummaryDto getAvailabilitySummary(Long id, VehicleAvailabilityRequestDto request) {
@@ -95,7 +77,7 @@ public class VehicleRealTimeService {
         String window = timeWindowCalculator.calculateWindowDuration(start, end);
 
         List<VehicleAvailabilityDto> dataPoints = getAggregatedAvailability(id, start, end, window);
-        return calculateSummary(dataPoints, start, end);
+        return vehicleMapper.toSummary(dataPoints, start, end);
     }
 
     public void saveLocation(VehicleLocationMessage location) {
@@ -122,72 +104,8 @@ public class VehicleRealTimeService {
     }
 
     private List<VehicleAvailabilityDto> getAggregatedAvailability(Long vehicleId, Instant start, Instant end, String window) {
-        String query = String.format(
-            """
-            from(bucket: "vehicle")
-              |> range(start: %s, stop: %s)
-              |> filter(fn: (r) => r["_measurement"] == "vehicle_availability")
-              |> filter(fn: (r) => r["vehicle_id"] == "%d")
-              |> filter(fn: (r) => r["_field"] == "is_online")
-              |> sort(columns: ["_time"])
-              |> elapsed(unit: 1m)
-              |> window(every: %s, createEmpty: false)
-              |> map(fn: (r) => ({
-                  r with
-                  online_minutes: if r._value == true then r.elapsed else 0,
-                  offline_minutes: if r._value == false then r.elapsed else 0
-              }))
-              |> reduce(
-                  identity: {online_minutes: 0, offline_minutes: 0},
-                  fn: (r, accumulator) => ({
-                      online_minutes: accumulator.online_minutes + r.online_minutes,
-                      offline_minutes: accumulator.offline_minutes + r.offline_minutes
-                  })
-              )
-              |> duplicate(column: "_stop", as: "_time")
-              |> drop(columns: ["_start"])
-              |> yield(name: "availability")
-            """,
-            start, end, vehicleId, window
-        );
-
-        DateTimeFormatter formatter = getFormatterForWindow(window);
+        String query = vehicleFlux.getAggregatedAvailability(vehicleId, start, end, window);
+        DateTimeFormatter formatter = timeWindowCalculator.getFormatterForWindow(window);
         return influxQueryService.query(query, fluxRecord -> vehicleMapper.fromFluxRecord(fluxRecord, formatter)).toList();
-    }
-
-    private DateTimeFormatter getFormatterForWindow(String window) {
-        if (window.endsWith("h") || window.equals("1d")) {
-            return DateTimeFormatter.ofPattern("MMM dd HH:mm");
-        } else if (window.endsWith("d")) {
-            return DateTimeFormatter.ofPattern("MMM dd");
-        } else {
-            return DateTimeFormatter.ofPattern("'Week' w");
-        }
-    }
-
-    private VehicleAvailabilitySummaryDto calculateSummary(List<VehicleAvailabilityDto> dataPoints, Instant start, Instant end) {
-        long totalOnlineMinutes = dataPoints.stream()
-                .mapToLong(VehicleAvailabilityDto::getOnlineMinutes)
-                .sum();
-
-        long totalOfflineMinutes = dataPoints.stream()
-                .mapToLong(VehicleAvailabilityDto::getOfflineMinutes)
-                .sum();
-
-        long totalMinutes = totalOnlineMinutes + totalOfflineMinutes;
-
-        if (totalMinutes == 0) {
-            totalMinutes = ChronoUnit.MINUTES.between(start, end);
-            totalOfflineMinutes = totalMinutes;
-        }
-
-        VehicleAvailabilitySummaryDto summary = new VehicleAvailabilitySummaryDto();
-        summary.setTotalOnlineMinutes(totalOnlineMinutes);
-        summary.setTotalOfflineMinutes(totalOfflineMinutes);
-        summary.setOnlinePercentage(totalMinutes > 0 ? (totalOnlineMinutes * 100.0 / totalMinutes) : 0.0);
-        summary.setOfflinePercentage(totalMinutes > 0 ? (totalOfflineMinutes * 100.0 / totalMinutes) : 0.0);
-        summary.setDataPoints(dataPoints);
-
-        return summary;
     }
 }

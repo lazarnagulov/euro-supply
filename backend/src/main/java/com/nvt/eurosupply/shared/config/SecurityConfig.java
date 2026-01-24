@@ -61,6 +61,7 @@ public class SecurityConfig {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
         );
         http.authorizeHttpRequests(request -> request
+                        .requestMatchers("/api/v1/ws/**").permitAll()
                         .requestMatchers("/**").permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 @Component
 public class TimeWindowCalculator {
@@ -24,4 +25,16 @@ public class TimeWindowCalculator {
 
         return "1mo";
     }
+
+    public DateTimeFormatter getFormatterForWindow(String window) {
+        if (window.endsWith("h") || window.equals("1d"))
+            return DateTimeFormatter.ofPattern("MMM dd HH:mm");
+        else if (window.endsWith("d") || window.endsWith("w"))
+            return DateTimeFormatter.ofPattern("MMM dd");
+        else if (window.endsWith("mo"))
+            return DateTimeFormatter.ofPattern("MMM yyyy");
+        else
+            return DateTimeFormatter.ofPattern("MMM dd");
+    }
+
 }

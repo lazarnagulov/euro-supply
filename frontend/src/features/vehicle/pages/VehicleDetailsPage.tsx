@@ -344,6 +344,7 @@ const VehicleDetailsPage: React.FC = () => {
                     onCustomFromChange={availabilityPeriod.setCustomFrom}
                     onCustomToChange={availabilityPeriod.setCustomTo}
                     onApplyCustomRange={handleAvailabilityCustomRange}
+                    mode={"availability"}
                 />
 
                 <AvailabilityCharts

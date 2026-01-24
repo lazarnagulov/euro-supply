@@ -2,6 +2,8 @@ package com.nvt.eurosupply.vehicle.mappers;
 
 import com.influxdb.query.FluxRecord;
 import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleAvailabilityDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleAvailabilitySummaryDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleDistanceDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.mappers.LocationMapper;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,6 +102,15 @@ public class VehicleMapper {
         return response;
     }
 
+    public VehicleDistanceDto fromFluxRecord(FluxRecord fluxRecord) {
+        VehicleDistanceDto response = new VehicleDistanceDto();
+        response.setTime(fluxRecord.getTime());
+        response.setDistanceTraveled(
+                fluxRecord.getValue() == null ? null : ((Number) fluxRecord.getValue()).doubleValue()
+        );
+        return response;
+    }
+
     public PagedResponse<VehicleResponseDto> toPagedResponse(Page<Vehicle> page) {
         return new PagedResponse<>(
                 page.getContent().stream()
@@ -131,5 +143,31 @@ public class VehicleMapper {
                 page.getTotalPages(),
                 page.getTotalElements()
         );
+    }
+
+    public VehicleAvailabilitySummaryDto toSummary(List<VehicleAvailabilityDto> dataPoints, Instant start, Instant end) {
+        long totalOnlineMinutes = dataPoints.stream()
+                .mapToLong(VehicleAvailabilityDto::getOnlineMinutes)
+                .sum();
+
+        long totalOfflineMinutes = dataPoints.stream()
+                .mapToLong(VehicleAvailabilityDto::getOfflineMinutes)
+                .sum();
+
+        long totalMinutes = totalOnlineMinutes + totalOfflineMinutes;
+
+        if (totalMinutes == 0) {
+            totalMinutes = ChronoUnit.MINUTES.between(start, end);
+            totalOfflineMinutes = totalMinutes;
+        }
+
+        VehicleAvailabilitySummaryDto summary = new VehicleAvailabilitySummaryDto();
+        summary.setTotalOnlineMinutes(totalOnlineMinutes);
+        summary.setTotalOfflineMinutes(totalOfflineMinutes);
+        summary.setOnlinePercentage(totalMinutes > 0 ? (totalOnlineMinutes * 100.0 / totalMinutes) : 0.0);
+        summary.setOfflinePercentage(totalMinutes > 0 ? (totalOfflineMinutes * 100.0 / totalMinutes) : 0.0);
+        summary.setDataPoints(dataPoints);
+
+        return summary;
     }
 }
