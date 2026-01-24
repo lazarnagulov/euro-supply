@@ -47,3 +47,19 @@ export interface DistancePoint {
     time: string;
     distance: number;
 }
+
+export interface AvailabilityDataPoint {
+    label: string;
+    timestamp: string;
+    onlineMinutes: number;
+    offlineMinutes: number;
+    onlinePercentage: number;
+}
+
+export interface AvailabilitySummary {
+    totalOnlineMinutes: number;
+    totalOfflineMinutes: number;
+    onlinePercentage: number;
+    offlinePercentage: number;
+    dataPoints: AvailabilityDataPoint[];
+}

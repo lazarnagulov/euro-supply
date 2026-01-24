@@ -5,3 +5,11 @@ export interface TimeRangeParams {
   start?: string;  // ISO string for custom range
   end?: string;    // ISO string for custom range
 }
+
+export const PERIOD_TO_DAYS: Record<PeriodAggregation, number> = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+  '180d': 180,
+  '365d': 365,
+};

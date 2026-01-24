@@ -1,7 +1,9 @@
 package com.nvt.eurosupply.realtime.controllers;
 
-import com.nvt.eurosupply.realtime.dtos.VehicleDistanceDto;
-import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleAvailabilityRequestDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleAvailabilitySummaryDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleDistanceDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleDistanceRequestDto;
 import com.nvt.eurosupply.realtime.services.VehicleRealTimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -88,5 +90,14 @@ public class VehicleRealtimeController {
             @Valid @ModelAttribute VehicleDistanceRequestDto request
     ) {
         return ResponseEntity.ok(service.getDistances(id, request));
+    }
+
+    @GetMapping("/{id}/availability")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<VehicleAvailabilitySummaryDto> getAvailability(
+            @PathVariable Long id,
+            @Valid @ModelAttribute VehicleAvailabilityRequestDto request
+    ) {
+        return ResponseEntity.ok(service.getAvailabilitySummary(id, request));
     }
 }

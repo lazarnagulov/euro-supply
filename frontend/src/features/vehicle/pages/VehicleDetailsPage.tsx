@@ -21,10 +21,12 @@ import { InteractiveMap } from "../../../components/map/InteractiveMap";
 import { PeriodSelector } from "../../../components/common/PeriodSelector";
 import { useVehicleData } from "../hooks/useVehicleData";
 import { useDistanceData } from "../hooks/useDistanceData";
+import { useAvailabilityData } from "../hooks/useAvailabilityData";
 import { usePeriodSelector } from "../../../hooks/common/usePeriodSelector";
 import { ImageModal } from "../../../components/modal/ImageModal";
 import { useVehiclePolling } from "../hooks/useVehiclePolling";
 import AppToaster from "../../../components/common/AppToaster.tsx";
+import AvailabilityCharts from "../components/charts/VehicleAvailabilityCharts.tsx";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
@@ -56,7 +58,12 @@ const VehicleDetailsPage: React.FC = () => {
     } = useDistanceData(vehicleId);
 
     const availabilityPeriod = usePeriodSelector("7d");
-    const availabilityData: any[] = []; // TODO: Implement availability data
+    const {
+        availabilityData,
+        loading: availabilityLoading,
+        loadPeriod: loadAvailabilityPeriod,
+        loadCustomRange: loadAvailabilityCustomRange,
+    } = useAvailabilityData(vehicleId);
 
     const handleTraveledPeriodSelect = async (period: string) => {
         traveledPeriod.setSelectedPeriod(period as any);
@@ -77,13 +84,13 @@ const VehicleDetailsPage: React.FC = () => {
         if (availabilityPeriod.useCustomRange) {
             availabilityPeriod.toggleCustomRange();
         }
-        // TODO: Implement availability loading
+        await loadAvailabilityPeriod(period as any);
     };
 
     const handleAvailabilityCustomRange = async () => {
         const range = availabilityPeriod.validateDateRange();
         if (!range) return;
-        // TODO: Implement availability custom range loading
+        await loadAvailabilityCustomRange(range.from, range.to);
     };
 
     const openImageModal = (index: number) => {
@@ -339,25 +346,10 @@ const VehicleDetailsPage: React.FC = () => {
                     onApplyCustomRange={handleAvailabilityCustomRange}
                 />
 
-                <div>
-                    <h3 className="font-semibold mb-4">Availability Chart</h3>
-                    <div className="w-full h-72">
-                        <ResponsiveContainer>
-                            <LineChart data={availabilityData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="label" />
-                                <YAxis />
-                                <Tooltip />
-                                <Line
-                                    type="monotone"
-                                    dataKey="distance"
-                                    stroke="#2563eb"
-                                    strokeWidth={3}
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
+                <AvailabilityCharts
+                    data={availabilityData}
+                    loading={availabilityLoading}
+                />
             </div>
 
             <div className="p-0 space-y-0">
