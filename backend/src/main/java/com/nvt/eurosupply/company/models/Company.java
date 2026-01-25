@@ -44,11 +44,20 @@ public class Company {
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
+    @Column(length = 200)
+    private String rejectionReason;
+
+    @ManyToOne
+    private User reviewedBy;
+
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private User owner;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Version
+    private Long version;
 
     @PrePersist
     public void onCreate() {

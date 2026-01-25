@@ -23,4 +23,5 @@ public class FactoryResponseDto {
     private List<FileResponseDto> imageUrls;
     private Double latitude;
     private Double longitude;
+    private Boolean online;
 }

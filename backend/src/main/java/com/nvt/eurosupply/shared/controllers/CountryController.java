@@ -28,7 +28,6 @@ public class CountryController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list of countries"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
     public ResponseEntity<List<CountryDto>> getCountries() {
@@ -42,7 +41,6 @@ public class CountryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cities retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Country not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}/cities")
     public ResponseEntity<List<CityDto>> getCountryCities(@PathVariable Long id) {

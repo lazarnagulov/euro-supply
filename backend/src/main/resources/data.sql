@@ -257,79 +257,156 @@ INSERT INTO vehicle_brands_models (vehicle_brand_id, models_id) VALUES
 
 
 INSERT INTO vehicles (
-    is_online, latitude, longitude, max_load_kg,
-    brand_id, created_at, last_heartbeat,
+    max_load_kg,
+    brand_id, created_at,
     model_id, updated_at, registration_number, version
 ) VALUES
       (
-          FALSE, NULL, NULL, 20000,
-          16, '2025-12-08 16:42:07.714908+01', NULL,
+    20000,
+          16, '2025-12-08 16:42:07.714908+01',
           48, '2025-12-08 16:42:07.714908+01', 'BG-123-AB', 0
       ),
       (
-          FALSE, NULL, NULL, 19000,
-          14, '2025-12-08 16:44:19.99891+01', NULL,
+        19000,
+          14, '2025-12-08 16:44:19.99891+01',
           41, '2025-12-08 16:42:07.714908+01', 'NS-456-CD', 0
       ),
       (
-          FALSE, NULL, NULL, 18500,
-          3, '2025-12-08 16:45:28.130303+01', NULL,
+        18500,
+          3, '2025-12-08 16:45:28.130303+01',
           8, '2025-12-08 16:42:07.714908+01', 'BG-789-EF', 0
       ),
       (
-          FALSE, NULL, NULL, 18000,
-          6, '2025-12-08 16:39:02.306783+01', NULL,
+        18000,
+          6, '2025-12-08 16:39:02.306783+01',
           17, '2025-12-08 16:42:07.714908+01', 'NS-012-GH', 0
       );
+
+WITH brand_models AS (
+    SELECT
+        vbm.vehicle_brand_id AS brand_id,
+        vbm.models_id AS model_id,
+        ROW_NUMBER() OVER () AS rn
+    FROM vehicle_brands_models vbm
+),
+     series AS (
+         SELECT
+             generate_series(1, 100000) AS seq,
+             (generate_series(1, 100000) - 1)
+    % (SELECT COUNT(*) FROM brand_models) + 1 AS bm_index
+    )
+INSERT INTO vehicles (
+    max_load_kg,
+    brand_id,
+    model_id,
+    registration_number,
+    created_at,
+    updated_at,
+    version
+)
+SELECT
+    (7000 + floor(random() * 25000))::int AS max_load_kg,
+    bm.brand_id,
+    bm.model_id,
+    CONCAT(
+            chr(65 + (random() * 26)::int),
+            chr(65 + (random() * 26)::int),
+            '-',
+            lpad(s.seq::text, 6, '0')
+    ) AS registration_number,
+    NOW() - (random() * INTERVAL '24 months') AS created_at,
+    NOW() - (random() * INTERVAL '24 months') AS updated_at,
+    0 AS version
+FROM series s
+         JOIN brand_models bm
+              ON bm.rn = s.bm_index
+ORDER BY random();
+
+INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
+VALUES
+    (1, true, NOW() - INTERVAL '2 minutes'),
+    (2, false, NOW() - INTERVAL '15 minutes'),
+    (3, true, NOW() - INTERVAL '1 minute'),
+    (4, false, NOW() - INTERVAL '1 hour');
+
+INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
+SELECT
+    id,
+    random() > 0.3,
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM vehicles
+WHERE id > 4;
+
+INSERT INTO vehicle_locations (vehicle_id, latitude, longitude, updated_at)
+VALUES
+    (1, 44.816410, 20.460150, NOW() - INTERVAL '2 minutes'),
+    (2, 45.255820, 19.845420, NOW() - INTERVAL '15 minutes'),
+    (3, 44.803280, 20.426940, NOW() - INTERVAL '1 minute'),
+    (4, 45.267136, 19.833549, NOW() - INTERVAL '1 hour');
+
+INSERT INTO vehicle_locations (
+    vehicle_id,
+    latitude,
+    longitude,
+    updated_at
+)
+SELECT
+    id,
+    44.75 + random() * 0.6,   -- Serbia latitude range
+    19.6  + random() * 1.2,   -- Serbia longitude range
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM vehicles
+WHERE id > 4;
 
 INSERT INTO factories (
     name, address,
     city_id, country_id,
     latitude, longitude,
-    created_at, updated_at,
-    last_heartbeat, version,
-    is_online
+    created_at, updated_at, version
 )
 VALUES
 ('EuroSteel Plant',
  'Industrijska zona 1',
  1118, 40,
  44.8167, 20.4667,
- now(), now(),
- now(), 0, false),
+ now(), now(),0),
 
 ('NordChem Factory',
  'Chemical Park 12',
  1005, 2,
  52.5200, 13.4050,
- now(), now(),
- now(), 0, false),
+ now(), now(),0),
 
 ('Adriatic Food Processing',
  'Port Area bb',
  1008, 3,
  43.5081, 16.4402,
- now(), now(),
- now(), 0, false);
+ now(), now(), 0);
 
+INSERT INTO factory_status (factory_id, is_online, last_heartbeat_at)
+VALUES
+    (1, true, NOW() - INTERVAL '2 minutes'),
+    (2, false, NOW() - INTERVAL '15 minutes'),
+    (3, true, NOW() - INTERVAL '1 minute');
 
 INSERT INTO products
 (name, description,
  price, weight, on_sale,
  category_id, created_at,
- updated_at, version, image_id)
+ updated_at, version, image_id, quantity)
 VALUES
     (
         'Steel Beam S235',
         'Structural steel beam for construction and industrial use',
         120.50,
         18.75,
-        false,
+        true,
         3,
         now(),
         now(),
         0,
-     5
+     5,
+     300
     ),
     (
         'Industrial Lubricant XL',
@@ -341,7 +418,8 @@ VALUES
         now(),
         now(),
         0,
-     6
+     6,
+     170
     ),
     (
         'Electronic Control Unit',
@@ -353,7 +431,8 @@ VALUES
         now(),
         now(),
         0,
-     7
+     7,
+     75
     );
 
 
@@ -376,8 +455,16 @@ INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude)
 INSERT INTO warehouses_images (images_id, warehouse_id) VALUES
                                                         (11, 1),
                                                         (12, 2);
-                                                        
+
 INSERT INTO factories_images (images_id, factory_id) VALUES
     (8,1),
     (9,2),
     (10,3);
+
+INSERT INTO users (email, username, password, role, is_verified, is_suspended, must_change_password, hash, firstname, lastname, phone_number) VALUES
+             ('customer@gmail.com', 'customer','$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W', 'CUSTOMER', true,false, false, '123', 'customer', 'customer', 8567459852),
+             ('manager@gmail.com', 'manager','$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W', 'MANAGER', true,false, false, '12345','manager', 'manager', 58521465524);
+
+
+INSERT INTO companies (name, address, city_id, country_id, latitude, longitude, status, rejection_reason, reviewed_by_id, owner_id, created_at, version) VALUES (
+             'Euro Supply Ltd','Nemanjina 12', 1118, 1, 44.8125, 20.4612, 'APPROVED', NULL, NULL, 1, NOW(), 0);

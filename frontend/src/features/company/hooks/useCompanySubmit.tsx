@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { validateFiles } from '../schemas/companySchema';
 import type {Company, RegisterCompanyRequest} from "../types/company.types.ts";
 import {companyService} from "../../../api/services/companyService.ts";
+import toast from "react-hot-toast";
 
 type SubmitStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -53,6 +54,7 @@ export const useCompanySubmit = () => {
                 await companyService.uploadFiles(company.id, allFiles);
             }
 
+            toast.success(`Registration request for ${company.name} submitted successfully!`);
             setStatus('success');
             return {
                 success: true,
@@ -64,7 +66,7 @@ export const useCompanySubmit = () => {
             setStatus('error');
             setError(errorMessage);
 
-            console.error('Company submission error:', err);
+            toast.error('Company submission error:', err);
 
             return {
                 success: false,

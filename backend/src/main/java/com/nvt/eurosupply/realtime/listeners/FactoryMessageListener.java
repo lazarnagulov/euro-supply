@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nvt.eurosupply.factory.services.FactoryService;
+import com.nvt.eurosupply.product.services.ProductService;
 import com.nvt.eurosupply.realtime.messages.FactoryHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
 import com.nvt.eurosupply.realtime.services.FactoryRealTimeService;
@@ -19,7 +20,8 @@ public class FactoryMessageListener {
 
     private final ObjectMapper mapper;
     private final FactoryRealTimeService realTimeService;
-    private final FactoryService service;
+    private final FactoryService factoryService;
+    private final ProductService productService;
 
     @RabbitListener(queues = "factory.heartbeat.queue")
     public void receiveHeartbeat(String message) {
@@ -28,7 +30,7 @@ public class FactoryMessageListener {
             realTimeService.saveHeartbeat(heartbeat);
             log.info("[{}] Received heartbeat from factory {}: status={}",
                     heartbeat.getTimestamp(), heartbeat.getFactoryId(), heartbeat.getStatus());
-            service.applyHeartbeat(heartbeat.getFactoryId(), heartbeat.getTimestamp());
+            factoryService.applyHeartbeat(heartbeat.getFactoryId(), heartbeat.getTimestamp());
         } catch (JsonProcessingException e) {
             log.error("Error processing factory heartbeat: {}", e.getMessage(), e);
         }
@@ -39,7 +41,7 @@ public class FactoryMessageListener {
         try {
             ProductionReportMessage report = mapper.readValue(message, new TypeReference<>() {});
             realTimeService.saveProductionReport(report);
-            service.saveProductions(report);
+            productService.applyProductionReport(report);
             log.info("[{}] Received production report from factory {}: {} items",
                     report.getProducedAt(), report.getFactoryId(), report.getItems().size());
         } catch (JsonProcessingException e) {

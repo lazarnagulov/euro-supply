@@ -1,15 +1,18 @@
 package com.nvt.eurosupply.company.services;
 
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
+import com.nvt.eurosupply.company.dtos.CompanySummaryResponseDto;
 import com.nvt.eurosupply.company.dtos.RegisterCompanyRequestDto;
 import com.nvt.eurosupply.company.dtos.ReviewCompanyRequestDto;
 import com.nvt.eurosupply.company.enums.RequestStatus;
+import com.nvt.eurosupply.company.events.CompanyReviewedEvent;
 import com.nvt.eurosupply.company.mappers.CompanyMapper;
 import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.repositories.CompanyRepository;
 import com.nvt.eurosupply.email.services.CompanyEmailService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
+import com.nvt.eurosupply.shared.exceptions.BadRequestException;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
 import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
@@ -19,14 +22,18 @@ import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
 import com.nvt.eurosupply.user.models.User;
+import com.nvt.eurosupply.user.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +49,9 @@ public class CompanyService {
 
     private final CompanyMapper mapper;
     private final FileMapper fileMapper;
+    private final UserService userService;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     public CompanyResponseDto registerCompany(RegisterCompanyRequestDto request) {
         Company company = mapper.fromRequest(request);
@@ -49,7 +59,7 @@ public class CompanyService {
         Country country = countryService.find(request.getCountryId());
         company.setCity(city);
         company.setCountry(country);
-        // TODO: set owner (logged in user)
+        company.setOwner(userService.getCurrentUser());
         User mockUser = new User();
         mockUser.setId(1L);
         company.setOwner(mockUser);
@@ -68,13 +78,26 @@ public class CompanyService {
         return response;
     }
 
+    @Transactional
     public CompanyResponseDto reviewCompany(Long id, ReviewCompanyRequestDto request) {
         Company company = find(id);
-        company.setStatus(request.getStatus());
-        Company saved = repository.save(company);
-        User customer = company.getOwner();
 
-        sendReviewEmail(company, customer, request.getStatus(), request.getRejectionReason());
+        if (company.getStatus() != RequestStatus.PENDING) {
+            throw new BadRequestException("Company already reviewed");
+        }
+
+        company.setStatus(request.getStatus());
+        company.setRejectionReason(request.getRejectionReason());
+        company.setReviewedBy(userService.getCurrentUser());
+        Company saved = repository.save(company);
+        eventPublisher.publishEvent(
+                new CompanyReviewedEvent(
+                        saved,
+                        saved.getOwner(),
+                        request.getStatus(),
+                        request.getRejectionReason()
+                )
+        );
         return mapper.toResponse(saved);
     }
 
@@ -93,20 +116,13 @@ public class CompanyService {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Company not found"));
     }
 
-    private void sendReviewEmail(Company company, User customer, RequestStatus status, String rejectionReason) {
-        if (status == RequestStatus.APPROVED) {
-            emailService.sendApprovalEmail(company, customer.getEmail(), customer.getUsername());
-        } else if (status == RequestStatus.REJECTED) {
-            emailService.sendRejectionEmail(
-                    company,
-                    customer.getEmail(),
-                    customer.getUsername(),
-                    rejectionReason
-            );
-        }
-    }
-
     public PagedResponse<CompanyResponseDto> getPendingCompanies(Pageable pageable) {
         return mapper.toPagedResponse(repository.findByStatus(RequestStatus.PENDING, pageable));
+    }
+
+    public List<CompanySummaryResponseDto> getCompaniesForCurrentUser() {
+        User currentUser = userService.getCurrentUser();
+        List<Company> companies = repository.findByOwnerIdAndStatus(currentUser.getId(), RequestStatus.APPROVED);
+        return companies.stream().map(mapper::toSummaryResponse).toList();
     }
 }

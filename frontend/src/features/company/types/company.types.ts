@@ -50,3 +50,8 @@ export interface CompanyResponse {
     latitude: number;
     longitude: number;
 }
+
+export interface CompanySummaryResponse {
+    id: number,
+    name: string;
+}

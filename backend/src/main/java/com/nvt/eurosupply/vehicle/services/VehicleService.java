@@ -15,14 +15,17 @@ import com.nvt.eurosupply.vehicle.dtos.UpdateVehicleRequestDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleResponseDto;
 import com.nvt.eurosupply.vehicle.dtos.VehicleSearchRequestDto;
 import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
-import com.nvt.eurosupply.vehicle.models.Vehicle;
-import com.nvt.eurosupply.vehicle.models.VehicleBrand;
-import com.nvt.eurosupply.vehicle.models.VehicleModel;
+import com.nvt.eurosupply.vehicle.models.*;
+import com.nvt.eurosupply.vehicle.repositories.VehicleLocationRepository;
 import com.nvt.eurosupply.vehicle.repositories.VehicleRepository;
+import com.nvt.eurosupply.vehicle.repositories.VehicleStatusRepository;
 import com.nvt.eurosupply.vehicle.specifications.VehicleSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -43,6 +46,8 @@ import java.util.Objects;
 public class VehicleService {
 
     private final VehicleRepository repository;
+    private final VehicleLocationRepository locationRepository;
+    private final VehicleStatusRepository statusRepository;
     private final VehicleBrandService brandService;
     private final FileService fileService;
 
@@ -57,11 +62,23 @@ public class VehicleService {
         VehicleModel model = brandService.findModel(request.getModelId());
         vehicle.setBrand(brand);
         vehicle.setModel(model);
-        vehicle.setIsOnline(false);
-        return mapper.toResponse(repository.save(vehicle));
+
+        vehicle = repository.save(vehicle);
+
+        VehicleLocation location = new VehicleLocation();
+        location.setVehicleId(vehicle.getId());
+        locationRepository.save(location);
+
+        VehicleStatus status = new VehicleStatus();
+        status.setVehicleId(vehicle.getId());
+        status.setIsOnline(false);
+        statusRepository.save(status);
+
+        return mapper.toResponse(vehicle, location, status);
     }
 
     @Transactional
+    @CacheEvict(value = "vehicle", key = "#id")
     public List<FileResponseDto> uploadImages(Long id, List<MultipartFile> images) {
         Vehicle vehicle = find(id);
         List<StoredFile> stored = fileService.uploadFiles(FileFolder.VEHICLE, id, images);
@@ -73,12 +90,12 @@ public class VehicleService {
                 .toList();
     }
 
-    public Vehicle find(Long id) {
-        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Vehicle not found"));
-    }
-
+    @Cacheable(value = "vehicle", key = "#id")
     public VehicleResponseDto getVehicle(Long id) {
-        return mapper.toResponse(find(id));
+        Vehicle vehicle = find(id);
+        VehicleLocation location = locationRepository.findById(id).orElse(null);
+        VehicleStatus status = statusRepository.findById(id).orElse(null);
+        return mapper.toResponse(vehicle, location, status);
     }
 
     public PagedResponse<VehicleResponseDto> getVehicles(Pageable pageable) {
@@ -86,6 +103,11 @@ public class VehicleService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Caching(evict = {
+            @CacheEvict(value = "vehicle", key = "#id"),
+            @CacheEvict(value = "vehicleLocation", key = "#id"),
+            @CacheEvict(value = "vehicleStatus", key = "#id"),
+    })
     public void deleteVehicle(Long id) {
         Vehicle vehicle = find(id);
 
@@ -93,10 +115,13 @@ public class VehicleService {
                 .map(StoredFile::getId)
                 .toList();
         deleteImagesInternal(vehicle, imageIds);
+        locationRepository.deleteById(id);
+        statusRepository.deleteById(id);
         repository.delete(vehicle);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "vehicle", key = "#id")
     public VehicleResponseDto updateVehicle(Long id, UpdateVehicleRequestDto request) {
         Vehicle vehicle = find(id);
 
@@ -118,10 +143,12 @@ public class VehicleService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = "vehicleLocation", key = "#id")
     public void updateLocation(Long id, Location location) {
-        Vehicle vehicle = find(id);
-        vehicle.setLastLocation(location);
-        repository.save(vehicle);
+        VehicleLocation vehicleLocation = locationRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Vehicle location not found"));
+        vehicleLocation.setLocation(location);
+        vehicleLocation.setUpdatedAt(Instant.now());
+        locationRepository.save(vehicleLocation);
     }
 
     public PagedResponse<VehicleResponseDto> searchVehicles(VehicleSearchRequestDto request, Pageable pageable) {
@@ -130,6 +157,7 @@ public class VehicleService {
     }
 
     @Transactional
+    @CacheEvict(value = "vehicle", key = "#id")
     public void deleteImages(Long id, List<Long> imageIds) {
         Vehicle vehicle = find(id);
         vehicle.getImages().removeIf(img -> imageIds.contains(img.getId()));
@@ -143,23 +171,28 @@ public class VehicleService {
         fileService.deleteFiles(imageIds);
     }
 
+    @Cacheable(value = "vehicleLocation", key = "#id")
     public LocationResponseDto getVehicleLocation(Long id) {
-        Vehicle vehicle = find(id);
-        return locationMapper.toResponse(vehicle.getLastLocation());
+        VehicleLocation vehicleLocation = locationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle location not found"));
+        return locationMapper.toResponse(vehicleLocation.getLocation());
     }
 
+    @Cacheable(value = "vehicleStatus", key = "#id")
     public ConnectionStatusDto getVehicleStatus(Long id) {
-        Vehicle vehicle = find(id);
-        return new ConnectionStatusDto(vehicle.getIsOnline());
+        VehicleStatus status = statusRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle status not found"));
+        return new ConnectionStatusDto(status.getIsOnline());
     }
 
     @Scheduled(fixedRate = 5 * 60 * 1000)
     @Transactional
+    @CacheEvict(value = "vehicleStatus", allEntries = true)
     public void markVehiclesOffline() {
         log.info("Updating vehicle status");
         Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
 
-        int updated = repository.markOffline(cutoff);
+        int updated = statusRepository.markOffline(cutoff);
 
         if (updated > 0) {
             log.info("Marked {} vehicles as offline", updated);
@@ -167,11 +200,17 @@ public class VehicleService {
     }
 
     @Transactional
+    @CacheEvict(value = "vehicleStatus", key = "#vehicleId")
     public void applyHeartbeat(Long vehicleId, Instant timestamp) {
-        int updated = repository.applyHeartbeat(vehicleId, timestamp);
+        int updated = statusRepository.applyHeartbeat(vehicleId, timestamp);
 
         if (updated == 0) {
-            throw new EntityNotFoundException("Vehicle not found: " + vehicleId);
+            throw new EntityNotFoundException("Vehicle status not found: " + vehicleId);
         }
+    }
+
+    public Vehicle find(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle not found"));
     }
 }

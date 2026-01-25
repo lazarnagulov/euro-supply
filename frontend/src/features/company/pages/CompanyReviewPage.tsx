@@ -5,6 +5,8 @@ import CompanyCard from "../components/CompanyCard.tsx";
 import type {CompanyResponse} from "../types/company.types.ts";
 import {companyService} from "../../../api/services/companyService.ts";
 import Pagination from "../../../components/common/Pagination.tsx";
+import AppToaster from "../../../components/common/AppToaster.tsx";
+import toast from "react-hot-toast";
 
 const CompanyReviewPage: React.FC = () => {
     const [companies, setCompanies] = useState<CompanyResponse[]>([]);
@@ -27,7 +29,7 @@ const CompanyReviewPage: React.FC = () => {
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
         } catch (error) {
-            console.error('Failed to load companies:', error);
+            toast.error(`Failed to load companies.`);
         } finally {
             setLoading(false);
         }
@@ -40,6 +42,7 @@ const CompanyReviewPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+            <AppToaster />
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
                     <div className="flex items-center justify-between">
