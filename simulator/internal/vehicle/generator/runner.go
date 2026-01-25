@@ -12,17 +12,16 @@ type Runner struct {
 	cancel context.CancelFunc
 	wg     sync.WaitGroup
 	err    error
+	done   chan struct{}
 }
 
-func NewRunner(
-	cfg *Config,
-	client influxdb2.Client,
-) *Runner {
+func NewRunner(cfg *Config, client influxdb2.Client) *Runner {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	r := &Runner{
 		ctx:    ctx,
 		cancel: cancel,
+		done:   make(chan struct{}),
 	}
 
 	vehicles := GenerateVehicles(cfg.Vehicle.NumVehicles)
@@ -31,9 +30,14 @@ func NewRunner(
 	go func() {
 		defer r.wg.Done()
 		r.err = GenerateHistoricData(ctx, client, cfg, vehicles)
+		close(r.done)
 	}()
 
 	return r
+}
+
+func (r *Runner) Done() <-chan struct{} {
+	return r.done
 }
 
 func (r *Runner) Stop() {

@@ -4,14 +4,74 @@ import (
 	"context"
 	"eurosupply/simulator/internal/vehicle/domain"
 	"eurosupply/simulator/internal/vehicle/simulator"
-	"fmt"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	"log"
 	"math/rand"
+	"strconv"
 	"sync"
 	"time"
 )
+
+type VehicleGenerator struct {
+	writeAPI          api.WriteAPI
+	movementSim       *simulator.MovementSimulator
+	reportingInterval time.Duration
+	batchSize         int
+	rng               *rand.Rand
+	workerID          int
+}
+
+func (g *VehicleGenerator) Generate(ctx context.Context, vehicle domain.Vehicle, startTime, endTime time.Time) {
+	currentTime := startTime
+	currentLocation := vehicle.Location
+	isOnline := false
+	var (
+		locationCount int
+		statusCount   int
+		pointsInBatch int
+	)
+	nextStatusChange := currentTime
+
+	for currentTime.Before(endTime) {
+		if ctx.Err() != nil {
+			return
+		}
+
+		if !currentTime.Before(nextStatusChange) {
+			isOnline = !isOnline
+			duration := nextStatusDuration(isOnline, currentTime, g.rng)
+			nextStatusChange = currentTime.Add(duration)
+			p := newAvailabilityPoint(vehicle.ID, isOnline, currentTime)
+			g.writeAPI.WritePoint(p)
+			statusCount++
+			pointsInBatch++
+		}
+
+		if isOnline {
+			intervalMinutes := g.reportingInterval.Minutes()
+			newLocation, distance := g.movementSim.SimulateMovement(currentLocation, intervalMinutes)
+			currentLocation = newLocation
+
+			p := newLocationPoint(vehicle.ID, newLocation, distance, currentTime)
+			g.writeAPI.WritePoint(p)
+			locationCount++
+			pointsInBatch++
+		}
+		currentTime = currentTime.Add(g.reportingInterval)
+
+		if pointsInBatch >= g.batchSize {
+			g.writeAPI.Flush()
+			log.Printf("Worker %d: Vehicle %d - Progress: %d locations, %d status changes",
+				g.workerID, vehicle.ID, locationCount, statusCount)
+			pointsInBatch = 0
+		}
+	}
+	g.writeAPI.Flush()
+	log.Printf("Worker %d: Vehicle %d completed - Locations: %d, Status changes: %d",
+		g.workerID, vehicle.ID, locationCount, statusCount)
+}
 
 func GenerateVehicles(count int) []domain.Vehicle {
 	vehicles := make([]domain.Vehicle, count)
@@ -73,133 +133,85 @@ func worker(
 	writeApi := client.WriteAPI(cfg.Influx.Org, cfg.Influx.Bucket)
 	defer writeApi.Flush()
 
-	errorsChan := writeApi.Errors()
 	go func() {
-		for err := range errorsChan {
-			log.Printf("Worker %d: Write error: %v", workerID, err)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case err, ok := <-writeApi.Errors():
+				if !ok {
+					return
+				}
+				log.Printf("Worker %d: Write error: %v", workerID, err)
+			}
 		}
 	}()
 
-	movementSim := simulator.NewMovementSimulator(cfg.Vehicle.MinSpeed, cfg.Vehicle.MaxSpeed)
+	generator := &VehicleGenerator{
+		writeAPI:          writeApi,
+		movementSim:       simulator.NewMovementSimulator(cfg.Vehicle.MinSpeed, cfg.Vehicle.MaxSpeed),
+		reportingInterval: cfg.Vehicle.ReportingInterval,
+		batchSize:         cfg.Vehicle.BatchSize,
+		rng:               rng,
+		workerID:          workerID,
+	}
+
 	for vehicle := range vehicleChan {
-		select {
-		case <-ctx.Done():
+		if ctx.Err() != nil {
 			return
-		default:
-			generateVehicleData(
-				ctx, workerID, writeApi, vehicle, startTime, endTime,
-				cfg.Vehicle.BatchSize, movementSim, cfg.Vehicle.ReportingInterval, rng)
 		}
+		generator.Generate(ctx, vehicle, startTime, endTime)
 	}
 }
 
-func generateVehicleData(
-	ctx context.Context,
-	workerID int,
-	writeAPI api.WriteAPI,
-	vehicle domain.Vehicle,
-	startTime, endTime time.Time,
-	batchSize int,
-	simulator *simulator.MovementSimulator,
-	reportingInterval time.Duration,
-	rng *rand.Rand,
-) {
-	currentTime := startTime
-	currentLocation := vehicle.Location
-	isOnline := false
+func nextStatusDuration(isOnline bool, t time.Time, rng *rand.Rand) time.Duration {
+	hour := t.Hour()
+	weekday := t.Weekday()
 
-	locationCount := 0
-	statusCount := 0
-	pointsInBatch := 0
-
-	nextStatusChange := currentTime
-
-	for currentTime.Before(endTime) {
-		select {
-		case <-ctx.Done():
-			return
+	if isOnline {
+		switch {
+		case hour >= 12 && hour < 13:
+			return time.Hour
+		case weekday == time.Saturday || weekday == time.Sunday:
+			return time.Duration(6+rng.Intn(6)) * time.Hour
+		case hour >= 18:
+			return time.Duration(10+rng.Intn(4)) * time.Hour
 		default:
-		}
-
-		if currentTime.Equal(nextStatusChange) || currentTime.After(nextStatusChange) {
-			if isOnline {
-				var offlineDuration time.Duration
-				hour := currentTime.Hour()
-				weekday := currentTime.Weekday()
-
-				if hour >= 12 && hour < 13 {
-					offlineDuration = 1 * time.Hour
-				} else if weekday == time.Saturday || weekday == time.Sunday {
-					offlineDuration = time.Duration(6+rng.Intn(6)) * time.Hour
-				} else if hour >= 18 {
-					offlineDuration = time.Duration(10+rng.Intn(4)) * time.Hour
-				} else {
-					offlineDuration = time.Duration(15+rng.Intn(45)) * time.Minute
-				}
-
-				isOnline = false
-				nextStatusChange = currentTime.Add(offlineDuration)
-			} else {
-				var onlineDuration time.Duration
-				hour := currentTime.Hour()
-				weekday := currentTime.Weekday()
-
-				if weekday == time.Saturday || weekday == time.Sunday {
-					onlineDuration = time.Duration(3+rng.Intn(4)) * time.Hour
-				} else if hour >= 7 && hour < 12 {
-					onlineDuration = time.Duration(4+rng.Intn(2)) * time.Hour
-				} else if hour >= 13 && hour < 18 {
-					onlineDuration = time.Duration(4+rng.Intn(3)) * time.Hour
-				} else {
-					onlineDuration = time.Duration(2+rng.Intn(3)) * time.Hour
-				}
-
-				isOnline = true
-				nextStatusChange = currentTime.Add(onlineDuration)
-			}
-
-			p := influxdb2.NewPoint(
-				"vehicle_availability",
-				map[string]string{"vehicle_id": fmt.Sprintf("%d", vehicle.ID)},
-				map[string]interface{}{"is_online": isOnline},
-				currentTime,
-			)
-			writeAPI.WritePoint(p)
-			statusCount++
-			pointsInBatch++
-		}
-
-		if isOnline {
-			intervalMinutes := reportingInterval.Minutes()
-			newLocation, distance := simulator.SimulateMovement(currentLocation, intervalMinutes)
-			currentLocation = newLocation
-
-			p := influxdb2.NewPoint(
-				"vehicle_location",
-				map[string]string{"vehicle_id": fmt.Sprintf("%d", vehicle.ID)},
-				map[string]interface{}{
-					"type":              "GPS",
-					"latitude":          newLocation.Latitude,
-					"longitude":         newLocation.Longitude,
-					"distance_traveled": distance,
-				},
-				currentTime,
-			)
-
-			writeAPI.WritePoint(p)
-			locationCount++
-			pointsInBatch++
-		}
-		currentTime = currentTime.Add(reportingInterval)
-
-		if pointsInBatch >= batchSize {
-			writeAPI.Flush()
-			log.Printf("Worker %d: Vehicle %d - Progress: %d locations, %d status changes",
-				workerID, vehicle.ID, locationCount, statusCount)
-			pointsInBatch = 0
+			return time.Duration(15+rng.Intn(45)) * time.Minute
 		}
 	}
-	writeAPI.Flush()
-	log.Printf("Worker %d: Vehicle %d completed - Locations: %d, Status changes: %d",
-		workerID, vehicle.ID, locationCount, statusCount)
+
+	switch {
+	case weekday == time.Saturday || weekday == time.Sunday:
+		return time.Duration(3+rng.Intn(4)) * time.Hour
+	case hour >= 7 && hour < 12:
+		return time.Duration(4+rng.Intn(2)) * time.Hour
+	case hour >= 13 && hour < 18:
+		return time.Duration(4+rng.Intn(3)) * time.Hour
+	default:
+		return time.Duration(2+rng.Intn(3)) * time.Hour
+	}
+}
+
+func newAvailabilityPoint(vehicleID int64, isOnline bool, t time.Time) *write.Point {
+	return influxdb2.NewPoint(
+		"vehicle_availability",
+		map[string]string{"vehicle_id": strconv.FormatInt(vehicleID, 10)},
+		map[string]interface{}{"is_online": isOnline},
+		t,
+	)
+}
+
+func newLocationPoint(vehicleID int64, loc domain.Location, dist float64, t time.Time) *write.Point {
+	return influxdb2.NewPoint(
+		"vehicle_location",
+		map[string]string{"vehicle_id": strconv.FormatInt(vehicleID, 10)},
+		map[string]interface{}{
+			"type":              "GPS",
+			"latitude":          loc.Latitude,
+			"longitude":         loc.Longitude,
+			"distance_traveled": dist,
+		},
+		t,
+	)
 }

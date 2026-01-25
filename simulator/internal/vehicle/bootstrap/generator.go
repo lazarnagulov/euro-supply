@@ -34,9 +34,6 @@ func InitInflux(cfg generator.InfluxConfig) influxdb2.Client {
 	return client
 }
 
-func StartGenerator(
-	cfg *generator.Config,
-	client influxdb2.Client,
-) *generator.Runner {
+func StartGenerator(cfg *generator.Config, client influxdb2.Client) *generator.Runner {
 	return generator.NewRunner(cfg, client)
 }
