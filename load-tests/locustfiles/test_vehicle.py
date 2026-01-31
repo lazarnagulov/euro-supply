@@ -1,6 +1,5 @@
 import random
 from locust import HttpUser, between, task
-
 from locustfiles import util
 
 
@@ -15,9 +14,14 @@ class HttpClient(HttpUser):
         })
     
     @task
-    def get_counties(self):
-        self.client.get("/countries")
+    def get_vehicle(self):
+        self.client.get(f"/vehicles/{ random.randint(1, util.MAX_VEHICLE_ID) }")
+   
+    @task
+    def get_distances(self):
+        self.client.get(f"/vehicles/{ random.randint(1, util.MAX_VEHICLE_ID) }/distances")
     
     @task
-    def get_cities(self):
-        self.client.get(f"/countries/{ random.randint(1, util.MAX_COUNTRY_ID) }/cities")
+    def search_vehicles(self):
+        params = util.build_vehicle_search_params()
+        self.client.get("/vehicles/search", params=params)
