@@ -2,8 +2,7 @@ import random
 from locust import HttpUser, between, task
 from locustfiles import util
 
-
-class HttpClient(HttpUser):
+class VehicleTasks(HttpUser):
     wait_time = between(1, 5)
     host = "http://localhost:8080/api/v1"
     
@@ -20,6 +19,14 @@ class HttpClient(HttpUser):
     @task
     def get_distances(self):
         self.client.get(f"/vehicles/{ random.randint(1, util.MAX_VEHICLE_ID) }/distances")
+    
+    @task
+    def get_brands(self):
+        self.client.get("/vehicles/brands")
+
+    @task
+    def get_models(self):
+        self.client.get(f"/vehicles/brands/{random.randint(1, util.MAX_VEHICLE_BRAND_ID)}/models")
     
     @task
     def search_vehicles(self):
