@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 import random
 from locust import HttpUser, between, task
 from locustfiles import util
@@ -15,10 +16,37 @@ class VehicleTasks(HttpUser):
     @task
     def get_vehicle(self):
         self.client.get(f"/vehicles/{ random.randint(1, util.MAX_VEHICLE_ID) }")
+
+    @task
+    def get_vehicle(self):
+        self.client.get(f"/vehicles/{ random.randint(1, util.MAX_VEHICLE_ID) }/location")
    
     @task
     def get_distances(self):
-        self.client.get(f"/vehicles/{ random.randint(1, util.MAX_VEHICLE_ID) }/distances")
+        vehicle_id = random.randint(1, 100)
+
+        now = datetime.now(timezone.utc)
+
+        ranges = [
+            timedelta(days=7),
+            timedelta(days=30),
+            timedelta(days=90),
+            timedelta(days=180),
+            timedelta(days=365),
+        ]
+
+        delta = random.choice(ranges)
+        start = now - delta
+
+        params = {
+            "start": start.isoformat(),
+            "end": now.isoformat()
+        }
+
+        self.client.get(
+            f"/vehicles/{vehicle_id}/distances",
+            params=params
+        )
     
     @task
     def get_brands(self):

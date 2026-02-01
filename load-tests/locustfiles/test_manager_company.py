@@ -18,21 +18,16 @@ class CompanyTasks(HttpUser):
         company_id = random.randint(util.MIN_COMPANY_PENDING, util.MAX_COMPANY_PENDING)
         status = random.choice(["APPROVED", "REJECTED"])
 
-        if status == "APPROVED":
-            payload = {
-                "status": "APPROVED",
-                "rejectionReason": None
-            }
-        else:
-            payload = {
-                "status": "REJECTED",
-                "rejectionReason": "Does not meet compliance requirements"
-            }
+        payload = {
+            "status": status,
+            "rejectionReason": None if status == "APPROVED" else "Does not meet compliance requirements"
+        }
 
         with self.client.patch(
             f"/companies/{company_id}",
             json=payload,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
+            catch_response=True
         ) as r:
             if r.status_code in (400, 409):
                 r.success()
