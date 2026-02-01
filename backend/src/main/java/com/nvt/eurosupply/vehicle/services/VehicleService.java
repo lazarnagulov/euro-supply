@@ -107,6 +107,7 @@ public class VehicleService {
             @CacheEvict(value = "vehicle", key = "#id"),
             @CacheEvict(value = "vehicleLocation", key = "#id"),
             @CacheEvict(value = "vehicleStatus", key = "#id"),
+            @CacheEvict(value = "vehicleExists", key = "#id"),
     })
     public void deleteVehicle(Long id) {
         Vehicle vehicle = find(id);
@@ -207,6 +208,11 @@ public class VehicleService {
         if (updated == 0) {
             throw new EntityNotFoundException("Vehicle status not found: " + vehicleId);
         }
+    }
+
+    @Cacheable(value = "vehicleExists", key = "#id")
+    public boolean vehicleExists(Long id) {
+        return repository.existsById(id);
     }
 
     public Vehicle find(Long id) {

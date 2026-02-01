@@ -10,6 +10,7 @@ import com.nvt.eurosupply.realtime.messages.VehicleHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
 import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,10 @@ public class VehicleRealTimeService {
     }
 
     public List<VehicleDistanceDto> getDistances(Long id, VehicleDistanceRequestDto request) {
-        vehicleService.find(id);
+        if(!vehicleService.vehicleExists(id)) {
+            throw new EntityNotFoundException("Vehicle not found");
+        }
+
         Instant start = request.getStart();
         Instant end = request.getEnd();
         String window = timeWindowCalculator.calculateWindowDuration(start, end);

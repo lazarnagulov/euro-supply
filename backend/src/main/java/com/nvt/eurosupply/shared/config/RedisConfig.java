@@ -64,6 +64,7 @@ public class RedisConfig {
 
 
                 Map.entry("vehicle", baseConfig(objectSerializer, Duration.ofMinutes(30))),
+                Map.entry("vehicleExists", baseConfig(objectSerializer, Duration.ofMinutes(30))),
                 Map.entry("vehicleLocation", baseConfig(objectSerializer, Duration.ofSeconds(30))),
                 Map.entry("vehicleStatus", baseConfig(objectSerializer, Duration.ofSeconds(30))),
 
