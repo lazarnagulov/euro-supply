@@ -18,7 +18,7 @@ class VehicleTasks(HttpUser):
         self.client.get(f"/vehicles/{ random.randint(1, util.MAX_VEHICLE_ID) }")
 
     @task
-    def get_vehicle(self):
+    def get_vehicle_location(self):
         self.client.get(f"/vehicles/{ random.randint(1, util.MAX_VEHICLE_ID) }/location")
    
     @task
