@@ -6,6 +6,7 @@ MAX_COUNTRY_ID = 47
 MAX_VEHICLE_ID = 100_000
 MAX_VEHICLE_BRAND_ID = 20
 
+PAGE_SIZE = 10
 MIN_COMPANY_PENDING = 2
 MAX_COMPANY_PENDING = 201
 
@@ -39,14 +40,16 @@ LOAD_RANGES = [
     (7000.0, None),
 ]
 
-def random_page():
+def random_page(max_page=10):
     r = random.random()
-    if r < 0.7:
+    if r < 0.35:
         return 0
-    if r < 0.95:
+    elif r < 0.6:
         return random.randint(1, 2)
-    return random.randint(3, 5)
-
+    elif r < 0.8:
+        return random.randint(3, 6)
+    else:
+        return random.randint(7, max_page)
 
 def random_size():
     return random.choices(

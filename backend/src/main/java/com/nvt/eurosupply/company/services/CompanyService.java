@@ -9,7 +9,6 @@ import com.nvt.eurosupply.company.events.CompanyReviewedEvent;
 import com.nvt.eurosupply.company.mappers.CompanyMapper;
 import com.nvt.eurosupply.company.models.Company;
 import com.nvt.eurosupply.company.repositories.CompanyRepository;
-import com.nvt.eurosupply.email.services.CompanyEmailService;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.exceptions.BadRequestException;
@@ -18,6 +17,7 @@ import com.nvt.eurosupply.shared.models.City;
 import com.nvt.eurosupply.shared.models.Country;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.shared.models.StoredFile;
+import com.nvt.eurosupply.shared.repositories.StoredFileRepository;
 import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
@@ -27,12 +27,14 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +45,6 @@ public class CompanyService {
     private final CityService cityService;
     private final CountryService countryService;
     private final FileService fileService;
-    private final CompanyEmailService emailService;
 
     private final CompanyRepository repository;
 
@@ -52,6 +53,7 @@ public class CompanyService {
     private final UserService userService;
 
     private final ApplicationEventPublisher eventPublisher;
+    private final StoredFileRepository storedFileRepository;
 
     public CompanyResponseDto registerCompany(RegisterCompanyRequestDto request) {
         Company company = mapper.fromRequest(request);
@@ -117,7 +119,27 @@ public class CompanyService {
     }
 
     public PagedResponse<CompanyResponseDto> getPendingCompanies(Pageable pageable) {
-        return mapper.toPagedResponse(repository.findByStatus(RequestStatus.PENDING, pageable));
+        Page<CompanyResponseDto> page = repository.findByStatus(RequestStatus.PENDING, pageable);
+        List<Long> companyIds = page.getContent()
+                .stream()
+                .map(CompanyResponseDto::getId)
+                .toList();
+
+        List<Object[]> filesPairs = repository.findFilesForCompanies(companyIds);
+        Map<Long, List<FileResponseDto>> filesByCompanyId = filesPairs.stream()
+                .collect(Collectors.groupingBy(
+                        pair -> (Long) pair[0],
+                        Collectors.mapping(
+                                pair -> fileMapper.toResponse(FileFolder.COMPANY, (Long) pair[0], (StoredFile) pair[1]),
+                                Collectors.toList()
+                        )
+                ));
+        page.getContent().forEach(dto -> dto.setFiles(filesByCompanyId.getOrDefault(dto.getId(), List.of())));
+        return new PagedResponse<>(
+                page.getContent(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
     }
 
     public List<CompanySummaryResponseDto> getCompaniesForCurrentUser() {

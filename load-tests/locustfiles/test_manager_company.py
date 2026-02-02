@@ -34,4 +34,7 @@ class CompanyTasks(HttpUser):
         
     @task
     def get_pending_companies(self):
-        self.client.get(f"/companies/pending")
+        self.client.get(f"/companies/pending", params={
+            "page": util.random_page(),
+            "size": util.PAGE_SIZE
+        })

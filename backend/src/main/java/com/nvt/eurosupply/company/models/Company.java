@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "companies")
+@Table(name = "companies", indexes = { @Index(name = "idx_company_status", columnList = "status") })
 @Builder
 public class Company {
     @Id
@@ -29,16 +29,16 @@ public class Company {
     @Column(length = 50, nullable = false)
     private String address;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private City city;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Country country;
 
     private Double latitude;
     private Double longitude;
 
-    @OneToMany(cascade = CascadeType.MERGE)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private List<StoredFile> files;
 
     @Enumerated(EnumType.STRING)
@@ -47,10 +47,10 @@ public class Company {
     @Column(length = 200)
     private String rejectionReason;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User reviewedBy;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User owner;
 
     @Column(nullable = false, updatable = false)
