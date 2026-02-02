@@ -87,7 +87,7 @@ def build_vehicle_search_params():
         params["registration"] = random_registration()
 
     params["page"] = random_page()
-    params["size"] = random_size()
+    params["size"] = PAGE_SIZE
 
     return params
 
