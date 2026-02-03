@@ -34,10 +34,10 @@ BRAND_MODELS = {
 }
 
 LOAD_RANGES = [
-    (500.0, 1000.0),
-    (1000.0, 3000.0),
-    (3000.0, 7000.0),
-    (7000.0, None),
+    (7000, 12000),
+    (12000, 18000),
+    (18000, 25000),
+    (25000, 32000),
 ]
 
 def random_page(max_page=10):
@@ -51,6 +51,7 @@ def random_page(max_page=10):
     else:
         return random.randint(7, max_page)
 
+
 def random_size():
     return random.choices(
         population=[10, 20, 50],
@@ -59,31 +60,29 @@ def random_size():
 
 def random_registration():
     return (
-        random.choice(["BG", "NS", "NI", "KG"])
-        + "-"
-        + str(random.randint(100, 999))
-        + "-"
-        + "".join(random.choices(string.ascii_uppercase, k=2))
+        chr(65 + random.randint(0, 25)) +
+        chr(65 + random.randint(0, 25)) +
+        "-" +
+        str(random.randint(0, 999999)).zfill(6)
     )
 
 
 def build_vehicle_search_params():
     params = {}
 
-    if random.random() < 0.7:
+    if random.random() < 0.8:
         brand_id = random.choice(list(BRAND_MODELS.keys()))
         params["brandId"] = brand_id
 
-        if random.random() < 0.8:
+        if random.random() < 0.85:
             params["modelId"] = random.choice(BRAND_MODELS[brand_id])
 
-    if random.random() < 0.4:
+    if random.random() < 0.5:
         min_load, max_load = random.choice(LOAD_RANGES)
         params["minLoad"] = min_load
-        if max_load:
-            params["maxLoad"] = max_load
+        params["maxLoad"] = max_load
 
-    if random.random() < 0.2:
+    if random.random() < 0.15:
         params["registration"] = random_registration()
 
     params["page"] = random_page()
