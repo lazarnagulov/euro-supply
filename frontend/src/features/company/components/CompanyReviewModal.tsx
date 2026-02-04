@@ -5,6 +5,7 @@ import {companyService} from "../../../api/services/companyService.ts";
 import {InteractiveMap} from "../../../components/map/InteractiveMap.tsx";
 import toast from "react-hot-toast";
 import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
+import apiClient from "../../../api/client.ts";
 
 interface CompanyReviewModelProps {
     company: CompanyResponse;
@@ -21,6 +22,30 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
 
     const images = company.files.filter(f => f.type == "IMAGE");
     const documents = company.files.filter(f => f.type == "PDF");
+
+    const handleViewDocument = async (url: string) => {
+        try {
+            const response = await apiClient.get(url, {
+                responseType: 'blob'
+            });
+
+            const blobUrl = URL.createObjectURL(response.data);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 30_000);
+        } catch (err) {
+            console.error('Failed to load document:', err);
+            toast.error('Failed to load document. Please try again.');
+        }
+    };
 
     const handleSubmit = async () => {
         setError('');
@@ -189,14 +214,12 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                                             <p className="text-sm text-gray-600">PDF Document</p>
                                         </div>
                                     </div>
-                                    <a
-                                        href={doc.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <button
+                                        onClick={() => handleViewDocument(doc.url)}
                                         className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
                                     >
                                         View
-                                    </a>
+                                    </button>
                                 </div>
                             ))}
                         </div>
