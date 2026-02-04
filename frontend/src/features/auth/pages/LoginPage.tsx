@@ -106,7 +106,7 @@ const LoginPage = () => {
 
         <div className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <button className="text-indigo-600 hover:underline font-medium">
+          <button className="text-indigo-600 hover:underline font-medium" onClick={() => navigate("/registration")} >
             Register
           </button>
         </div>
