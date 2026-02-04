@@ -2,6 +2,7 @@ import React from "react";
 import { Edit2, Trash2, Package, ArrowRight } from "lucide-react";
 import type { ProductWithImage } from "../types/product.types";
 import { useNavigate } from "react-router-dom";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface ManageableProductCardProps {
   product: ProductWithImage;
@@ -20,7 +21,7 @@ const ManageableProductCard: React.FC<ManageableProductCardProps> = ({
       {/* IMAGE */}
       <div className="relative h-48 bg-gray-200">
         {product.imageUrl?.url ? (
-          <img
+          <AuthenticatedImage
             src={product.imageUrl.url}
             alt={product.name}
             className="w-full h-full object-cover"

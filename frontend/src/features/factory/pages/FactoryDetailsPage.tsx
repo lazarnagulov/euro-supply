@@ -19,6 +19,7 @@ import type { ConnectionStatus } from "../../../types/status.types.ts";
 import { useFactoryPolling } from "../hooks/useFactoryPolling.ts";
 import type { PagedResponse } from "../../../types/api.types.ts";
 import { ProductStatsModal } from "../components/ProductStatsModal.tsx";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 const FactoryDetailsPage: React.FC = () => {
   const { factoryId } = useParams();
@@ -227,7 +228,7 @@ const FactoryDetailsPage: React.FC = () => {
                   className="relative group cursor-pointer rounded-xl overflow-hidden shadow-sm border"
                   onClick={() => openImageModal(index)}
                 >
-                  <img
+                  <AuthenticatedImage
                     src={fileResponse.url}
                     className="w-full h-40 object-cover group-hover:scale-105 transition-transform"
                     alt={`Factory ${index + 1}`}

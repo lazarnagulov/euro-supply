@@ -1,6 +1,7 @@
 import {FileText, Image, MapPin, User} from "lucide-react";
 import type {CompanyResponse} from "../types/company.types.ts";
 import React, {type MouseEventHandler} from "react";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface CompanyCardProps {
     company: CompanyResponse;
@@ -17,7 +18,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onReview }) => {
                 <div className="flex-1">
                     <div className="flex items-start gap-4">
                         {images[0] && (
-                            <img
+                            <AuthenticatedImage
                                 src={images[0].url}
                                 alt={company.name}
                                 className="w-20 h-20 rounded-lg object-cover"

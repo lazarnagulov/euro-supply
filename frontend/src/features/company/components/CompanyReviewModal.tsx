@@ -4,6 +4,7 @@ import {type CompanyResponse, RequestStatus} from "../types/company.types.ts";
 import {companyService} from "../../../api/services/companyService.ts";
 import {InteractiveMap} from "../../../components/map/InteractiveMap.tsx";
 import toast from "react-hot-toast";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface CompanyReviewModelProps {
     company: CompanyResponse;
@@ -140,7 +141,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                         </h3>
 
                         <div className="mb-4">
-                            <img
+                            <AuthenticatedImage
                                 src={images[selectedImage]?.url}
                                 alt={`Company ${selectedImage + 1}`}
                                 className="w-full h-96 object-cover rounded-xl border-2 border-gray-200"
@@ -158,7 +159,7 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                                             : 'border-gray-200 hover:border-indigo-300'
                                     }`}
                                 >
-                                    <img
+                                    <AuthenticatedImage
                                         src={image.url}
                                         alt={`Thumbnail ${index + 1}`}
                                         className="w-full h-24 object-cover"

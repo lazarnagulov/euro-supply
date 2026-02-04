@@ -2,6 +2,7 @@ import React from "react";
 import { Edit2, Trash2, Factory, MapPin, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { FactoryResponse } from "../types/factory.types.ts";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface FactoryCardProps {
   factory: FactoryResponse;
@@ -20,7 +21,7 @@ const FactoryCard: React.FC<FactoryCardProps> = ({
     <div className="bg-white rounded-xl shadow hover:shadow-xl transition-all overflow-hidden">
       <div className="relative h-48 bg-gray-200">
         {factory.imageUrls?.[0] ? (
-          <img
+          <AuthenticatedImage
             src={factory.imageUrls[0].url}
             alt={factory.name}
             className="w-full h-full object-cover"

@@ -14,6 +14,7 @@ import {
 import { vehicleService } from "../../../api/services/vehicleService.ts";
 import { Upload, X } from "lucide-react";
 import {StatusAlert} from "../../../components/common/StatusAlert.tsx";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface VehicleModalProps {
     onSuccess: () => void;
@@ -366,7 +367,7 @@ const VehicleModal: React.FC<VehicleModalProps> = ({
                                 <div className="grid grid-cols-4 gap-3">
                                     {existingImages.map((fileResponse, index) => (
                                         <div key={index} className="relative group">
-                                            <img
+                                            <AuthenticatedImage
                                                 src={fileResponse.url}
                                                 alt={`Existing ${index + 1}`}
                                                 className="w-full h-24 object-cover rounded-lg"
