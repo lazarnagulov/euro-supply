@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
-
+    boolean existsByIdAndOwner_Username(Long id, String username);
     Page<Company> findByStatus(RequestStatus status, Pageable pageable);
     List<Company> findByOwnerIdAndStatus(Long ownerId, RequestStatus status);
 }

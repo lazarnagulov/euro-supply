@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService service;
@@ -36,8 +38,8 @@ public class AuthController {
     }
 
     @GetMapping("/authorize-file")
-    public ResponseEntity<Void> authorize() {
-        //TODO: Authorize file
+    public ResponseEntity<Void> authorizeFile(@RequestHeader("X-Original-URI") String originalUri) {
+        service.authorizeFile(originalUri);
         return ResponseEntity.ok().build();
     }
 }
