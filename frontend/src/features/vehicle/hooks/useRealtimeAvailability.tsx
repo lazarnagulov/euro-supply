@@ -21,7 +21,7 @@ export const useRealtimeAvailability = (
         }
 
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://localhost:8080/api/v1/ws'),
+            webSocketFactory: () => new SockJS('/api/v1/ws'),
             debug: (str) => {
                 console.log('[STOMP]', str);
             },
