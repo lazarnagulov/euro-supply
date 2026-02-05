@@ -43,7 +43,7 @@ const RegistrationPage = () => {
     }
 
     try {
-      const response = await authService.register({
+      await authService.register({
         username,
         email,
         password,
