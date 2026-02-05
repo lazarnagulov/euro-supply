@@ -40,13 +40,13 @@ public class VehicleSubscriptionService {
         });
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 10000)
     public void broadcastAvailabilityUpdates() {
         if (activeSubscriptions.isEmpty()) {
             return;
         }
 
-        log.debug("Broadcasting availability updates for {} vehicles", activeSubscriptions.size());
+        log.info("Broadcasting availability updates for {} vehicles", activeSubscriptions.size());
 
         Instant end = Instant.now();
         Instant start = end.minus(3, ChronoUnit.HOURS);
@@ -68,6 +68,7 @@ public class VehicleSubscriptionService {
             }
         }
     }
+
     public void triggerUpdate(Long vehicleId) {
         if (!activeSubscriptions.containsKey(vehicleId))
             return;

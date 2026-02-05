@@ -323,19 +323,11 @@ FROM series s
 ORDER BY random();
 
 INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat)
-VALUES
-    (1, true, NOW() - INTERVAL '2 minutes'),
-    (2, false, NOW() - INTERVAL '15 minutes'),
-    (3, true, NOW() - INTERVAL '1 minute'),
-    (4, false, NOW() - INTERVAL '1 hour');
-
-INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat)
 SELECT
     id,
     false,
     NOW() - (random() * INTERVAL '30 minutes')
-FROM vehicles
-WHERE id > 4;
+FROM vehicles;
 
 INSERT INTO vehicle_locations (vehicle_id, latitude, longitude, updated_at)
 VALUES

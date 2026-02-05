@@ -9,7 +9,8 @@ import java.time.temporal.ChronoUnit;
 public class VehicleFlux {
 
     public String getAggregatedAvailability(Long vehicleId, Instant start, Instant end, String window) {
-        Instant lookBackStart = start.minus(30, ChronoUnit.DAYS);
+        Instant lookBackStart = start.minus(7, ChronoUnit.DAYS);
+
         return String.format(
                 """
                 lastState = from(bucket: "vehicle")
@@ -43,6 +44,8 @@ public class VehicleFlux {
                       })
                   )
                   |> duplicate(column: "_stop", as: "_time")
+                  |> filter(fn: (r) => r._time < now())
+                  |> filter(fn: (r) => r.online_minutes + r.offline_minutes > 0)
                   |> drop(columns: ["_start"])
                   |> yield(name: "availability")
                 """,

@@ -84,22 +84,23 @@ const AvailabilityCharts: React.FC<AvailabilityChartsProps> = ({ data, loading }
                     <h3 className="font-semibold mb-4">Availability Percentage Trend</h3>
                     <ResponsiveContainer width="100%" height={250}>
                         <AreaChart data={data.dataPoints}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb"/>
                             <XAxis
                                 dataKey="label"
-                                tick={{ fontSize: 12 }}
+                                tick={{fontSize: 12}}
                                 angle={-45}
                                 textAnchor="end"
                                 height={80}
                             />
                             <YAxis
                                 domain={[0, 100]}
-                                label={{ value: 'Online %', angle: -90, position: 'insideLeft' }}
-                                tick={{ fontSize: 12 }}
+                                label={{value: 'Online %', angle: -90, position: 'insideLeft'}}
+                                tick={{fontSize: 12}}
                             />
                             <Tooltip
                                 formatter={(value: number) => formatPercentage(value)}
-                                labelStyle={{ fontWeight: 'bold' }}
+                                labelFormatter={(label) => `${label} (window average)`}
+                                labelStyle={{fontWeight: 'bold'}}
                             />
                             <Area
                                 type="monotone"
@@ -112,11 +113,14 @@ const AvailabilityCharts: React.FC<AvailabilityChartsProps> = ({ data, loading }
                             />
                         </AreaChart>
                     </ResponsiveContainer>
+                    <p className="text-xs text-gray-500 mt-2 text-center">
+                        Each point shows the online percentage for that specific time window
+                    </p>
                 </div>
 
                 {/* Pie Chart - 1/3 width */}
                 <div className="bg-white rounded-xl p-6 shadow border border-gray-200">
-                    <h3 className="font-semibold mb-4">Overall Distribution</h3>
+                <h3 className="font-semibold mb-4">Overall Distribution</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                             <Pie
