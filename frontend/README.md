@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the **React frontend application** for the EuroSupply system.
+The frontend provides a responsive and user-friendly interface for interacting with the backend API, enabling users to manage companies, vehicles, and supply-chain–related data based on their assigned roles.
 
-Currently, two official plugins are available:
+The application is built using **React**, **TypeScript**, and **Tailwind CSS**, with a focus on modularity, maintainability, and clear separation of concerns.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+The frontend supports the following core features:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- User authentication and role-based access
+- Company management and moderation workflows
+- Vehicle browsing, searching, and filtering
+- Reference data visualization (countries, cities, brands, models)
+- Responsive UI suitable for desktop and smaller screens
+- Integration with secured backend REST APIs
+...
 
-## Expanding the ESLint configuration
+UI behavior and available actions dynamically adapt based on the authenticated user role (Administrator, Manager, Customer).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Technology Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **React** – Component-based UI framework
+- **TypeScript** – Static typing and improved developer experience
+- **Tailwind CSS** – Utility-first styling
+- **Vite** – Fast development server and build tool
+- **Axios** – Backend communication (depending on implementation)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Requirements
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Before running the frontend application, ensure the following are installed:
+
+- Node.js 18+
+- npm (comes with Node.js)
+- Running backend application (see backend `README.md`)
+
+## Setup
+
+1. Navigate to the frontend directory
+
+```bash
+cd frontend
 ```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Install dependencies
+```bash
+npm install
 ```
+3. Start the development server
+```bash
+npm run dev
+```
+or Build for Production
+```bash
+npm run build
+```
+The generated static files will be located in the dist/ directory and can be served using Nginx or another web server.
+
+## Notes
+
+- This frontend is designed to be used together with the EuroSupply backend.
+- For API contracts and data models, refer to backend OpenAPI documentation.
+- For production deployments, ensure environment variables and Nginx configuration are properly aligned.
