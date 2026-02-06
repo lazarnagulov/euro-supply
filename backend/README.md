@@ -54,6 +54,7 @@ The application is configured using Spring profiles and environment variables.
 - application-dev.properties – Local development profile
 - application-prod.properties – Production profile
 
+Spring Boot automatically executes `src/main/resources/data.sql` after the schema is created when SQL initialization is enabled (dev mode).
 
 ## Setup
 1. Start Infrastructure Services
