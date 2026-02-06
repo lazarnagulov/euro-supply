@@ -322,20 +322,12 @@ FROM series s
               ON bm.rn = s.bm_index
 ORDER BY random();
 
-INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
-VALUES
-    (1, true, NOW() - INTERVAL '2 minutes'),
-    (2, false, NOW() - INTERVAL '15 minutes'),
-    (3, true, NOW() - INTERVAL '1 minute'),
-    (4, false, NOW() - INTERVAL '1 hour');
-
-INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
+INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat)
 SELECT
     id,
-    random() > 0.3,
+    false,
     NOW() - (random() * INTERVAL '30 minutes')
-FROM vehicles
-WHERE id > 4;
+FROM vehicles;
 
 INSERT INTO vehicle_locations (vehicle_id, latitude, longitude, updated_at)
 VALUES

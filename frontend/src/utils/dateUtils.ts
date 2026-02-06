@@ -1,4 +1,6 @@
-export const calculateStartDate = (period: "7d" | "30d" | "90d" | "180d" | "365d"): string => {
+import type {PeriodAggregation} from "../types/time.types.ts";
+
+export const calculateStartDate = (period: PeriodAggregation): string => {
     let start: Date;
 
     switch (period) {

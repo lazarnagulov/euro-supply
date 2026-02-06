@@ -1,7 +1,9 @@
 package com.nvt.eurosupply.realtime.controllers;
 
-import com.nvt.eurosupply.realtime.dtos.VehicleDistanceDto;
-import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleAvailabilityRequestDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleAvailabilitySummaryDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleDistanceDto;
+import com.nvt.eurosupply.realtime.dtos.vehicle.VehicleDistanceRequestDto;
 import com.nvt.eurosupply.realtime.services.VehicleRealTimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,10 +13,12 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,7 +44,8 @@ public class VehicleRealtimeController {
                             required = true,
                             example = "1"
                     )
-            }
+            },
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -74,9 +79,12 @@ public class VehicleRealtimeController {
                     responseCode = "400",
                     description = "Invalid request parameters (missing start/end date or invalid date range)"
             ),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "404", description = "Vehicle not found"),
     })
     @GetMapping("/{id}/distances")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<VehicleDistanceDto>> getLocations(
             @PathVariable Long id,
             @Valid @ModelAttribute VehicleDistanceRequestDto request
@@ -84,5 +92,12 @@ public class VehicleRealtimeController {
         return ResponseEntity.ok(service.getDistances(id, request));
     }
 
-
+    @GetMapping("/{id}/availability")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<VehicleAvailabilitySummaryDto> getAvailability(
+            @PathVariable Long id,
+            @Valid @ModelAttribute VehicleAvailabilityRequestDto request
+    ) {
+        return ResponseEntity.ok(service.getAvailabilitySummary(id, request));
+    }
 }

@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.realtime.dtos;
+package com.nvt.eurosupply.realtime.dtos.vehicle;
 
 import com.nvt.eurosupply.realtime.validators.DateRangeRequest;
 import com.nvt.eurosupply.realtime.validators.ValidDateRange;

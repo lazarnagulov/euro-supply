@@ -8,6 +8,7 @@ import com.nvt.eurosupply.realtime.dtos.ProductionChartDto;
 import com.nvt.eurosupply.factory.services.FactoryService;
 import com.nvt.eurosupply.realtime.messages.FactoryHeartbeatMessage;
 import com.nvt.eurosupply.realtime.messages.ProductionReportMessage;
+import com.nvt.eurosupply.realtime.queries.FactoryFlux;
 import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,17 +25,19 @@ public class FactoryRealTimeService {
     private final InfluxQueryService service;
     private final FactoryService factoryService;
     private final TimeWindowCalculator timeWindowCalculator;
+    private final FactoryFlux factoryFlux;
 
     public FactoryRealTimeService(
             @Qualifier("factoryInfluxClient") InfluxDBClient influxDBClient,
             InfluxQueryService service,
             FactoryService factoryService,
-            TimeWindowCalculator timeWindowCalculator
-    ) {
+            TimeWindowCalculator timeWindowCalculator,
+            FactoryFlux factoryFlux) {
         this.writeApi = influxDBClient.getWriteApiBlocking();
         this.service = service;
         this.factoryService = factoryService;
         this.timeWindowCalculator = timeWindowCalculator;
+        this.factoryFlux = factoryFlux;
     }
 
     public List<ProductionChartDto> getProduction(
@@ -44,22 +47,8 @@ public class FactoryRealTimeService {
             Instant end
     ) {
         factoryService.find(factoryId);
-
         String window = timeWindowCalculator.calculateWindowDuration(start, end);
-
-        String query = String.format(
-                """
-                from(bucket: "factory")
-                |> range(start: %s, stop: %s)
-                |> filter(fn: (r) => r["factory_id"] == "%d")
-                |> filter(fn: (r) => r["product_id"] == "%d")
-                |> filter(fn: (r) => r["_measurement"] == "factory_production")
-                |> filter(fn: (r) => r["_field"] == "quantity")
-                |> aggregateWindow(every: %s, fn: sum, createEmpty: false)
-                |> yield()
-                """,
-                start.toString(), end.toString(), factoryId, productId, window
-        );
+        String query = factoryFlux.getProduction(factoryId, productId, start, end, window);
 
         return service.query(query, fluxRecord -> new ProductionChartDto(
                 fluxRecord.getTime().toString(),

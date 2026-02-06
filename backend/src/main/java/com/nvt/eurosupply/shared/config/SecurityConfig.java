@@ -63,6 +63,8 @@ public class SecurityConfig {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
         );
         http.authorizeHttpRequests(request -> request
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/v1/ws/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
