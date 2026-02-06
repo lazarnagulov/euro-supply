@@ -29,7 +29,10 @@ apiClient.interceptors.response.use(
     (response) => response,
     (error: AxiosError<ApiError>) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem('token');
+            const tokenExpired = error.response.headers['x-token-expired'] === 'true';
+            if (tokenExpired) {
+                localStorage.removeItem('token');
+            }
         }
 
         if (error.response?.status === 403) {
