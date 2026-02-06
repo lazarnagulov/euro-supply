@@ -99,7 +99,7 @@ const NavigationHeader: React.FC = () => {
   const visibleNavItems = navItems.filter((item) => {
     if (!role) return item.roles.includes("GUEST");
 
-    return role !== undefined && item.roles.includes(role);
+    return item.roles.includes(role);
   });
 
   return (
@@ -170,7 +170,7 @@ const NavigationHeader: React.FC = () => {
         {mobileMenuOpen && (
           <nav className="md:hidden py-4 border-t border-gray-200">
             <div className="space-y-2">
-              {navItems.map((item) => {
+              {visibleNavItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
 

@@ -30,3 +30,12 @@ export interface PersonRequest {
     phoneNumber: string;
     imageUrl?: StoredFile;
 }
+
+export const ROLES = {
+    ADMIN: "ROLE_ADMIN",
+    MANAGER: "ROLE_MANAGER",
+    CUSTOMER: "ROLE_CUSTOMER",
+    GUEST: "GUEST",
+} as const;
+
+export type Role = typeof ROLES[keyof typeof ROLES];
