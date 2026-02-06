@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Registration Approved</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(to bottom right, #EFF6FF, #E0E7FF);
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4F46E5, #6366F1);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .header h1 {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #1F2937;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 16px;
+            color: #4B5563;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .info-card {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+        .info-card h2 {
+            font-size: 20px;
+            color: #1F2937;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .info-row {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-size: 14px;
+            color: #6B7280;
+            min-width: 120px;
+            font-weight: 500;
+        }
+        .info-value {
+            font-size: 14px;
+            color: #1F2937;
+            font-weight: 600;
+        }
+        .success-badge {
+            display: inline-block;
+            background: #D1FAE5;
+            color: #065F46;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #4F46E5;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+        }
+        .cta-button:hover {
+            background: #4338CA;
+        }
+        .footer {
+            background: #F9FAFB;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #E5E7EB;
+        }
+        .footer p {
+            color: #6B7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .footer-links {
+            margin-top: 20px;
+        }
+        .footer-links a {
+            color: #4F46E5;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <div class="header-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        </div>
+        <h1>Registration Approved!</h1>
+        <p>Your company has been successfully verified</p>
+    </div>
+
+    <div class="content">
+        <span class="success-badge">✓ Approved</span>
+
+        <p class="greeting">Dear <strong th:text="${customerName}">Customer</strong>,</p>
+
+        <p class="message">
+            Congratulations! We're pleased to inform you that your company registration request has been reviewed and approved.
+            You can now start using your company profile on EuroSupply.
+        </p>
+
+        <div class="info-card">
+            <h2>Company Details</h2>
+            <div class="info-row">
+                <span class="info-label">Company Name</span>
+                <span class="info-value" th:text="${company.name}">Company Name</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Address</span>
+                <span class="info-value" th:text="${company.address}">Address</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">City</span>
+                <span class="info-value" th:text="${company.city}">City</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Country</span>
+                <span class="info-value" th:text="${company.country}">Country</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value" style="color: #059669;">Active</span>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="#" th:href="${dashboardUrl}" class="cta-button">
+                Go to Dashboard →
+            </a>
+        </div>
+
+        <p class="message" style="margin-top: 30px; font-size: 14px;">
+            If you have any questions or need assistance, please don't hesitate to contact our support team.
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>
+            <strong>EuroSupply</strong><br>
+            Your trusted B2B marketplace
+        </p>
+        <div class="footer-links">
+            <a href="#" th:href="${baseUrl}">Visit Website</a>
+            <a href="#" th:href="${baseUrl + '/support'}">Support</a>
+            <a href="#" th:href="${baseUrl + '/contact'}">Contact Us</a>
+        </div>
+        <p style="margin-top: 20px; font-size: 12px; color: #9CA3AF;">
+            © 2026 EuroSupply. All rights reserved.
+        </p>
+    </div>
+</div>
+</body>
+</html>
