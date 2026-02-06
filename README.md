@@ -36,6 +36,9 @@
     <li>
       <a href="#available-roles-and-credentials">Available Roles and Credentials</a>
     </li>
+    <li>
+      <a href="#contributors">Contributors</a>
+    </li>
   </ol>
 </details>
 
@@ -134,6 +137,12 @@ The system supports the following predefined roles for development and testing p
   - Password: `pera`
 
 > These credentials are intended **for local development only**.
+
+## Contributors
+
+- [Ana Šinik](https://gitlab.com/sinikana7)
+- [Nataša Kašiković](https://gitlab.com/natasakasikovic)
+- [Lazar Nagulov](https://gitlab.com/lazarnagulov)
 
 [Locust-img]: https://img.shields.io/badge/Locust-Load%20Testing-00c853?logo=locust&logoColor=white
 [Locust-url]: https://locust.io/
