@@ -27,5 +27,5 @@ public class VehicleStatus {
     private Vehicle vehicle;
 
     private Boolean isOnline;
-    private Instant lastHeartbeatAt;
+    private Instant lastHeartbeat;
 }

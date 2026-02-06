@@ -43,7 +43,7 @@ const RegistrationPage = () => {
     }
 
     try {
-      const response = await authService.register({
+      await authService.register({
         username,
         email,
         password,
@@ -55,7 +55,6 @@ const RegistrationPage = () => {
         },
       }, image);
       
-      console.log(response)
       toast.success("User registered successfully. Please check your email to verify your account.");
       setTimeout(() => navigate("/"), 1500);
     } catch (err: any) {
