@@ -25,8 +25,6 @@ import java.util.List;
 @RequestMapping("/api/v1/companies")
 @RequiredArgsConstructor
 @Tag(name = "Companies", description = "Company management API")
-//TODO: Remove later
-@CrossOrigin
 public class CompanyController {
 
     private final CompanyService service;
