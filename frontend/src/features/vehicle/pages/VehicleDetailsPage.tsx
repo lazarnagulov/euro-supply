@@ -6,6 +6,8 @@ import {
     Car,
     ChartBar,
     RefreshCw,
+    Wifi,
+    WifiOff,
 } from "lucide-react";
 import {
     LineChart,
@@ -21,10 +23,13 @@ import { InteractiveMap } from "../../../components/map/InteractiveMap";
 import { PeriodSelector } from "../../../components/common/PeriodSelector";
 import { useVehicleData } from "../hooks/useVehicleData";
 import { useDistanceData } from "../hooks/useDistanceData";
+import { useAvailabilityData } from "../hooks/useAvailabilityData";
+import { useRealtimeAvailability } from "../hooks/useRealtimeAvailability";
 import { usePeriodSelector } from "../../../hooks/common/usePeriodSelector";
 import { ImageModal } from "../../../components/modal/ImageModal";
 import { useVehiclePolling } from "../hooks/useVehiclePolling";
 import AppToaster from "../../../components/common/AppToaster.tsx";
+import AvailabilityCharts from "../components/charts/VehicleAvailabilityCharts.tsx";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
@@ -55,8 +60,21 @@ const VehicleDetailsPage: React.FC = () => {
         loadCustomRange: loadTraveledCustomRange,
     } = useDistanceData(vehicleId);
 
-    const availabilityPeriod = usePeriodSelector("7d");
-    const availabilityData: any[] = []; // TODO: Implement availability data
+    const availabilityPeriod = usePeriodSelector("12h");
+    const {
+        availabilityData,
+        loading: availabilityLoading,
+        loadPeriod: loadAvailabilityPeriod,
+        loadCustomRange: loadAvailabilityCustomRange,
+    } = useAvailabilityData(vehicleId);
+
+    const isRealtimeEnabled = availabilityPeriod.selectedPeriod === "3h" && !availabilityPeriod.useCustomRange;
+    const {
+        availabilityData: realtimeAvailabilityData,
+        connected: websocketConnected,
+    } = useRealtimeAvailability(vehicleId, isRealtimeEnabled);
+
+    const displayAvailabilityData = isRealtimeEnabled ? realtimeAvailabilityData : availabilityData;
 
     const handleTraveledPeriodSelect = async (period: string) => {
         traveledPeriod.setSelectedPeriod(period as any);
@@ -77,13 +95,13 @@ const VehicleDetailsPage: React.FC = () => {
         if (availabilityPeriod.useCustomRange) {
             availabilityPeriod.toggleCustomRange();
         }
-        // TODO: Implement availability loading
+        await loadAvailabilityPeriod(period as any);
     };
 
     const handleAvailabilityCustomRange = async () => {
         const range = availabilityPeriod.validateDateRange();
         if (!range) return;
-        // TODO: Implement availability custom range loading
+        await loadAvailabilityCustomRange(range.from, range.to);
     };
 
     const openImageModal = (index: number) => {
@@ -286,6 +304,7 @@ const VehicleDetailsPage: React.FC = () => {
                     onCustomFromChange={traveledPeriod.setCustomFrom}
                     onCustomToChange={traveledPeriod.setCustomTo}
                     onApplyCustomRange={handleTraveledCustomRange}
+                    mode="distance"
                 />
 
                 <div className="relative">
@@ -323,9 +342,21 @@ const VehicleDetailsPage: React.FC = () => {
             </div>
 
             <div className="bg-white rounded-2xl shadow p-6 space-y-4">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <ChartBar size={18} /> Availability
-                </h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                        <ChartBar size={18} /> Availability
+                    </h2>
+                    {isRealtimeEnabled && (
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
+                            websocketConnected
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                        }`}>
+                            {websocketConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
+                            {websocketConnected ? 'Live Updates' : 'Disconnected'}
+                        </div>
+                    )}
+                </div>
 
                 <PeriodSelector
                     selectedPeriod={availabilityPeriod.selectedPeriod}
@@ -337,27 +368,13 @@ const VehicleDetailsPage: React.FC = () => {
                     onCustomFromChange={availabilityPeriod.setCustomFrom}
                     onCustomToChange={availabilityPeriod.setCustomTo}
                     onApplyCustomRange={handleAvailabilityCustomRange}
+                    mode="availability"
                 />
 
-                <div>
-                    <h3 className="font-semibold mb-4">Availability Chart</h3>
-                    <div className="w-full h-72">
-                        <ResponsiveContainer>
-                            <LineChart data={availabilityData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="label" />
-                                <YAxis />
-                                <Tooltip />
-                                <Line
-                                    type="monotone"
-                                    dataKey="distance"
-                                    stroke="#2563eb"
-                                    strokeWidth={3}
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
+                <AvailabilityCharts
+                    data={displayAvailabilityData}
+                    loading={availabilityLoading && !isRealtimeEnabled}
+                />
             </div>
 
             <div className="p-0 space-y-0">

@@ -1,3 +1,6 @@
+SET synchronous_commit = OFF;
+
+BEGIN;
 INSERT INTO files (path, filename, content_type, type, created_at) VALUES
 ('vehicle/1', 'vehicle_1.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:42:07.714908+01'),
 ('vehicle/2', 'vehicle_2.jpg', 'image/jpeg', 'IMAGE', '2025-12-08 16:44:19.99891+01'),
@@ -322,20 +325,12 @@ FROM series s
               ON bm.rn = s.bm_index
 ORDER BY random();
 
-INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
-VALUES
-    (1, true, NOW() - INTERVAL '2 minutes'),
-    (2, false, NOW() - INTERVAL '15 minutes'),
-    (3, true, NOW() - INTERVAL '1 minute'),
-    (4, false, NOW() - INTERVAL '1 hour');
-
-INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat_at)
+INSERT INTO vehicle_status (vehicle_id, is_online, last_heartbeat)
 SELECT
     id,
-    random() > 0.3,
+    false,
     NOW() - (random() * INTERVAL '30 minutes')
-FROM vehicles
-WHERE id > 4;
+FROM vehicles;
 
 INSERT INTO vehicle_locations (vehicle_id, latitude, longitude, updated_at)
 VALUES
@@ -468,3 +463,227 @@ INSERT INTO users (email, username, password, role, is_verified, is_suspended, m
 
 INSERT INTO companies (name, address, city_id, country_id, latitude, longitude, status, rejection_reason, reviewed_by_id, owner_id, created_at, version) VALUES (
              'Euro Supply Ltd','Nemanjina 12', 1118, 1, 44.8125, 20.4612, 'APPROVED', NULL, NULL, 1, NOW(), 0);
+
+INSERT INTO users (
+    email,
+    username,
+    password,
+    role,
+    is_verified,
+    is_suspended,
+    must_change_password,
+    hash,
+    firstname,
+    lastname,
+    phone_number
+)
+SELECT
+    'customer' || gs || '@example.com'               AS email,
+    'customer_' || gs                                AS username,
+    '$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W' AS password,
+    'CUSTOMER'                                       AS role,
+    true                                             AS is_verified,
+    false                                            AS is_suspended,
+    false                                            AS must_change_password,
+    'cust_hash_' || gs                               AS hash,
+    'Customer'                                      AS firstname,
+    'User' || (gs % 10000)                           AS lastname,
+    ('+3816' || lpad((gs % 10000000)::text, 7, '0')) AS phone_number
+FROM generate_series(1, 2000000) gs;
+
+INSERT INTO users (
+    email,
+    username,
+    password,
+    role,
+    is_verified,
+    is_suspended,
+    must_change_password,
+    hash,
+    firstname,
+    lastname,
+    phone_number
+)
+SELECT
+    'manager' || gs || '@example.com'                 AS email,
+    'manager_' || gs                                 AS username,
+    '$2a$10$Z3JiBldbaNQ4qGPjtr7TV.FeT2He/KgqxT68impZ9.H3XeyQAZ03W' AS password,
+    'MANAGER'                                        AS role,
+    true                                             AS is_verified,
+    false                                            AS is_suspended,
+    false                                            AS must_change_password,
+    'mgr_hash_' || gs                                AS hash,
+    'Manager'                                       AS firstname,
+    'User' || (gs % 5000)                            AS lastname,
+    ('+38165' || lpad((gs % 10000000)::text, 7, '0')) AS phone_number
+FROM generate_series(1, 1000000) gs;
+
+WITH
+    customers AS (
+        SELECT id, ROW_NUMBER() OVER () rn
+        FROM users
+        WHERE role = 'CUSTOMER'
+    ),
+    managers AS (
+        SELECT id, ROW_NUMBER() OVER () rn
+        FROM users
+        WHERE role = 'MANAGER'
+    ),
+    counts AS (
+        SELECT
+            (SELECT COUNT(*) FROM customers) AS cu_cnt,
+            (SELECT COUNT(*) FROM managers) AS ma_cnt
+    )
+INSERT INTO companies (
+    name,
+    address,
+    city_id,
+    country_id,
+    latitude,
+    longitude,
+    status,
+    rejection_reason,
+    reviewed_by_id,
+    owner_id,
+    created_at,
+    version
+)
+SELECT
+    'Pending Company ' || gs,
+    'Business Street ' || gs,
+    1118,
+    40,
+    44.80 + random() * 0.05,
+    20.45 + random() * 0.05,
+    'PENDING',
+    NULL,
+    NULL,
+    c.id,
+    NOW(),
+    0
+FROM (
+         SELECT
+             gs,
+             ((gs - 1) % cu_cnt) + 1 AS c_idx
+FROM generate_series(1, 200) gs,
+    counts
+    ) s
+    JOIN customers c ON c.rn = s.c_idx;
+
+
+WITH
+    target_customer AS (
+        SELECT id
+        FROM users
+        WHERE email = 'customer@gmail.com'
+          AND role = 'CUSTOMER'
+    LIMIT 1
+    ),
+    any_manager AS (
+SELECT id
+FROM users
+WHERE role = 'MANAGER'
+    LIMIT 1
+    )
+INSERT INTO companies (
+    name,
+    address,
+    city_id,
+    country_id,
+    latitude,
+    longitude,
+    status,
+    rejection_reason,
+    reviewed_by_id,
+    owner_id,
+    created_at,
+    version
+)
+SELECT
+    'VIP Company ' || gs,
+    'VIP Industrial Zone ' || gs,
+    1118,
+    40,
+    44.80 + random() * 0.05,
+    20.45 + random() * 0.05,
+    'APPROVED',
+    NULL,
+    m.id,
+    c.id,
+    NOW(),
+    0
+FROM generate_series(1, 150) gs
+         CROSS JOIN target_customer c
+         CROSS JOIN any_manager m;
+
+WITH
+    customers AS (
+        SELECT id, ROW_NUMBER() OVER () rn
+        FROM users
+        WHERE role = 'CUSTOMER'
+    ),
+    managers AS (
+        SELECT id, ROW_NUMBER() OVER () rn
+        FROM users
+        WHERE role = 'MANAGER'
+    ),
+    counts AS (
+        SELECT
+            (SELECT COUNT(*) FROM customers) AS cu_cnt,
+            (SELECT COUNT(*) FROM managers) AS ma_cnt
+    )
+INSERT INTO companies (
+    name,
+    address,
+    city_id,
+    country_id,
+    latitude,
+    longitude,
+    status,
+    rejection_reason,
+    reviewed_by_id,
+    owner_id,
+    created_at,
+    version
+)
+SELECT
+    'Company ' || gs,
+    'Industrial Zone ' || (gs % 10000),
+
+    CASE loc
+        WHEN 0 THEN 1118
+        WHEN 1 THEN 1052
+        WHEN 2 THEN 1046
+        WHEN 3 THEN 1067
+        ELSE 1127
+        END,
+
+    CASE loc
+        WHEN 0 THEN 40
+        WHEN 1 THEN 18
+        WHEN 2 THEN 16
+        WHEN 3 THEN 23
+        ELSE 43
+        END,
+
+    40 + random(),
+    20 + random(),
+
+    'APPROVED',
+    NULL,
+    m.id,
+    c.id,
+    NOW(),
+    0
+FROM (
+     SELECT
+         gs,
+         ((random() ^ 2) * cu_cnt)::int + 1 AS c_idx,
+    ((gs - 1) % ma_cnt) + 1 AS m_idx,
+    (gs % 5) AS loc
+FROM generate_series(1, 2000000) gs,
+    counts
+    ) s
+    JOIN customers c ON c.rn = s.c_idx
+    JOIN managers  m ON m.rn = s.m_idx;
+COMMIT;

@@ -4,16 +4,19 @@ import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.WriteApiBlocking;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
-import com.nvt.eurosupply.realtime.dtos.VehicleDistanceDto;
-import com.nvt.eurosupply.realtime.dtos.VehicleDistanceRequestDto;
-import com.nvt.eurosupply.realtime.messages.VehicleHeartbeatMessage;
+import com.nvt.eurosupply.realtime.dtos.vehicle.*;
 import com.nvt.eurosupply.realtime.messages.VehicleLocationMessage;
+import com.nvt.eurosupply.realtime.queries.VehicleFlux;
 import com.nvt.eurosupply.shared.components.TimeWindowCalculator;
+import com.nvt.eurosupply.vehicle.events.StatusChangeEvent;
+import com.nvt.eurosupply.vehicle.mappers.VehicleMapper;
 import com.nvt.eurosupply.vehicle.services.VehicleService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -23,48 +26,63 @@ public class VehicleRealTimeService {
     private final InfluxQueryService service;
     private final VehicleService vehicleService;
     private final TimeWindowCalculator timeWindowCalculator;
+    private final InfluxQueryService influxQueryService;
+    private final VehicleMapper vehicleMapper;
+    private final VehicleFlux vehicleFlux;
 
     public VehicleRealTimeService(
             @Qualifier("vehicleInfluxClient") InfluxDBClient influxDBClient,
             InfluxQueryService service,
             VehicleService vehicleService,
-            TimeWindowCalculator timeWindowCalculator
-    ) {
+            TimeWindowCalculator timeWindowCalculator,
+            InfluxQueryService influxQueryService, VehicleMapper vehicleMapper, VehicleFlux vehicleFlux) {
         this.writeApi = influxDBClient.getWriteApiBlocking();
         this.service = service;
         this.vehicleService = vehicleService;
         this.timeWindowCalculator = timeWindowCalculator;
+        this.influxQueryService = influxQueryService;
+        this.vehicleMapper = vehicleMapper;
+        this.vehicleFlux = vehicleFlux;
+    }
+
+    public void saveStatusChanges(List<StatusChangeEvent> statusChanges) {
+        if (statusChanges == null || statusChanges.isEmpty())
+            return;
+
+        List<Point> points = statusChanges.stream()
+                .map(change -> Point
+                        .measurement("vehicle_availability")
+                        .addTag("vehicle_id", String.valueOf(change.vehicleId()))
+                        .addField("is_online", change.isOnline())
+                        .time(change.timestamp(), WritePrecision.NS))
+                .toList();
+
+        writeApi.writePoints(points);
     }
 
     public List<VehicleDistanceDto> getDistances(Long id, VehicleDistanceRequestDto request) {
-        vehicleService.find(id);
+        if(!vehicleService.vehicleExists(id)) {
+            throw new EntityNotFoundException("Vehicle not found");
+        }
+
         Instant start = request.getStart();
         Instant end = request.getEnd();
         String window = timeWindowCalculator.calculateWindowDuration(start, end);
 
-        String query = String.format(
-                """
-                from(bucket: "vehicle")
-                |> range(start: %s, stop: %s)
-                |> filter(fn: (r) => r["vehicle_id"] == "%d")
-                |> filter(fn: (r) => r["_measurement"] == "vehicle_location")
-                |> filter(fn: (r) => r["_field"] == "distance_traveled")
-                |> aggregateWindow(every: %s, fn: sum, createEmpty: false)
-                |> yield()
-                """,
-                start, end, id, window
-        );
-
-        return service.query(query, fluxRecord -> {
-            VehicleDistanceDto dto = new VehicleDistanceDto();
-            dto.setTime(fluxRecord.getTime());
-            dto.setDistanceTraveled(
-                    fluxRecord.getValue() == null ? null : ((Number) fluxRecord.getValue()).doubleValue()
-            );
-            return dto;
-        }).toList();
+        String query = vehicleFlux.getDistances(id, start, end, window);
+        return service.query(query, vehicleMapper::fromFluxRecord).toList();
     }
 
+    public VehicleAvailabilitySummaryDto getAvailabilitySummary(Long id, VehicleAvailabilityRequestDto request) {
+        vehicleService.find(id);
+
+        Instant start = request.getStart();
+        Instant end = request.getEnd();
+        String window = timeWindowCalculator.calculateWindowDuration(start, end);
+
+        List<VehicleAvailabilityDto> dataPoints = getAggregatedAvailability(id, start, end, window);
+        return vehicleMapper.toSummary(dataPoints, start, end);
+    }
 
     public void saveLocation(VehicleLocationMessage location) {
         Point point = Point
@@ -79,14 +97,19 @@ public class VehicleRealTimeService {
         writeApi.writePoint(point);
     }
 
-    public void saveHearthBeat(VehicleHeartbeatMessage heartbeat) {
+    public void saveStatusChange(Long vehicleId, boolean isOnline, Instant timestamp) {
         Point point = Point
                 .measurement("vehicle_availability")
-                .addTag("vehicle_id", String.valueOf(heartbeat.getVehicleId()))
-                .addField("status", heartbeat.getStatus().ordinal())
-                .time(heartbeat.getTimestamp(), WritePrecision.NS);
+                .addTag("vehicle_id", String.valueOf(vehicleId))
+                .addField("is_online", isOnline)
+                .time(timestamp, WritePrecision.NS);
 
         writeApi.writePoint(point);
     }
 
+    private List<VehicleAvailabilityDto> getAggregatedAvailability(Long vehicleId, Instant start, Instant end, String window) {
+        String query = vehicleFlux.getAggregatedAvailability(vehicleId, start, end, window);
+        DateTimeFormatter formatter = timeWindowCalculator.getFormatterForWindow(window);
+        return influxQueryService.query(query, fluxRecord -> vehicleMapper.fromFluxRecord(fluxRecord, formatter)).toList();
+    }
 }

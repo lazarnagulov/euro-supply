@@ -1,4 +1,5 @@
 import type {
+    AvailabilitySummary,
     DistancePoint, DistanceRequest,
     Vehicle,
     VehicleBrand,
@@ -55,11 +56,19 @@ export const vehicleService = {
     },
 
     getDistances: async (id: number, request: DistanceRequest) => {
-        const vehicleResponse = await apiClient.get<DistancePoint[]>(
+        const response = await apiClient.get<DistancePoint[]>(
             `/vehicles/${id}/distances`,
             { params: request }
         );
-        return vehicleResponse.data;
+        return response.data;
+    },
+
+    getAvailability: async (id: number, request: DistanceRequest) => {
+        const response = await apiClient.get<AvailabilitySummary>(
+            `/vehicles/${id}/availability`,
+            { params: request }
+        );
+        return response.data;
     },
 
     createVehicle: async (data: Vehicle, images: File[]) => {
