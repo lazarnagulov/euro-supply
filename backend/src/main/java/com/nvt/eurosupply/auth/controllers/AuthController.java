@@ -6,9 +6,9 @@ import com.nvt.eurosupply.auth.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@Slf4j
+@Tag(name = "Authentication and Authorization", description = "Authentication and Authorization API")
 public class AuthController {
 
     private final AuthService service;
@@ -37,6 +37,15 @@ public class AuthController {
         return ResponseEntity.ok(service.login(request));
     }
 
+    @Operation(
+            summary = "Authorize file access",
+            description = "Checks whether the currently authenticated user is authorized to access a protected file."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User is authorized to access the file"),
+            @ApiResponse(responseCode = "401", description = "User is not authenticated"),
+            @ApiResponse(responseCode = "403", description = "User is not authorized to access the file"),
+    })
     @GetMapping("/authorize-file")
     public ResponseEntity<Void> authorizeFile(@RequestHeader("X-Original-URI") String originalUri) {
         service.authorizeFile(originalUri);
