@@ -113,8 +113,7 @@ public class VehicleService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Caching(evict = {
             @CacheEvict(value = "vehicle", key = "#id"),
-            @CacheEvict(value = "vehicleLocation", key = "#id"),
-            @CacheEvict(value = "vehicleStatus", key = "#id"),
+            @CacheEvict(value = "vehicleExists", key = "#id"),
     })
     public void deleteVehicle(Long id) {
         Vehicle vehicle = find(id);
@@ -151,7 +150,6 @@ public class VehicleService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @CacheEvict(value = "vehicleLocation", key = "#id")
     public void updateLocation(Long id, Location location) {
         VehicleLocation vehicleLocation = locationRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Vehicle location not found"));
         vehicleLocation.setLocation(location);
@@ -179,14 +177,12 @@ public class VehicleService {
         fileService.deleteFiles(imageIds);
     }
 
-    @Cacheable(value = "vehicleLocation", key = "#id")
     public LocationResponseDto getVehicleLocation(Long id) {
         VehicleLocation vehicleLocation = locationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle location not found"));
         return locationMapper.toResponse(vehicleLocation.getLocation());
     }
 
-    @Cacheable(value = "vehicleStatus", key = "#id")
     public ConnectionStatusDto getVehicleStatus(Long id) {
         VehicleStatus status = statusRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle status not found"));
@@ -195,7 +191,6 @@ public class VehicleService {
 
     @Scheduled(fixedRate = 5 * 60 * 1000)
     @Transactional
-    @CacheEvict(value = "vehicleStatus", allEntries = true)
     public void markVehiclesOffline() {
         log.info("Updating vehicle status");
         Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
@@ -213,7 +208,6 @@ public class VehicleService {
     }
 
     @Transactional
-    @CacheEvict(value = "vehicleStatus", key = "#vehicleId")
     public void applyHeartbeat(Long vehicleId, Instant timestamp) {
         VehicleStatus status = statusRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle status not found: " + vehicleId));
@@ -224,6 +218,11 @@ public class VehicleService {
         if (wasOffline && statusChangeListener != null) {
             statusChangeListener.accept(new StatusChangeEvent(vehicleId, true, timestamp));
         }
+    }
+
+    @Cacheable(value = "vehicleExists", key = "#id")
+    public boolean vehicleExists(Long id) {
+        return repository.existsById(id);
     }
 
     public Vehicle find(Long id) {

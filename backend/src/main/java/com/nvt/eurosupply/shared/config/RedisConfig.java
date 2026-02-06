@@ -55,23 +55,22 @@ public class RedisConfig {
         RedisCacheConfiguration defaultConfig = baseConfig(objectSerializer, Duration.ofMinutes(10));
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = Map.ofEntries(
-                Map.entry("countries", baseConfig(listSerializer, Duration.ofHours(12))),
-                Map.entry("countryCities", baseConfig(listSerializer, Duration.ofHours(12))),
-                Map.entry("vehicleModels", baseConfig(listSerializer, Duration.ofHours(12))),
-                Map.entry("vehicleBrands", baseConfig(listSerializer, Duration.ofHours(12))),
-                Map.entry("categories", baseConfig(listSerializer, Duration.ofHours(12))),
-                Map.entry("cities", baseConfig(listSerializer, Duration.ofHours(12))),
+            Map.entry("countries", baseConfig(listSerializer, Duration.ofHours(12))),
+            Map.entry("countryCities", baseConfig(listSerializer, Duration.ofHours(12))),
+            Map.entry("vehicleModels", baseConfig(listSerializer, Duration.ofHours(12))),
+            Map.entry("vehicleBrands", baseConfig(listSerializer, Duration.ofHours(12))),
+            Map.entry("categories", baseConfig(listSerializer, Duration.ofHours(12))),
+            Map.entry("cities", baseConfig(listSerializer, Duration.ofHours(12))),
 
 
-                Map.entry("vehicle", baseConfig(objectSerializer, Duration.ofMinutes(30))),
-                Map.entry("vehicleLocation", baseConfig(objectSerializer, Duration.ofSeconds(30))),
-                Map.entry("vehicleStatus", baseConfig(objectSerializer, Duration.ofSeconds(30))),
+            Map.entry("vehicle", baseConfig(objectSerializer, Duration.ofMinutes(30))),
+            Map.entry("vehicleExists", baseConfig(objectSerializer, Duration.ofMinutes(30))),
 
-                Map.entry("factory", baseConfig(objectSerializer, Duration.ofMinutes(30))),
-                Map.entry("factoryStatus", baseConfig(objectSerializer, Duration.ofSeconds(30))),
+            Map.entry("factory", baseConfig(objectSerializer, Duration.ofMinutes(30))),
+            Map.entry("factoryStatus", baseConfig(objectSerializer, Duration.ofSeconds(30))),
 
-                Map.entry("product", baseConfig(objectSerializer, Duration.ofMinutes(30)))
-                );
+            Map.entry("product", baseConfig(objectSerializer, Duration.ofMinutes(30)))
+        );
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)

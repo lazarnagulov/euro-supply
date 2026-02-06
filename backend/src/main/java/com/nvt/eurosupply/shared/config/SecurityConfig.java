@@ -71,8 +71,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs.yaml"
                         ).permitAll()
-
                         .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/auth/authorize-file").permitAll()
                         .requestMatchers("/api/v1/users/registration").permitAll()
                         .requestMatchers("/api/v1/users/password").permitAll()
 
