@@ -15,6 +15,9 @@ apiClient.interceptors.request.use(
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        if (config.url?.startsWith('/files/')) {
+            config.baseURL = '';
+        }
         return config;
     },
     (error: AxiosError) => {

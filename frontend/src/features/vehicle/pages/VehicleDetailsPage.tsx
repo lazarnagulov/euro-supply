@@ -30,6 +30,7 @@ import { ImageModal } from "../../../components/modal/ImageModal";
 import { useVehiclePolling } from "../hooks/useVehiclePolling";
 import AppToaster from "../../../components/common/AppToaster.tsx";
 import AvailabilityCharts from "../components/charts/VehicleAvailabilityCharts.tsx";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 const VehicleDetailsPage: React.FC = () => {
     const { vehicleId } = useParams();
@@ -220,7 +221,7 @@ const VehicleDetailsPage: React.FC = () => {
                                     className="relative group cursor-pointer rounded-xl overflow-hidden shadow-sm border"
                                     onClick={() => openImageModal(index)}
                                 >
-                                    <img
+                                    <AuthenticatedImage
                                         src={fileResponse.url}
                                         className="w-full h-40 object-cover group-hover:scale-105 transition-transform"
                                         alt={`Vehicle ${index + 1}`}

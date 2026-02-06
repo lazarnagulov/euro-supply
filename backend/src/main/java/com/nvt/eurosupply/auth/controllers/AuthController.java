@@ -47,8 +47,8 @@ public class AuthController {
             @ApiResponse(responseCode = "403", description = "User is not authorized to access the file"),
     })
     @GetMapping("/authorize-file")
-    public ResponseEntity<Void> authorize() {
-        //TODO: Authorize file
+    public ResponseEntity<Void> authorizeFile(@RequestHeader("X-Original-URI") String originalUri) {
+        service.authorizeFile(originalUri);
         return ResponseEntity.ok().build();
     }
 }

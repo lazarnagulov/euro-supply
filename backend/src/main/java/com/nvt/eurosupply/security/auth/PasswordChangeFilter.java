@@ -34,7 +34,8 @@ public class PasswordChangeFilter extends OncePerRequestFilter {
 
         if (requestURI.startsWith("/api/v1/auth/login") ||
                 requestURI.startsWith("/api/v1/users/registration") ||
-                requestURI.equals("/api/v1/users/password")
+                requestURI.equals("/api/v1/users/password")||
+                requestURI.equals("/api/v1/auth/authorize-file")
         ) {
             filterChain.doFilter(request, response);
             return;

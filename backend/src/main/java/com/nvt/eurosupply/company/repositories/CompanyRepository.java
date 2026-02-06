@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.company.repositories;
 
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
+import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.enums.RequestStatus;
 import com.nvt.eurosupply.company.models.Company;
 import org.springframework.data.domain.Page;
@@ -38,5 +39,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
         WHERE c.id IN :companyIds
     """)
     List<Object[]> findFilesForCompanies(@Param("companyIds") List<Long> companyIds);
+    boolean existsByIdAndOwner_Username(Long id, String username);
     List<Company> findByOwnerIdAndStatus(Long ownerId, RequestStatus status);
 }
