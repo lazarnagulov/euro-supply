@@ -4,7 +4,7 @@ This directory contains the Spring Boot backend application for the EuroSupply s
 
 The backend exposes a secure, role-aware REST API used by the frontend, simulators, and load-testing tools. It is responsible for business logic, authentication and authorization, persistence, integrations, and system coordination across supply-chain–related domains such as companies, vehicles, and reference data.
 
-The application is built with Spring Boot 3, Java 17+, and PostgreSQL, following clean architecture principles and emphasizing scalability, security, and maintainability.
+The application is built with **Spring Boot 3**, **Java 17+**, **PostgreSQL** and **Redis**, following clean architecture principles and emphasizing scalability, security, and maintainability.
 
 ## Features
 
@@ -51,8 +51,8 @@ The application is configured using Spring profiles and environment variables.
 
 ### Key configuration files:
 
-- application-dev.yml – Local development profile
-- application-prod.yml – Production profile
+- application-dev.properties – Local development profile
+- application-prod.properties – Production profile
 
 
 ## Setup
