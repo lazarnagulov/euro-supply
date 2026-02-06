@@ -1,5 +1,3 @@
-<a id="readme-top"></a>
-
 [![Contributors][contributors-shield]][contributors-url]
 [![Last Commit][last-commit-shield]][last-commit-url]
 
@@ -46,8 +44,6 @@
 
 **Euro Supply** is a full-stack web application designed to manage supply-chain–related processes, users, and resources in a secure and scalable way. The system is built with a modern backend architecture and a lightweight, responsive frontend, making it suitable both for development and production environments.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Built With
 
 This project is built using the following core technologies:
@@ -88,9 +84,6 @@ This project is built using the following core technologies:
 
 [![Locust][Locust-img]][Locust-url]
 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Repository Structure
 
 This repository is organized as a **multi-module system**, where each major component has its own dedicated README with detailed setup and usage instructions:
@@ -107,8 +100,6 @@ This repository is organized as a **multi-module system**, where each major comp
 - **Load Tests** – Locust performance and stress tests
   - See: `load-tests/README.md`
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ## Getting Started
 
 To run the full system locally, follow these high-level steps:
@@ -123,8 +114,6 @@ To run the full system locally, follow these high-level steps:
 4. _(Optional)_ Run simulators and load tests
 
 Detailed instructions for each step are available in the corresponding subproject README files.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Available Roles and Credentials
 
@@ -143,8 +132,6 @@ The system supports the following predefined roles for development and testing p
   - Password: `pera`
 
 > These credentials are intended **for local development only**.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 [Locust-img]: https://img.shields.io/badge/Locust-Load%20Testing-00c853?logo=locust&logoColor=white
 [Locust-url]: https://locust.io/
