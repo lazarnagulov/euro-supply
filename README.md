@@ -94,11 +94,13 @@ This repository is organized as a **multi-module system**, where each major comp
 - **Frontend** – React + Tailwind CSS web client
   - See: `frontend/README.md`
 
-- **Simulators** – Go-based simulators producing domain events and telemetry
+- **Simulators** – Go-based simulators producing telemetry
   - See: `simulators/README.md`
 
-- **Load Tests** – Locust performance and stress tests
+- **Load Tests** – Locust load tests
   - See: `load-tests/README.md`
+
+- **Docs** – Project documentation (Swagger/OpenAPI specs, Locust test reports)
 
 ## Getting Started
 
