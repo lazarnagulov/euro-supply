@@ -86,6 +86,7 @@ public class AuthService {
                     yield authorizeCompanyFile(resourceId, username);
                 yield false;
             }
+            case "product" -> isCustomer;
             case "user" -> {
                 if (isCustomer)
                     yield authorizeUserFile(resourceId, username);
