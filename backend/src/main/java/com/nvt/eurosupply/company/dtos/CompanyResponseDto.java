@@ -1,7 +1,6 @@
 package com.nvt.eurosupply.company.dtos;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
-import com.nvt.eurosupply.user.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +19,8 @@ public class CompanyResponseDto {
     private String city;
     private String country;
     private List<FileResponseDto> files;
-    private User owner;
+    private String username;
+    private String email;
     private Double latitude;
     private Double longitude;
 }

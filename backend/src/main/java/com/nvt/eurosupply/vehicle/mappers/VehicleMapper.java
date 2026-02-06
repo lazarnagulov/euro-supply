@@ -40,10 +40,10 @@ public class VehicleMapper {
     private final LocationMapper locationMapper;
 
     public Vehicle fromCreateRequest(CreateVehicleRequestDto request) {
-        return Vehicle.builder()
-                .maxLoadKg(request.getMaxLoadKg())
-                .registrationNumber(request.getRegistrationNumber())
-                .build();
+        Vehicle vehicle = new Vehicle();
+        vehicle.setRegistrationNumber(request.getRegistrationNumber());
+        vehicle.setMaxLoadKg(request.getMaxLoadKg());
+        return vehicle;
     }
 
     public VehicleResponseDto toResponse(Vehicle vehicle) {

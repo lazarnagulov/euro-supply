@@ -124,11 +124,11 @@ const CompanyReviewModal: React.FC<CompanyReviewModelProps> = ({ company, onClos
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">Customer</p>
-                                <p className="font-semibold text-gray-800">{company.owner.name}</p>
+                                <p className="font-semibold text-gray-800">{company.username}</p>
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">Email</p>
-                                <p className="font-semibold text-gray-800">{company.owner.email}</p>
+                                <p className="font-semibold text-gray-800">{company.email}</p>
                             </div>
                             <div className="col-span-2">
                                 <p className="text-sm text-gray-600">Location</p>
