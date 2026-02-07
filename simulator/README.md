@@ -79,8 +79,8 @@ Typical use cases include:
 
 ```bash
 ./vehicle_simulator \
-  --config configs/vehicle_simulator.yml \
-  --vehicle.id=vehicle-42 \
+  --config ./configs/vehicle/vehicle_simulator.yaml \
+  --vehicle.id=42 \
   --simulator.reporting_interval=2s \
 ```
 ## Technology Stack
@@ -108,11 +108,13 @@ Ensure all service URLs, credentials, and routing keys match the target environm
 2. Build Simulators and Generators
 
 ```bash
-go build ./cmd/vehicle_simulator/main.go
-go build ./cmd/factory_simulator/main.go
-go build ./cmd/warehouse_simulator/main.go
-go build ./cmd/vehicle_generator/main.go
-go build ./cmd/warehouse_generator/main.go
+go build -o vehicle_simulator ./cmd/vehicle_simulator/main.go
+go build -o factory_simulator ./cmd/factory_simulator/main.go
+go build -o warehouse_simulator ./cmd/warehouse_simulator/main.go
+
+go build -o vehicle_generator ./cmd/vehicle_generator/main.go
+go build -o factory_generator ./cmd/factory_generator/main.go
+go build -o warehouse_generator ./cmd/warehouse_generator/main.go
 ```
 
 3. Run Generators
@@ -122,7 +124,7 @@ Run generators to create initial data:
 ```bash
 ./vehicle_generator -config configs/vehicle/generator.yaml
 ./factory_generator --config configs/factory/generator.yaml
-./warehouse_generator -config configs/warehouse/generator.yaml
+./warehouse_generator --config configs/warehouse/generator.yaml
 ```
 
 4. Run Simulators

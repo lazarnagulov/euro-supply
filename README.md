@@ -162,7 +162,7 @@ The system supports the following predefined roles for development and testing p
 [Nginx-img]: https://img.shields.io/badge/Nginx-Reverse%20Proxy-009639?logo=nginx&logoColor=white
 [Nginx-url]: https://nginx.org/
 
-[Go-img]: https://img.shields.io/badge/Go-1.22-00ADD8?logo=go&logoColor=white
+[Go-img]: https://img.shields.io/badge/Go-1.24-00ADD8?logo=go&logoColor=white
 [Go-url]: https://go.dev/
 
 [Redis-img]: https://img.shields.io/badge/Redis-Cache%20%26%20Sessions-dc382d?logo=redis&logoColor=white

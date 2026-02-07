@@ -61,7 +61,7 @@ const VehicleDetailsPage: React.FC = () => {
         loadCustomRange: loadTraveledCustomRange,
     } = useDistanceData(vehicleId);
 
-    const availabilityPeriod = usePeriodSelector("12h");
+    const availabilityPeriod = usePeriodSelector("7d");
     const {
         availabilityData,
         loading: availabilityLoading,
