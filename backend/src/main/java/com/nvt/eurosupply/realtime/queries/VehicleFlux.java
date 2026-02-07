@@ -18,6 +18,7 @@ public class VehicleFlux {
                   |> filter(fn: (r) => r["_measurement"] == "vehicle_availability")
                   |> filter(fn: (r) => r["vehicle_id"] == "%d")
                   |> filter(fn: (r) => r["_field"] == "is_online")
+                  |> sort(columns: ["_time"])
                   |> last()
                   |> map(fn: (r) => ({r with _time: %s}))
             
@@ -28,7 +29,7 @@ public class VehicleFlux {
                   |> filter(fn: (r) => r["_field"] == "is_online")
             
                 union(tables: [lastState, currentStates])
-                  |> sort(columns: ["_time"])
+                  |> sort(columns: ["_time", "_value"])
                   |> elapsed(unit: 1m)
                   |> window(every: %s, createEmpty: false)
                   |> map(fn: (r) => ({
@@ -44,12 +45,12 @@ public class VehicleFlux {
                       })
                   )
                   |> duplicate(column: "_stop", as: "_time")
-                  |> filter(fn: (r) => r._time < now())
+                  |> filter(fn: (r) => r._time < time(v: %s))
                   |> filter(fn: (r) => r.online_minutes + r.offline_minutes > 0)
                   |> drop(columns: ["_start"])
                   |> yield(name: "availability")
                 """,
-                lookBackStart, start, vehicleId, start, start, end, vehicleId, window
+                lookBackStart, start, vehicleId, start, start, end, vehicleId, window, end
         );
     }
 

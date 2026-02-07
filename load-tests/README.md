@@ -37,7 +37,7 @@ http://localhost:8080/
 ```bash
 python -m pip install virtualenv
 python -m virtualenv venv
-.\venv\bin\activate # ./venv/Scripts/activate (Windows)
+./venv/bin/activate # .\venv\Scripts\activate (Windows)
 ```
 
 3. Install dependencies

@@ -74,11 +74,11 @@ public class VehicleService {
         Vehicle createdVehicle = repository.save(vehicle);
 
         VehicleLocation location = new VehicleLocation();
-        location.setVehicleId(createdVehicle.getId());
+        location.setVehicle(createdVehicle);
         locationRepository.save(location);
 
         VehicleStatus status = new VehicleStatus();
-        status.setVehicleId(createdVehicle.getId());
+        status.setVehicle(createdVehicle);
         status.setIsOnline(false);
         statusRepository.save(status);
 

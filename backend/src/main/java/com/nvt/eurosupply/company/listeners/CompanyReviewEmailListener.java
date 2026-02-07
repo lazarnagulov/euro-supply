@@ -2,8 +2,6 @@ package com.nvt.eurosupply.company.listeners;
 
 import com.nvt.eurosupply.company.events.CompanyReviewedEvent;
 import com.nvt.eurosupply.email.facades.CompanyEmailFacade;
-import com.nvt.eurosupply.email.services.CompanyEmailService;
-import com.nvt.eurosupply.email.services.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

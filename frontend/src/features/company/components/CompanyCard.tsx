@@ -34,7 +34,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onReview }) => {
                                 </p>
                                 <p className="flex items-center gap-2">
                                     <User className="w-4 h-4" />
-                                    {company.owner.username} ({company.owner.email})
+                                    {company.username} ({company.email})
                                 </p>
                             </div>
 

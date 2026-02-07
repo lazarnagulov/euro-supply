@@ -6,6 +6,7 @@ import com.nvt.eurosupply.auth.exceptons.AccountAccessDeniedException;
 import com.nvt.eurosupply.auth.exceptons.UserSuspendedException;
 import com.nvt.eurosupply.company.repositories.CompanyRepository;
 import com.nvt.eurosupply.security.utils.JwtTokenUtil;
+import com.nvt.eurosupply.shared.exceptions.BadRequestException;
 import com.nvt.eurosupply.shared.exceptions.FileAuthorizationException;
 import com.nvt.eurosupply.user.enums.Role;
 import com.nvt.eurosupply.user.models.User;
@@ -45,6 +46,7 @@ public class AuthService {
         Long expiresIn = jwtTokenUtil.accessTokenExpiration;
         return new UserTokenState(user.getId(), jwt, expiresIn, user.getMustChangePassword());
     }
+
     public void authorizeFile(String originalUri) {
         String filePath = originalUri.replaceFirst("^/files/", "");
         determineFileOwnership(filePath);
@@ -66,7 +68,7 @@ public class AuthService {
                 throw new FileAuthorizationException();
             }
         } catch (Exception e) {
-            throw new FileAuthorizationException();
+            throw new BadRequestException("File url is not correct");
         }
     }
 

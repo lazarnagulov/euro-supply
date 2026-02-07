@@ -1,7 +1,6 @@
 package com.nvt.eurosupply.company.repositories;
 
 import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
-import com.nvt.eurosupply.company.dtos.CompanyResponseDto;
 import com.nvt.eurosupply.company.enums.RequestStatus;
 import com.nvt.eurosupply.company.models.Company;
 import org.springframework.data.domain.Page;
@@ -21,7 +20,8 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
             city.name,
             country.name,
             null,
-            c.owner,
+            c.owner.username,
+            c.owner.email,
             c.latitude,
             c.longitude
         )

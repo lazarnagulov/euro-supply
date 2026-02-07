@@ -50,7 +50,7 @@ public class Company {
     @ManyToOne(fetch = FetchType.LAZY)
     private User reviewedBy;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private User owner;
 
     @Column(nullable = false, updatable = false)
