@@ -1,0 +1,43 @@
+warehouse:
+  id: 1
+  name: "Central Warehouse"
+  address: "Kralja Milana 6"
+  city: "Belgrade"
+  country: "Serbia"
+  latitude: 16020
+  longitude: 454545
+
+sectors:
+  - name: "Electronics"
+    min_temperature: -20.0
+    max_temperature: -15.0
+  - name: "Furniture"
+    min_temperature: 2.0
+    max_temperature: 8.0
+  - name: "Clothing"
+    min_temperature: 15.0
+    max_temperature: 25.0
+
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672/"
+  exchanges:
+    - name: "warehouse.temperature"
+      kind: "topic"
+      durable: true
+    - name: "warehouse.heartbeat"
+      kind: "topic"
+      durable: true
+
+  connection_timeout: "10s"
+  reconnect_delay: "5s"
+  max_reconnect_attempts: 10
+
+simulator:
+  reporting_interval: "10m"  
+  randomize_temperature: true 
+  min_sector_interval: 1      
+
+logging:
+  level: "info"
+  format: "console"
+  output_path: "stdout"

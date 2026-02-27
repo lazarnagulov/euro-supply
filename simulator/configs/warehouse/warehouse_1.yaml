@@ -1,0 +1,43 @@
+warehouse:
+  id: 2
+  name: "Belgrade Warehouse"
+  address: "Lamartinova 52, Vracar"
+  city: "Belgrade"
+  country: "Serbia"
+  latitude: 16520
+  longitude: 454545
+
+sectors:
+  - name: "Frozen"
+    minTemperature: -20.0
+    maxTemperature: -15.0
+  - name: "Cool"
+    minTemperature: 2.0
+    maxTemperature: 8.0
+  - name: "Dry"
+    minTemperature: 15.0
+    maxTemperature: 25.0
+
+rabbitmq:
+  url: "amqp://guest:guest@localhost:5672/"
+  exchanges:
+    - name: "warehouse.temperature"
+      kind: "topic"
+      durable: true
+    - name: "warehouse.heartbeat"
+    - kind: "topic"
+    - durable: true
+
+  connection_timeout: "10s"
+  reconnect_delay: "5s"
+  max_reconnect_attempts: 10
+
+simulator:
+  reporting_interval: "10m"  
+  randomize_temperature: true 
+  min_sector_interval: 1      
+
+logging:
+  level: "info"
+  format: "console"
+  output_path: "stdout"
