@@ -1,0 +1,14 @@
+influx:
+  url: "http://localhost:8086"
+  token: "my-secret-token"
+  org: "eurosupply"
+  bucket: "vehicle"
+
+vehicle:
+  numVehicles: 100
+  yearsOfHistory: 5
+  workers: 10
+  batchSize: 5000
+  minSpeed: 20.0
+  maxSpeed: 90.0
+  reportingInterval: 10m

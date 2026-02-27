@@ -1,5 +1,5 @@
 import "./App.css";
-import { Route, Routes } from "react-router-dom";
+import {Navigate, Route, Routes} from "react-router-dom";
 import { CompanyRegistrationPage } from "./features/company/pages/CompanyRegistrationPage.tsx";
 import CompanyReviewPage from "./features/company/pages/CompanyReviewPage.tsx";
 import NavigationHeader from "./components/layout/NavigationHeader.tsx";
@@ -17,6 +17,8 @@ import AccountVerificationPage from "./features/auth/pages/AccountVerificationPa
 import ProductCatalogPage from "./features/product/pages/ProductCatalogPage.tsx";
 import ManagerManagementPage from "./features/manager/pages/ManagerManagementPage.tsx";
 import ChangePasswordPage from "./features/auth/pages/ChangePasswordPage.tsx";
+import {ROLES} from "./features/auth/types/auth.types.ts";
+import RequireAuth from "./features/auth/components/RequireAuth.tsx";
 
 function App() {
   return (
@@ -25,29 +27,27 @@ function App() {
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/change-password" element={<ChangePasswordPage />} />
-        <Route
-          path="/company-registration"
-          element={<CompanyRegistrationPage />}
-        />
-        <Route path="/company-review" element={<CompanyReviewPage />} />
-        <Route path="/vehicle-management" element={<VehicleManagementPage />} />
-        <Route path="/product-management" element={<ProductManagementPage />} />
-        <Route
-          path="/warehouse-management"
-          element={<WarehouseManagementPage />}
-        />
-        <Route path="/manager-management" element={<ManagerManagementPage />} />
-        <Route path="/products/:productId" element={<ProductDetailsPage />} />
-        <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
-        <Route path="/factory-management" element={<FactoryManagementPage />} />
-        <Route path="/factories/:factoryId" element={<FactoryDetailsPage />} />
-        <Route
-          path="/account-verification/:id"
-          element={<AccountVerificationPage />}
-        />
-        <Route path="/products-catalog" element={<ProductCatalogPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registration" element={<RegistrationPage />} />
+        <Route path="/account-verification/:id" element={<AccountVerificationPage />}/>
+        <Route element={<RequireAuth allowedRoles={[ROLES.CUSTOMER]} />}>
+            <Route path="/company-registration" element={<CompanyRegistrationPage />}/>
+            <Route path="/products-catalog" element={<ProductCatalogPage />} />
+        </Route>
+        <Route element={<RequireAuth allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]} />}>
+            <Route path="/company-review" element={<CompanyReviewPage />} />
+            <Route path="/vehicle-management" element={<VehicleManagementPage />} />
+            <Route path="/product-management" element={<ProductManagementPage />} />
+            <Route path="/warehouse-management" element={<WarehouseManagementPage />}/>
+            <Route path="/factory-management" element={<FactoryManagementPage />} />
+            <Route path="/products/:productId" element={<ProductDetailsPage />} />
+            <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
+            <Route path="/factories/:factoryId" element={<FactoryDetailsPage />} />
+        </Route>
+        <Route element={<RequireAuth allowedRoles={[ROLES.ADMIN]} />}>
+          <Route path="/manager-management" element={<ManagerManagementPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

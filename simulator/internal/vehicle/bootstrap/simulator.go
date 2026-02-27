@@ -50,6 +50,12 @@ func StartSimulator(cfg *internalConfig.Config, mq *messaging.RabbitMQClient) *s
 	return sim
 }
 
+func ShutdownSignal() <-chan os.Signal {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	return sigChan
+}
+
 func WaitForShutdown() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)

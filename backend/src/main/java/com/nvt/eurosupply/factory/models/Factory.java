@@ -45,9 +45,6 @@ public class Factory {
     @OneToMany
     private List<StoredFile> images;
 
-    @OneToMany(mappedBy = "factory", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Production> productions = new ArrayList<>();
-
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
     @Column(nullable = false)

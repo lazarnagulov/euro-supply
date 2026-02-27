@@ -9,40 +9,48 @@ public class VehicleSpecification {
     private VehicleSpecification() {}
 
     public static Specification<Vehicle> search(VehicleSearchRequestDto request) {
-        return Specification.where(registrationContains(request.getRegistration()))
-                .and(byBrand(request.getBrandId()))
-                .and(byModel(request.getModelId()))
+        return Specification
+                .where(registrationContains(request.getRegistration()))
+                .and(byBrandId(request.getBrandId()))
+                .and(byModelId(request.getModelId()))
                 .and(byMinLoad(request.getMinLoad()))
                 .and(byMaxLoad(request.getMaxLoad()));
     }
 
     private static Specification<Vehicle> registrationContains(String term) {
-        return (root, query, cb) ->
-                term == null ? cb.conjunction() :
-                        cb.like(cb.lower(root.get("registrationNumber")), "%" + term.toLowerCase() + "%");
+        return (root, query, cb) -> {
+            if (term == null || term.isBlank())
+                return cb.conjunction();
+
+            return cb.like(root.get("registrationNumber"), "%" + term + "%");
+        };
     }
 
-    private static Specification<Vehicle> byBrand(Long brandId) {
+    private static Specification<Vehicle> byBrandId(Long brandId) {
         return (root, query, cb) ->
-                brandId == null ? cb.conjunction() :
-                        cb.equal(root.get("brand").get("id"), brandId);
+                brandId == null
+                        ? cb.conjunction()
+                        : cb.equal(root.join("brand").get("id"), brandId);
     }
 
-    private static Specification<Vehicle> byModel(Long modelId) {
+    private static Specification<Vehicle> byModelId(Long modelId) {
         return (root, query, cb) ->
-                modelId == null ? cb.conjunction() :
-                        cb.equal(root.get("model").get("id"), modelId);
+                modelId == null
+                        ? cb.conjunction()
+                        : cb.equal(root.join("model").get("id"), modelId);
     }
 
     private static Specification<Vehicle> byMinLoad(Double minLoad) {
         return (root, query, cb) ->
-                minLoad == null ? cb.conjunction() :
-                    cb.greaterThanOrEqualTo(root.get("maxLoadKg"), minLoad);
+                minLoad == null
+                        ? cb.conjunction()
+                        : cb.greaterThanOrEqualTo(root.get("maxLoadKg"), minLoad);
     }
 
     private static Specification<Vehicle> byMaxLoad(Double maxLoad) {
         return (root, query, cb) ->
-                maxLoad == null ? cb.conjunction() :
-                            cb.lessThanOrEqualTo(root.get("maxLoadKg"), maxLoad);
+                maxLoad == null
+                        ? cb.conjunction()
+                        : cb.lessThanOrEqualTo(root.get("maxLoadKg"), maxLoad);
     }
 }

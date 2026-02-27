@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { LatLngTuple } from "leaflet";
 import { MapField } from "../../../components/map/MapField.tsx";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface FactoryModalProps {
   onSuccess: () => void;
@@ -394,7 +395,7 @@ const FactoryModal: React.FC<FactoryModalProps> = ({
                   <div className="grid grid-cols-4 gap-3">
                     {existingImages.map((fileResponse, index) => (
                       <div key={index} className="relative group">
-                        <img
+                        <AuthenticatedImage
                           src={fileResponse.url}
                           alt={`Existing ${index + 1}`}
                           className="w-full h-24 object-cover rounded-lg"

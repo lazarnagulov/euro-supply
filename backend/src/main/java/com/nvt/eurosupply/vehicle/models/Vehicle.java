@@ -14,7 +14,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "vehicles")
+@Table(
+        name = "vehicles",
+        indexes = {
+                @Index(name = "idx_vehicle_brand_id", columnList = "brand_id"),
+                @Index(name = "idx_vehicle_model_id", columnList = "model_id"),
+                @Index(name = "idx_vehicle_max_load", columnList = "max_load_kg"),
+                @Index(name = "idx_vehicle_brand_model_load", columnList = "brand_id, model_id")
+        }
+)
 @Builder
 public class Vehicle {
 

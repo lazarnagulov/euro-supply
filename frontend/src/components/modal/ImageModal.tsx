@@ -1,5 +1,6 @@
 import React from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import AuthenticatedImage from "../auth/AuthenticatedImage.tsx";
 
 interface ImageModalProps {
     images: Array<{ url: string }>;
@@ -62,7 +63,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
                 className="relative max-w-5xl max-h-full"
                 onClick={(e) => e.stopPropagation()}
             >
-                <img
+                <AuthenticatedImage
                     src={images[selectedIndex].url}
                     alt={`Image ${selectedIndex + 1}`}
                     className="max-w-full max-h-[85vh] object-contain rounded-lg"

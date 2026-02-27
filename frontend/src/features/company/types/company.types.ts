@@ -46,7 +46,8 @@ export interface CompanyResponse {
     city: string;
     country: string;
     files: FileResponse[];
-    owner: any;
+    username: string;
+    email: string;
     latitude: number;
     longitude: number;
 }

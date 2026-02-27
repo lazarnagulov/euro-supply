@@ -15,6 +15,9 @@ apiClient.interceptors.request.use(
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        if (config.url?.startsWith('/files/')) {
+            config.baseURL = '';
+        }
         return config;
     },
     (error: AxiosError) => {
@@ -26,7 +29,10 @@ apiClient.interceptors.response.use(
     (response) => response,
     (error: AxiosError<ApiError>) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem('token');
+            const tokenExpired = error.response.headers['x-token-expired'] === 'true';
+            if (tokenExpired) {
+                localStorage.removeItem('token');
+            }
         }
 
         if (error.response?.status === 403) {

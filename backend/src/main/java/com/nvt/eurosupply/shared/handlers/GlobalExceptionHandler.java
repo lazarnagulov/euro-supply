@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -93,6 +92,23 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
+
+    @ExceptionHandler(FileAuthorizationException.class)
+    public ResponseEntity<ExceptionResponse> handleFileAuthorizationException(
+            FileAuthorizationException ex,
+            HttpServletRequest request) {
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error("Forbidden")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .status(HttpStatus.FORBIDDEN.value())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
 
     @ExceptionHandler(FileDeleteException.class)
     public ResponseEntity<ExceptionResponse> handleFileDeleteException(

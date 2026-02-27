@@ -11,6 +11,7 @@ import { productService } from "../../../api/services/productService";
 import { categoryService } from "../../../api/services/categoryService";
 import { factoryService } from "../../../api/services/factoryService";
 import type { FactoryResponse } from "../../factory/types/factory.types";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface ProductModalProps {
   mode: "create" | "edit";
@@ -431,7 +432,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
                 {previewUrl && (
                   <div className="mt-4 relative w-40">
-                    <img
+                    <AuthenticatedImage
                       src={previewUrl}
                       alt="Product preview"
                       className="w-full h-24 object-cover rounded-lg"

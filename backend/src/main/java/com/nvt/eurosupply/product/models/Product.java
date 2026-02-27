@@ -41,6 +41,9 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @Column(nullable = false)
+    private Integer quantity = 0;
+
     @ManyToMany
     @JoinTable(
             name = "product_factory",

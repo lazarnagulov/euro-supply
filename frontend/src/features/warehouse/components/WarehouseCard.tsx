@@ -2,6 +2,7 @@ import React from "react";
 import { Edit2, Trash2, Truck, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { WarehouseResponse } from "../types/warehouse.type";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface WarehouseCardProps {
     warehouse: WarehouseResponse;
@@ -16,9 +17,10 @@ const WarehouseCard: React.FC<WarehouseCardProps> = ({ warehouse, onEdit, onDele
         <div className="bg-white rounded-xl shadow hover:shadow-xl transition-all overflow-hidden">
             <div className="relative h-48 bg-gray-200">
                 {warehouse.imageUrls?.[0] ? (
-                    <img
+                    <AuthenticatedImage
                         src={warehouse.imageUrls[0].url}
                         className="w-full h-full object-cover"
+                        alt={`Warehouse`}
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">

@@ -1,6 +1,7 @@
 import React from "react";
 import { Package } from "lucide-react";
 import type { ProductWithImage } from "../types/product.types";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface OrderableProductCardProps {
   product: ProductWithImage;
@@ -15,7 +16,7 @@ const OrderableProductCard: React.FC<OrderableProductCardProps> = ({
     <div className="bg-white rounded-xl shadow hover:shadow-xl transition-all overflow-hidden">
       <div className="relative h-48 bg-gray-200">
         {product.imageUrl?.url ? (
-          <img
+          <AuthenticatedImage
             src={product.imageUrl.url}
             alt={product.name}
             className="w-full h-full object-cover"

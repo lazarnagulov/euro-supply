@@ -2,6 +2,7 @@ import React from "react";
 import { Edit2, Trash2, Truck, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { VehicleResponse } from "../types/vehicle.types.ts";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 interface VehicleCardProps {
     vehicle: VehicleResponse;
@@ -16,10 +17,15 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onEdit, onDelete }) 
         <div className="bg-white rounded-xl shadow hover:shadow-xl transition-all overflow-hidden">
             <div className="relative h-48 bg-gray-200">
                 {vehicle.imageUrls?.[0] ? (
-                    <img
+                    <AuthenticatedImage
                         src={vehicle.imageUrls[0].url}
                         alt={vehicle.registrationNumber}
                         className="w-full h-full object-cover"
+                        fallback={
+                            <div className="w-full h-full flex items-center justify-center">
+                                <Truck className="w-16 h-16 text-gray-400" />
+                            </div>
+                        }
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">

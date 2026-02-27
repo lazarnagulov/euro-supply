@@ -3,6 +3,7 @@ import { ArrowLeft, Package, Tag, Weight, DollarSign } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useProductData } from "../hooks/useProductData";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 const ProductDetailsPage: React.FC = () => {
   const { productId } = useParams();
@@ -118,7 +119,7 @@ const ProductDetailsPage: React.FC = () => {
         ) : (
           <div className="flex justify-center">
             <div className="relative group rounded-xl overflow-hidden shadow-lg border max-w-2xl">
-              <img
+              <AuthenticatedImage
                 src={product.imageUrl.url}
                 className="w-full h-96 object-cover"
                 alt={product.name}

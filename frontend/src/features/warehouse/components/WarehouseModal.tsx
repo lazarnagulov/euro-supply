@@ -9,6 +9,7 @@
   import { X, CheckCircle, AlertCircle, Upload } from "lucide-react";
   import { MapField } from "../../../components/map/MapField";
   import type { LatLngTuple } from "leaflet";
+  import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
   interface WarehouseModalProps {
     onSuccess: () => void;
@@ -357,7 +358,7 @@
                   <div className="grid grid-cols-4 gap-3">
                     {existingImages.map((fileResponse, index) => (
                       <div key={index} className="relative group">
-                        <img
+                        <AuthenticatedImage
                           src={fileResponse.url}
                           alt={`Existing ${index + 1}`}
                           className="w-full h-24 object-cover rounded-lg"

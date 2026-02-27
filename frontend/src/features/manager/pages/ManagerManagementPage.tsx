@@ -7,6 +7,7 @@ import ManagerModal from "../components/ManagerModal";
 import SuspendConfirmationModal from "../components/SuspendConfirmationModal.tsx";
 import Pagination from "../../../components/common/Pagination.tsx";
 import toast from "react-hot-toast";
+import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
 
 const ManagerManagementPage = () => {
   const [managers, setManagers] = useState<ManagerResponse[]>([]);
@@ -205,7 +206,7 @@ const ManagerManagementPage = () => {
                         <td className="px-6 py-4">
                           <div className="w-12 h-12 rounded-full border-2 border-indigo-200 flex items-center justify-center overflow-hidden">
                             {manager.imageUrl?.url ? (
-                              <img
+                              <AuthenticatedImage
                                 src={manager.imageUrl.url}
                                 alt={`${manager.firstname} ${manager.lastname}`}
                                 className="w-full h-full object-cover"
