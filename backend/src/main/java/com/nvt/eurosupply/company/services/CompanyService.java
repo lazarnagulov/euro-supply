@@ -62,10 +62,6 @@ public class CompanyService {
         company.setCity(city);
         company.setCountry(country);
         company.setOwner(userService.getCurrentUser());
-        User mockUser = new User();
-        mockUser.setId(1L);
-        company.setOwner(mockUser);
-
         return mapper.toResponse(repository.save(company));
     }
 
