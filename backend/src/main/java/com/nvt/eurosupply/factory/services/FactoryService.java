@@ -40,9 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -102,7 +100,7 @@ public class FactoryService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @CacheEvict(value = "factory", key = "#id")
     public FactoryResponseDto updateFactory(Long id, UpdateFactoryRequestDto request) {
-        Factory factory = find(id);
+        Factory factory = repository.findOneById(id);
 
         if (!Objects.equals(factory.getCity().getId(), request.getCityId())) {
             City city = cityService.find(request.getCityId());
