@@ -93,7 +93,7 @@ public class ProductService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @CacheEvict(value = "product", key = "#id")
     public ProductResponseDto updateProduct(Long id, UpdateProductRequestDto request) {
-        Product product = find(id);
+        Product product = repository.findOneById(id);
 
         if (!Objects.equals(product.getCategory().getId(), request.getCategoryId())) {
             Category category = categoryService.find(request.getCategoryId());
