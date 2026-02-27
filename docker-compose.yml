@@ -1,5 +1,3 @@
-version: "3.7"
-
 services:
 
   rabbitmq:
@@ -8,11 +6,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     volumes:
-      - ./rabbitmq/data:/var/lib/rabbitmq
+      - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - iot-network
 
@@ -40,6 +35,9 @@ services:
     networks:
       - iot-network
     command: ["redis-server", "--appendonly", "yes"]
+
+volumes:
+  rabbitmq_data:
 
 networks:
   iot-network:
