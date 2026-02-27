@@ -40,6 +40,7 @@
         cityId: 0,
         latitude: null,
         longitude: null,
+        sectors: []
       },
       mode: "onChange",
     });
@@ -55,6 +56,7 @@
       const [submitStatus, setSubmitStatus] = useState<string | null>(null);
       const [submitError, setSubmitError] = useState<string | null>(null);
       const [currentLocation, setCurrentLocation] = useState<LatLngTuple | null>(null);
+      const [sectorNames, setSectorNames] = useState<string[]>([]);
 
     const countryId = watch("countryId");
 
@@ -71,11 +73,15 @@
             cityId: warehouse.city.id,
             latitude: warehouse.latitude ?? null,
             longitude: warehouse.longitude ?? null,
+            sectors: warehouse.sectors?.map(s => ({ name: s.name })) || [],
           });
+          setSectorNames(warehouse.sectors?.map(s => s.name) || []);
 
           if (warehouse.latitude != null && warehouse.longitude != null) {
             setCurrentLocation([warehouse.latitude, warehouse.longitude]);
           }
+
+          setSectorNames(warehouse.sectors?.map(s => s.name) || []);
         }
       };
       initializeForm();
@@ -89,6 +95,14 @@
           setValue("cityId", 0);
         }
       }, [countryId, setValue]);
+
+    useEffect(() => {
+      setValue(
+        "sectors",
+        sectorNames.map((name) => ({ name })),
+        { shouldValidate: true }
+      );
+    }, [sectorNames]);
 
     const loadCountries = async () => {
       const data = await locationService.getCountries();
@@ -113,14 +127,14 @@
         setImages((prev) => [...prev, ...imageFiles]);
       };
     
-      const removeImage = (index: number) => {
-        setImages((prev) => prev.filter((_, i) => i !== index));
-        setImageError("");
-      };
-    
-      const removeExistingImage = (index: number) => {
-        setExistingImages((prev) => prev.filter((_, i) => i !== index));
-      };
+    const removeImage = (index: number) => {
+      setImages((prev) => prev.filter((_, i) => i !== index));
+      setImageError("");
+    };
+  
+    const removeExistingImage = (index: number) => {
+      setExistingImages((prev) => prev.filter((_, i) => i !== index));
+    };
     
     const onSubmit = async (data: Warehouse) => {
         if (mode === "create" && images.length === 0) {
@@ -306,6 +320,40 @@
                 )}
               </div>
             </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-1">Sectors</label>
+              {sectorNames.map((name, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    className="flex-1 border border-gray-300 rounded px-3 py-2"
+                    value={name}
+                    onChange={(e) => {
+                      const newSectors = [...sectorNames];
+                      newSectors[index] = e.target.value;
+                      setSectorNames(newSectors);
+                    }}
+                    placeholder={`Sector ${index + 1}`}
+                  />
+                  <button
+                    type="button"
+                    className="text-red-500 font-bold"
+                    onClick={() => {
+                      setSectorNames(sectorNames.filter((_, i) => i !== index));
+                    }}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="text-indigo-600 font-medium hover:underline"
+                onClick={() => setSectorNames([...sectorNames, ""])}>
+              + Add Sector
+            </button>
+          </div>
   
             <section>
               <MapField

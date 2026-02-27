@@ -1,5 +1,7 @@
 package com.nvt.eurosupply.warehouse.services;
 
+import com.nvt.eurosupply.realtime.messages.SectorTemperatureMessage;
+import com.nvt.eurosupply.realtime.messages.WarehouseReportMessage;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -16,6 +18,7 @@ import com.nvt.eurosupply.warehouse.dtos.WarehouseResponseDto;
 import com.nvt.eurosupply.warehouse.dtos.WarehouseSearchRequestDto;
 import com.nvt.eurosupply.warehouse.mappers.WarehouseMapper;
 import com.nvt.eurosupply.warehouse.models.Warehouse;
+import com.nvt.eurosupply.warehouse.repositories.SectorTemperatureRepository;
 import com.nvt.eurosupply.warehouse.repositories.WarehouseRepository;
 import com.nvt.eurosupply.warehouse.specifications.WarehouseSpecification;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,8 +30,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +43,12 @@ public class WarehouseService {
     private final CityService cityService;
     private final CountryService countryService;
     private final FileService fileService;
+    private final SectorService sectorService;
 
     private final WarehouseRepository repository;
     private final FileMapper fileMapper;
     private final WarehouseMapper mapper;
+    private final SectorTemperatureRepository sectorTemperatureRepository;
 
     public Warehouse find (Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
@@ -52,7 +60,9 @@ public class WarehouseService {
         Country country = countryService.find(request.getCountryId());
         warehouse.setCity(city);
         warehouse.setCountry(country);
-        return mapper.toResponse(repository.save(warehouse));
+        Warehouse saved = repository.save(warehouse);
+        sectorService.createSectors(request.getSectors(), warehouse);
+        return mapper.toResponse(saved);
     }
 
     public WarehouseResponseDto updateWarehouse(Long id, UpdateWarehouseRequestDto request) {
