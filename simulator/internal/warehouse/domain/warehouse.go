@@ -6,6 +6,7 @@ import (
 )
 
 type Sector struct {
+	ID             int64
 	Name           string
 	MinTemperature float64
 	MaxTemperature float64
@@ -23,34 +24,30 @@ type Warehouse struct {
 }
 
 type SectorTemperature struct {
-    SectorName  string  `json:"sector_name"`
+    SectorID int64     `json:"sector_id"`
     Temperature float64 `json:"temperature"`
 }
 
 type WarehouseTemperatureMessage struct {
     WarehouseID   int64               `json:"warehouse_id"`
-    WarehouseName string              `json:"warehouse_name"`
-    Sectors       []SectorTemperature `json:"sectors"`
+    Temperatures       []SectorTemperature `json:"temperatures"`
     Timestamp     time.Time           `json:"timestamp"`
-    Type          string              `json:"type"`
 }
 
-func NewWarehouseTemperatureMessage(warehouse *Warehouse, temperatures map[string]float64) WarehouseTemperatureMessage {
-    sectors := make([]SectorTemperature, 0, len(temperatures))
-    for name, temp := range temperatures {
-        sectors = append(sectors, SectorTemperature{
-            SectorName:  name,
-            Temperature: temp,
-        })
-    }
+func NewWarehouseTemperatureMessage(warehouse *Warehouse, temps map[int64]float64) WarehouseTemperatureMessage {
+	sectorTemps := make([]SectorTemperature, 0, len(temps))
+	for id, temp := range temps {
+		sectorTemps = append(sectorTemps, SectorTemperature{
+			SectorID:    id,
+			Temperature: temp,
+		})
+	}
 
-    return WarehouseTemperatureMessage{
-        WarehouseID:   warehouse.ID,
-        WarehouseName: warehouse.Name,
-        Sectors:       sectors,
-        Timestamp:     time.Now(),
-        Type:          "temperature",
-    }
+	return WarehouseTemperatureMessage{
+		WarehouseID:  warehouse.ID,
+		Temperatures: sectorTemps,
+		Timestamp:    time.Now(),
+	}
 }
 
 func NewWarehouse(cfg *config.Config) *Warehouse {
@@ -70,6 +67,7 @@ func buildSectors(cfg *config.Config) []Sector {
 	sectors := make([]Sector, len(cfg.Warehouse.Sectors))
 	for i, s := range cfg.Warehouse.Sectors {
 		sectors[i] = Sector{
+			ID:             int64(s.ID),
 			Name:           s.Name,
 			MinTemperature: s.MinTemperature,
 			MaxTemperature: s.MaxTemperature,

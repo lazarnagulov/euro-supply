@@ -77,7 +77,7 @@ func (s *Simulator) sendTemperatures() error {
 	ctx, cancel := context.WithTimeout(s.ctx, 5*time.Second)
 	defer cancel()
 
-	routingKey := fmt.Sprintf("warehouse.%d.all.temperatures", s.warehouse.ID)
+	routingKey := fmt.Sprintf("warehouse.%d.temperatures", s.warehouse.ID)
 
 	if err := s.publisher.Publish(ctx, "warehouse.temperature", routingKey, msg); err != nil {
 		fmt.Printf("failed to publish temperatures for warehouse %d: %v\n", s.warehouse.ID, err)

@@ -7,16 +7,19 @@ warehouse:
   latitude: 16020
   longitude: 454545
 
-sectors:
-  - name: "Electronics"
-    min_temperature: -20.0
-    max_temperature: -15.0
-  - name: "Furniture"
-    min_temperature: 2.0
-    max_temperature: 8.0
-  - name: "Clothing"
-    min_temperature: 15.0
-    max_temperature: 25.0
+  sectors:
+    - id: 1
+      name: "Electronics"
+      min_temperature: -20.0
+      max_temperature: -15.0
+    - id: 2
+      name: "Furniture"
+      min_temperature: 2.0
+      max_temperature: 8.0
+    - id: 3
+      name: "Clothing"
+      min_temperature: 15.0
+      max_temperature: 25.0
 
 rabbitmq:
   url: "amqp://guest:guest@localhost:5672/"
@@ -33,7 +36,8 @@ rabbitmq:
   max_reconnect_attempts: 10
 
 simulator:
-  reporting_interval: "10m"  
+  reporting_interval: "10s"  
+  heartbeat_interval: "30s" 
   randomize_temperature: true 
   min_sector_interval: 1      
 

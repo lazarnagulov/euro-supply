@@ -16,6 +16,7 @@ type Config struct {
 }
 
 type SectorConfig struct {
+	ID             int64   `yaml:"id"`
 	Name           string  `mapstructure:"name"`
 	MinTemperature float64 `mapstructure:"min_temperature"`
 	MaxTemperature float64 `mapstructure:"max_temperature"`

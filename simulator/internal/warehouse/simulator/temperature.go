@@ -25,10 +25,10 @@ func (t *TemperatureSimulator) SimulateTemperature(sector domain.Sector) float64
 	return temp
 }
 
-func (t *TemperatureSimulator) SimulateAllTemperature(sectors []domain.Sector) map[string]float64 {
-	result := make(map[string]float64, len(sectors))
+func (t *TemperatureSimulator) SimulateAllTemperature(sectors []domain.Sector) map[int64]float64 {
+	result := make(map[int64]float64, len(sectors))
 	for _, s := range sectors {
-		result[s.Name] = t.SimulateTemperature(s)
+		result[s.ID] = t.SimulateTemperature(s)
 	}
 	return result
 }

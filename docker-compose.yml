@@ -1,3 +1,5 @@
+version: "3.7"
+
 services:
 
   rabbitmq:
@@ -12,16 +14,20 @@ services:
       - iot-network
 
   influxdb:
-    image: influxdb:1.8
+    image: influxdb:2.6
     container_name: influxdb-eurosupply
     ports:
       - "8086:8086"
     environment:
-      - INFLUXDB_DB=${INFLUXDB_DB}
-      - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
-      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+      # Admin korisnik i password
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORGANIZATION}
+      - DOCKER_INFLUXDB_INIT_BUCKET=warehouse
+      - DOCKER_INFLUXDB_INIT_MODE=setup
     volumes:
-      - ./influxdb/data:/var/lib/influxdb
+      - ./influxdb/data:/var/lib/influxdb2
+      - ./influxdb/init:/docker-entrypoint-initdb.d
     networks:
       - iot-network
 
