@@ -34,4 +34,10 @@ public class InfluxDbConfig {
         String url = String.format("http://%s:%s", host, port);
         return InfluxDBClientFactory.create(url, token.toCharArray(), organization, "factory");
     }
+
+    @Bean("warehouseInfluxClient")
+    public InfluxDBClient warehouseInfluxClient() {
+        String url = String.format("http://%s:%s", host, port);
+        return InfluxDBClientFactory.create(url, token.toCharArray(), organization, "warehouse");
+    }
 }

@@ -123,4 +123,25 @@ public class WarehouseService {
         repository.saveAndFlush(warehouse);
         fileService.deleteFiles(imageIds);
     }
+
+    @Transactional
+    public void applyReport(WarehouseReportMessage report) {
+        if (report.getTemperatures() == null || report.getTemperatures().isEmpty())
+            return;
+
+        Map<Long, Double> updates = report.getTemperatures().stream()
+                .collect(Collectors.toMap(
+                        SectorTemperatureMessage::getSectorId,
+                        SectorTemperatureMessage::getTemperature
+                ));
+
+        int[] results = sectorTemperatureRepository.batchUpdateTemperature(updates, report.getTimestamp());
+
+        int i = 0;
+        for (Long sectorId : updates.keySet()) {
+            if (results[i++] == 0) {
+                throw new EntityNotFoundException("Sector not found: " + sectorId);
+            }
+        }
+    }
 }

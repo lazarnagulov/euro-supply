@@ -36,7 +36,7 @@ rabbitmq:
   max_reconnect_attempts: 10
 
 simulator:
-  reporting_interval: "10s"  
+  reporting_interval: "10m"  
   heartbeat_interval: "30s" 
   randomize_temperature: true 
   min_sector_interval: 1      
