@@ -12,6 +12,22 @@ type Sector struct {
 	MaxTemperature float64
 }
 
+type WarehouseHeartbeatMessage struct {
+	WarehouseID int64     `json:"warehouse_id"`
+	Timestamp time.Time `json:"timestamp"`
+	Status      string    `json:"status"`
+    Type        string    `json:"type"`
+}
+
+func NewHeartbeatMessage(warehouseID int64) WarehouseHeartbeatMessage {
+    return WarehouseHeartbeatMessage{
+        WarehouseID: warehouseID,
+        Timestamp:   time.Now(),
+        Status:      "online",
+        Type:        "heartbeat",
+    }
+}
+
 type Warehouse struct {
 	ID        int64
 	Name      string

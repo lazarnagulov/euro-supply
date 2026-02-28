@@ -12,6 +12,7 @@ func RegisterFlags() {
 	pflag.Float64("warehouse.longitude", 19.8335, "Warehouse longitude")
 
 	pflag.Duration("simulator.reporting_interval", 10*60*1e9, "Reporting interval in nanoseconds") // 10 min
+	pflag.String("rabbitmq.heartbeat_exchange", "", "Heartbeat exchange")
 	pflag.Bool("simulator.randomize_temperature", true, "Randomize sector temperature")
 	pflag.Int("simulator.min_sector_interval", 1, "Minimum interval per sector update")
 
