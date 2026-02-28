@@ -10,16 +10,16 @@ warehouse:
   sectors:
     - id: 4
       name: "Frozen"
-      minTemperature: -20.0
-      maxTemperature: -15.0
+      min_temperature: -20.0
+      max_temperature: -15.0
     - id: 5
       name: "Cool"
-      minTemperature: 2.0
-      maxTemperature: 8.0
+      min_temperature: 2.0
+      max_temperature: 8.0
     - id: 6
       name: "Dry"
-      minTemperature: 15.0
-      maxTemperature: 25.0
+      min_temperature: 15.0
+      max_temperature: 25.0
 
 rabbitmq:
   url: "amqp://guest:guest@localhost:5672/"
