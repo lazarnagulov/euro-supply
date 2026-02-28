@@ -41,8 +41,8 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(nullable = false)
-    private Integer quantity = 0;
+    @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
+    private ProductInventory inventory;
 
     @ManyToMany
     @JoinTable(
@@ -56,9 +56,6 @@ public class Product {
     private Instant createdAt;
     @Column(nullable = false)
     private Instant updatedAt;
-
-    @Version
-    private Long version;
 
     @PrePersist
     public void onCreate() {
