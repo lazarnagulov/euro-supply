@@ -27,6 +27,7 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ProductService {
 
     private final ProductRepository repository;
@@ -133,8 +135,14 @@ public class ProductService {
     @CacheEvict(value = "product", key = "#id")
     public void deleteProduct(Long id) {
         Product product = find(id);
+        Long imageId = product.getImage() != null ? product.getImage().getId() : null;
+
+        inventoryRepository.deleteByProductId(id);
         repository.delete(product);
-        fileService.deleteFiles(List.of(product.getImage().getId()));
+        repository.flush();
+
+        if (imageId != null)
+            fileService.deleteFiles(List.of(imageId));
     }
 
     public PagedResponse<FactoryProductListItemDto> getProductsByFactoryId(Long factoryId, Pageable pageable) {

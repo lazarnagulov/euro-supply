@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 public interface ProductInventoryRepository extends JpaRepository<ProductInventory, Long>, ProductBatchOperations {
+    void deleteByProductId(Long productId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT i FROM ProductInventory i WHERE i.product.id = :productId")
