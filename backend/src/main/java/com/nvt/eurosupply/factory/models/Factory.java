@@ -16,7 +16,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "factories")
+@Table(
+        name = "factories",
+        indexes = {
+                @Index(name = "idx_factory_country_id", columnList = "country_id"),
+                @Index(name = "idx_factory_country_city", columnList = "country_id, city_id")
+        }
+)
 @Builder
 public class Factory {
 

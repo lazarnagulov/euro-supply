@@ -18,3 +18,9 @@ CREATE INDEX IF NOT EXISTS idx_product_name_trgm
 
 CREATE INDEX IF NOT EXISTS idx_product_description_trgm
     ON products USING GIN (description gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_factory_name_trgm
+    ON factories USING GIN (name gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_factory_address_trgm
+    ON factories USING GIN (address gin_trgm_ops);
