@@ -55,4 +55,13 @@ public class WarehouseRealTimeService {
         });
     }
 
+    public void saveHeartbeat(WarehouseHeartbeatMessage heartbeat) {
+        Point point = Point
+                .measurement("warehouse_availability")
+                .addTag("warehouse_id", String.valueOf(heartbeat.getWarehouseId()))
+                .addField("status", heartbeat.getStatus().ordinal())
+                .time(heartbeat.getTimestamp(), WritePrecision.NS);
+
+        writeApi.writePoint(point);
+    }
 }

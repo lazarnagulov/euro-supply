@@ -21,6 +21,19 @@ public class WarehouseMessageListener {
     private final WarehouseRealTimeService realTimeService;
     private final WarehouseService service;
 
+    @RabbitListener(queues = "warehouse.heartbeat.queue")
+    public void receiveHeartbeat(String message) {
+        try {
+            WarehouseHeartbeatMessage heartbeat = mapper.readValue(message, new TypeReference<>() {});
+            realTimeService.saveHeartbeat(heartbeat);
+            log.info("[{}] Received heartbeat from warehouse {}: status={}",
+                    heartbeat.getTimestamp(), heartbeat.getWarehouseId(), heartbeat.getStatus());
+           service.applyHeartbeat(heartbeat.getWarehouseId(), heartbeat.getTimestamp());
+        } catch (JsonProcessingException e) {
+            log.error("Error processing warehouse heartbeat: {}", e.getMessage(), e);
+        }
+    }
+
     @RabbitListener(queues = "warehouse.temperature.queue")
     public void receiveWarehouseReport(String message) {
         try {
