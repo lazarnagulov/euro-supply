@@ -13,7 +13,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "products")
+@Table(
+        name = "products",
+        indexes = {
+                @Index(name = "idx_product_category_id", columnList = "category_id"),
+                @Index(name = "idx_product_on_sale", columnList = "on_sale"),
+                @Index(name = "idx_product_price", columnList = "price"),
+                @Index(name = "idx_product_weight", columnList = "weight"),
+                @Index(name = "idx_product_category_on_sale", columnList = "category_id, on_sale")
+        }
+)
 @Builder
 public class Product {
 

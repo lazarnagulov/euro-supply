@@ -13,5 +13,8 @@ CREATE INDEX IF NOT EXISTS idx_users_search
 CREATE INDEX IF NOT EXISTS idx_vehicle_registration_trgm
     ON vehicles USING GIN (registration_number gin_trgm_ops);
 
-CREATE INDEX IF NOT EXISTS idx_vehicle_brand_model_load
-    ON vehicles (brand_id, model_id, max_load_kg);
+CREATE INDEX IF NOT EXISTS idx_product_name_trgm
+    ON products USING GIN (name gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_product_description_trgm
+    ON products USING GIN (description gin_trgm_ops);
