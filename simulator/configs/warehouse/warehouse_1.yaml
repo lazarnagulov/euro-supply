@@ -28,8 +28,8 @@ rabbitmq:
       kind: "topic"
       durable: true
     - name: "warehouse.heartbeat"
-    - kind: "topic"
-    - durable: true
+      kind: "topic"
+      durable: true
 
   connection_timeout: "10s"
   reconnect_delay: "5s"
