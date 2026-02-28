@@ -76,7 +76,6 @@ public class FactoryService {
         factory = repository.save(factory);
 
         FactoryStatus status = new FactoryStatus();
-        status.setFactoryId(factory.getId());
         status.setFactory(factory);
         status.setIsOnline(false);
         statusRepository.save(status);
