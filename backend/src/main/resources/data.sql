@@ -445,7 +445,29 @@ INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
 
 INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude) VALUES
      ('Central Warehouse', 'Kralja Milana 6, Beograd', 40, 1118, 16020, 454545),
-     ('Belgrade Warehouse', 'Lamartinova 52, Vracar', 40, 1118, 16520, 454545);
+     ('Belgrade Warehouse', 'Lamartinova 52, Vracar', 40, 1118, 16520, 454545),
+     ('Main Warehouse', '123 Storage St.', 40, 1120, 45.2671, 19.8335);
+
+
+INSERT INTO warehouse_status (warehouse_id, is_online, last_heartbeat_at)
+SELECT id, false, NOW() - (random() * INTERVAL '30 minutes')
+FROM warehouses;
+
+INSERT INTO sectors (name, warehouse_id) VALUES
+('Electronics', 1),
+('Furniture', 1),
+('Clothing', 1),
+('Frozen', 2),
+('Cool', 2),
+('Dry', 2);
+
+INSERT INTO sector_temperatures (sector_id, temperature) VALUES
+(1, 22.0),   -- Electronics
+(2, 21.0),   -- Furniture
+(3, 20.0),   -- Clothing
+(4, -20.0),   -- Frozen
+(5, 5.0),     -- Cool 
+(6, 20.0);    -- Dry 
 
 INSERT INTO warehouses_images (images_id, warehouse_id) VALUES
                                                         (11, 1),

@@ -39,6 +39,17 @@ export const warehouseSchema = z.object({
         .max(180, 'Invalid longitude')
         .nullable()
         .refine((val) => val !== null, 'Please select location on the map'),
+
+    sectors: z.array(
+             z.object({
+                name: z
+                    .string()
+                    .min(1, 'Sector name cannot be empty')
+                    .max(50, 'Sector name too long')
+                    .trim(),
+            })
+        )
+        .min(1, 'At least one sector is required'),
 });
 
 export const warehouseImagesSchema = z.object({
