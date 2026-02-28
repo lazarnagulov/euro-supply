@@ -30,35 +30,39 @@ public class ProductMapper {
                 .build();
     }
 
-    public ProductResponseDto toResponse(Product product) {
+    public ProductResponseDto toResponse(Product product, Integer quantity) {
         ProductResponseDto response = modelMapper.map(product, ProductResponseDto.class);
+
         if (product.getImage() != null) {
             response.setImageUrl(
-                    fileMapper.toResponse(
-                            FileFolder.PRODUCT,
-                            product.getId(),
-                            product.getImage()
-                    ));
+                    fileMapper.toResponse(FileFolder.PRODUCT, product.getId(), product.getImage()));
         }
         response.setFactoryIds(
-                product.getProducingFactories()
-                        .stream()
-                        .map(Factory::getId)
-                        .toList()
-        );
-
+                product.getProducingFactories().stream().map(Factory::getId).toList());
         response.setFactoryNames(
-                product.getProducingFactories()
-                        .stream()
-                        .map(Factory::getName)
-                        .toList()
-        );
+                product.getProducingFactories().stream().map(Factory::getName).toList());
+        response.setQuantity(quantity);
+
         return response;
+    }
+
+    public ProductResponseDto toResponse(Product product) {
+        return toResponse(product, null);
     }
 
     public PagedResponse<ProductResponseDto> toPagedResponse(Page<Product> page) {
         return new PagedResponse<>(
                 page.getContent().stream().map(this::toResponse).toList(),
+                page.getTotalPages(),
+                page.getTotalElements()
+        );
+    }
+
+    public PagedResponse<ProductResponseDto> toPagedResponseWithInventory(Page<Product> page) {
+        return new PagedResponse<>(
+                page.getContent().stream()
+                        .map(p -> toResponse(p, p.getInventory() != null ? p.getInventory().getQuantity() : 0))
+                        .toList(),
                 page.getTotalPages(),
                 page.getTotalElements()
         );

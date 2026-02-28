@@ -19,6 +19,7 @@ public class ProductResponseDto {
     private Boolean onSale;
     private Double price;
     private Double weight;
+    private Integer quantity;
     private FileResponseDto imageUrl;
     private CategoryDto category;
     private List<Long> factoryIds;

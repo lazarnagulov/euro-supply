@@ -12,7 +12,9 @@ import com.nvt.eurosupply.product.mappers.ProductMapper;
 import com.nvt.eurosupply.product.models.Category;
 import com.nvt.eurosupply.product.models.Order;
 import com.nvt.eurosupply.product.models.Product;
+import com.nvt.eurosupply.product.models.ProductInventory;
 import com.nvt.eurosupply.product.repositories.OrderRepository;
+import com.nvt.eurosupply.product.repositories.ProductInventoryRepository;
 import com.nvt.eurosupply.product.repositories.ProductRepository;
 import com.nvt.eurosupply.product.specifications.ProductSpecification;
 import com.nvt.eurosupply.realtime.messages.ProductionItemMessage;
@@ -25,6 +27,7 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -44,9 +47,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ProductService {
 
     private final ProductRepository repository;
+    private final ProductInventoryRepository inventoryRepository;
     private final ProductMapper mapper;
 
     private final CategoryService categoryService;
@@ -67,7 +72,14 @@ public class ProductService {
         Product product = mapper.fromCreateRequest(request);
         product.setCategory(categoryService.find(request.getCategoryId()));
         product.setProducingFactories(factoryRepository.findAllById(request.getFactoryIds()));
-        return mapper.toResponse(repository.save(product));
+        Product saved = repository.save(product);
+
+        inventoryRepository.save(ProductInventory.builder()
+                .product(saved)
+                .quantity(0)
+                .build());
+
+        return mapper.toResponse(saved, 0);
     }
 
     @Transactional
@@ -82,18 +94,21 @@ public class ProductService {
     }
 
     public PagedResponse<ProductResponseDto> getProducts(Pageable pageable) {
-        return mapper.toPagedResponse(repository.findAll(pageable));
+        Page<Product> page = repository.findAllWithInventory(pageable);
+        return mapper.toPagedResponseWithInventory(page);
     }
 
     @Cacheable(value = "product", key = "#id")
     public ProductResponseDto getProduct(Long id) {
-        return mapper.toResponse(find(id));
+        Product product = repository.findByIdWithInventory(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        return mapper.toResponse(product, product.getInventory() != null ? product.getInventory().getQuantity() : 0);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @CacheEvict(value = "product", key = "#id")
     public ProductResponseDto updateProduct(Long id, UpdateProductRequestDto request) {
-        Product product = repository.findOneById(id);
+        Product product = find(id);
 
         if (!Objects.equals(product.getCategory().getId(), request.getCategoryId())) {
             Category category = categoryService.find(request.getCategoryId());
@@ -120,8 +135,14 @@ public class ProductService {
     @CacheEvict(value = "product", key = "#id")
     public void deleteProduct(Long id) {
         Product product = find(id);
+        Long imageId = product.getImage() != null ? product.getImage().getId() : null;
+
+        inventoryRepository.deleteByProductId(id);
         repository.delete(product);
-        fileService.deleteFiles(List.of(product.getImage().getId()));
+        repository.flush();
+
+        if (imageId != null)
+            fileService.deleteFiles(List.of(imageId));
     }
 
     public PagedResponse<FactoryProductListItemDto> getProductsByFactoryId(Long factoryId, Pageable pageable) {
@@ -130,8 +151,8 @@ public class ProductService {
     }
 
     public PagedResponse<ProductResponseDto> getAvailableProducts(Pageable pageable) {
-        Page<Product> page = repository.findAllByOnSaleTrue(pageable);
-        return mapper.toPagedResponse(page);
+        Page<Product> page = repository.findAllByOnSaleTrueWithInventory(pageable);
+        return mapper.toPagedResponseWithInventory(page);
     }
 
     public PagedResponse<ProductResponseDto> searchAvailableProducts(String keyword, Pageable pageable) {
@@ -144,19 +165,18 @@ public class ProductService {
     public OrderResponseDto orderProduct(OrderRequestDto request) {
         Order order = fromRequest(request);
 
-        int updated = repository.decrementQuantity(
+        int updated = inventoryRepository.decrementQuantity(
                 request.getProductId(),
                 request.getQuantity()
         );
 
         if (updated == 0) {
-            Product product = repository.findById(request.getProductId())
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            "Product not found: " + request.getProductId()
-                    ));
+            ProductInventory inventory = inventoryRepository
+                    .findByProductIdForUpdate(request.getProductId());
 
+            int available = inventory != null ? inventory.getQuantity() : 0;
             throw new InsufficientStockException(
-                    "Insufficient stock. Available quantity: %d".formatted(product.getQuantity())
+                    "Insufficient stock. Available quantity: %d".formatted(available)
             );
         }
 
@@ -186,7 +206,7 @@ public class ProductService {
                         Collectors.summingInt(ProductionItemMessage::getQuantity)
                 ));
 
-        int[] results = repository.batchIncrementQuantity(updates);
+        int[] results = inventoryRepository.batchIncrementQuantity(updates);
 
         int i = 0;
         for (Long productId : updates.keySet()) {

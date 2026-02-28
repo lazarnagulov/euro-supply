@@ -388,7 +388,7 @@ INSERT INTO products
 (name, description,
  price, weight, on_sale,
  category_id, created_at,
- updated_at, version, image_id, quantity)
+ updated_at, image_id)
 VALUES
     (
         'Steel Beam S235',
@@ -399,9 +399,8 @@ VALUES
         3,
         now(),
         now(),
-        0,
-     5,
-     300
+
+     5
     ),
     (
         'Industrial Lubricant XL',
@@ -412,9 +411,8 @@ VALUES
         12,
         now(),
         now(),
-        0,
-     6,
-     170
+
+     6
     ),
     (
         'Electronic Control Unit',
@@ -425,11 +423,15 @@ VALUES
         21,
         now(),
         now(),
-        0,
-     7,
-     75
+
+     7
     );
 
+INSERT INTO product_inventory (product_id, quantity, updated_at)
+VALUES
+    (1, 0, now()),
+    (2, 0, now()),
+    (3, 0, now());
 
 insert into product_factory (product_id, factory_id) values
  (1, 1), (1, 2), (1, 3),
