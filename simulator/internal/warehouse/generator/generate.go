@@ -36,7 +36,6 @@ func (g *WarehouseGenerator) Generate(ctx context.Context, warehouse Warehouse, 
 			return
 		}
 
-		// iterate through the day in intervalMinutes steps
 		t := current
 		for !t.After(current.Add(24*time.Hour-interval)) {
 			if t.Before(startTime) {
@@ -74,35 +73,23 @@ func (g *WarehouseGenerator) Generate(ctx context.Context, warehouse Warehouse, 
 		g.workerID, warehouse.ID, totalRecords)
 }
 
-// simulateTemperature generates a realistic temperature reading for a sector.
-// It models:
-//   - Seasonal variation (sinusoidal, affects ambient sectors most)
-//   - Daily fluctuation (slight rise during working hours from door openings)
-//   - Small gaussian noise
-//   - Occasional brief anomalies (door left open, compressor lag)
 func simulateTemperature(rng *rand.Rand, sector Sector, t time.Time) float64 {
 	mid := (sector.MinTemp + sector.MaxTemp) / 2.0
 	halfRange := (sector.MaxTemp - sector.MinTemp) / 2.0
 
-	// Seasonal component: peaks in summer, troughs in winter (northern hemisphere)
-	// day-of-year 0..365 mapped to 0..2π, shifted so peak ~= day 196 (mid July)
 	dayOfYear := float64(t.YearDay())
 	seasonalPhase := 2 * math.Pi * (dayOfYear - 15) / 365.25
 	seasonalAmplitude := seasonalInfluence(sector.Type)
 	seasonal := seasonalAmplitude * math.Sin(seasonalPhase)
 
-	// Daily fluctuation: temperature rises slightly during the day (8-18h)
-	// due to door openings, human activity, lighting
 	hourOfDay := float64(t.Hour()) + float64(t.Minute())/60.0
 	dailyPhase := 2 * math.Pi * (hourOfDay - 6) / 24.0
 	dailyAmplitude := dailyInfluence(sector.Type)
 	daily := dailyAmplitude * math.Sin(dailyPhase)
 
-	// Gaussian noise (σ = 0.3°C for cold sectors, slightly more for ambient)
 	noiseSigma := noiseLevel(sector.Type)
 	noise := rng.NormFloat64() * noiseSigma
 
-	// Rare anomaly: ~0.5% chance of a brief temperature spike (e.g., door open)
 	anomaly := 0.0
 	if rng.Float64() < 0.005 {
 		anomaly = anomalyMagnitude(sector.Type, rng)
@@ -110,10 +97,9 @@ func simulateTemperature(rng *rand.Rand, sector Sector, t time.Time) float64 {
 
 	raw := mid + seasonal + daily + noise + anomaly
 
-	// Clamp to a realistic envelope around the sector's operating range
 	minClamp := sector.MinTemp - 3.0
 	maxClamp := sector.MaxTemp + 3.0
-	_ = halfRange // used implicitly via mid/halfRange above
+	_ = halfRange 
 
 	if raw < minClamp {
 		raw = minClamp
@@ -122,18 +108,17 @@ func simulateTemperature(rng *rand.Rand, sector Sector, t time.Time) float64 {
 		raw = maxClamp
 	}
 
-	// Round to 1 decimal place, as a real sensor would report
 	return math.Round(raw*10) / 10
 }
 
 func seasonalInfluence(t SectorType) float64 {
 	switch t {
 	case SectorFrozen:
-		return 0.5 // compressors compensate well
+		return 0.5
 	case SectorRefrigerated:
 		return 1.0
 	case SectorAmbient:
-		return 4.0 // most affected by outside temperature
+		return 4.0 
 	default:
 		return 1.0
 	}
@@ -168,7 +153,7 @@ func noiseLevel(t SectorType) float64 {
 func anomalyMagnitude(t SectorType, rng *rand.Rand) float64 {
 	switch t {
 	case SectorFrozen:
-		return rng.Float64() * 4.0 // up to +4°C spike
+		return rng.Float64() * 4.0
 	case SectorRefrigerated:
 		return rng.Float64() * 5.0
 	case SectorAmbient:
@@ -186,14 +171,13 @@ func GenerateWarehouses(cfg *Config) []Warehouse {
 		sectors := make([]Sector, cfg.Warehouse.NumSectors)
 
 		for j := 0; j < cfg.Warehouse.NumSectors; j++ {
-			// Assign sector types cyclically so each warehouse gets a mix.
-			// Extra sectors beyond the 3 base profiles repeat the ambient type.
 			profileIdx := j
 			if profileIdx >= len(sectorProfiles) {
 				profileIdx = len(sectorProfiles) - 1
 			}
 			profile := sectorProfiles[profileIdx]
 
+			log.Printf("Warehouse %d, Sector %d: Type=%s, TempRange=%.1f to %.1f°C")
 			sectors[j] = Sector{
 				SectorID: int64(i*cfg.Warehouse.NumSectors + j + 1),
 				Type:     profile.sType,
@@ -292,7 +276,6 @@ func newTemperaturePoint(warehouseID, sectorID int64, sectorType string, tempera
 		map[string]string{
 			"warehouse_id": strconv.FormatInt(warehouseID, 10),
 			"sector_id":    strconv.FormatInt(sectorID, 10),
-			"sector_type":  sectorType,
 		},
 		map[string]interface{}{
 			"temperature": temperature,

@@ -446,8 +446,8 @@ INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (4,4);
 
 INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude) VALUES
-     ('Central Warehouse', 'Kralja Milana 6, Beograd', 40, 1118, 16020, 454545),
-     ('Belgrade Warehouse', 'Lamartinova 52, Vracar', 40, 1118, 16520, 454545),
+     ('Central Warehouse', 'Kralja Milana 6, Beograd', 40, 1118, 16.020, 45.4545),
+     ('Belgrade Warehouse', 'Lamartinova 52, Vracar', 40, 1118, 16.520, 45.4545),
      ('Main Warehouse', '123 Storage St.', 40, 1120, 45.2671, 19.8335);
 
 
