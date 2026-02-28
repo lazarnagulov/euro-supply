@@ -70,7 +70,7 @@ public class WarehouseService {
         warehouse.setCity(city);
         warehouse.setCountry(country);
         Warehouse saved = repository.save(warehouse);
-        sectorService.createSectors(request.getSectors(), warehouse);
+        sectorService.createSectors(request.getSectors(), saved);
         saveWarehouseInitialStatus(warehouse);
         return mapper.toResponse(saved);
     }
@@ -105,6 +105,8 @@ public class WarehouseService {
                 .toList();
 
         deleteImagesInternal(warehouse, imageIds);
+        sectorService.deleteSectorAndTemperatures(warehouse.getId());
+        statusRepository.deleteById(warehouse.getId());
         repository.delete(warehouse);
     }
 
@@ -178,7 +180,6 @@ public class WarehouseService {
 
     private void saveWarehouseInitialStatus(Warehouse warehouse) {
         WarehouseStatus status = new WarehouseStatus();
-        status.setWarehouseId(warehouse.getId());
         status.setWarehouse(warehouse);
         status.setIsOnline(false);
         statusRepository.save(status);
