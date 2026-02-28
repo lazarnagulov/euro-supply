@@ -13,10 +13,10 @@ public class WarehouseFlux {
                 |> range(start: %s, stop: %s)
                 |> filter(fn: (r) => r["warehouse_id"] == "%d")
                 |> filter(fn: (r) => r["sector_id"] == "%d")
-                |> filter(fn: (r) => r["_measurement"] == "sector_temperature")
+                |> filter(fn: (r) => r["_measurement"] == "warehouse_temperature")
                 |> filter(fn: (r) => r["_field"] == "temperature")
                 |> aggregateWindow(every: %s, fn: mean, createEmpty: false)
-                |> yield()
+                |> yield(name: "mean")
                 """,
                 start.toString(), end.toString(), warehouseId, sectorId, window
         );

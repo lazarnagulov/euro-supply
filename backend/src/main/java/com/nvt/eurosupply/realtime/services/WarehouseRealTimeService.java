@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -39,6 +40,24 @@ public class WarehouseRealTimeService {
         this.warehouseService = warehouseService;
         this.timeWindowCalculator = timeWindowCalculator;
         this.warehouseFlux = warehouseFlux;
+    }
+
+    public List<SectorTemperatureChartDto> getSectorTemperatureChart(
+            Long warehouseId,
+            Long sectorId,
+            Instant start,
+            Instant end
+    ) {
+        warehouseService.find(warehouseId);
+
+        String window = timeWindowCalculator.calculateWindowDuration(start, end);
+        String query = warehouseFlux.getAverageTemperature(warehouseId, sectorId, start, end, window);
+        log.info(query);
+
+        return service.query(query, fluxRecord -> new SectorTemperatureChartDto(
+                Objects.requireNonNull(fluxRecord.getTime()).toString(),
+                fluxRecord.getValue() == null ? 0 : ((Number) fluxRecord.getValue()).doubleValue()
+        )).toList();
     }
 
 

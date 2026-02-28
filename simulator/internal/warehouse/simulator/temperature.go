@@ -3,6 +3,7 @@ package simulator
 
 import (
 	"eurosupply/simulator/internal/warehouse/domain"
+	"math"
 	"math/rand"
 	"time"
 )
@@ -22,7 +23,7 @@ func (t *TemperatureSimulator) SimulateTemperature(sector domain.Sector) float64
 	max := sector.MaxTemperature
 
 	temp := min + t.rng.Float64()*(max-min)
-	return temp
+	return  math.Round(temp*100) / 100
 }
 
 func (t *TemperatureSimulator) SimulateAllTemperature(sectors []domain.Sector) map[int64]float64 {

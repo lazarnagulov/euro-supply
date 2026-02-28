@@ -2,10 +2,7 @@ package com.nvt.eurosupply.warehouse.controllers;
 
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
-import com.nvt.eurosupply.warehouse.dtos.CreateWarehouseRequestDto;
-import com.nvt.eurosupply.warehouse.dtos.UpdateWarehouseRequestDto;
-import com.nvt.eurosupply.warehouse.dtos.WarehouseResponseDto;
-import com.nvt.eurosupply.warehouse.dtos.WarehouseSearchRequestDto;
+import com.nvt.eurosupply.warehouse.dtos.*;
 import com.nvt.eurosupply.warehouse.services.WarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +62,11 @@ public class WarehouseController {
             Pageable pageable
     ) {
         return ResponseEntity.ok(service.searchWarehouses(request, pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<WarehouseResponseDto> getWarehouse(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getWarehouse(id));
     }
 
     @Operation(
@@ -123,4 +126,8 @@ public class WarehouseController {
         return ResponseEntity.ok(service.uploadImages(id, images));
     }
 
+    @GetMapping("/{warehouseId}/sectors")
+    public Page<WarehouseSectorResponse> getSectors(@PathVariable Long warehouseId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return service.getSectors(warehouseId, page, size);
+    }
 }

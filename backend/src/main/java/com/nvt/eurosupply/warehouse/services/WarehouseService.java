@@ -13,10 +13,7 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
-import com.nvt.eurosupply.warehouse.dtos.CreateWarehouseRequestDto;
-import com.nvt.eurosupply.warehouse.dtos.UpdateWarehouseRequestDto;
-import com.nvt.eurosupply.warehouse.dtos.WarehouseResponseDto;
-import com.nvt.eurosupply.warehouse.dtos.WarehouseSearchRequestDto;
+import com.nvt.eurosupply.warehouse.dtos.*;
 import com.nvt.eurosupply.warehouse.mappers.WarehouseMapper;
 import com.nvt.eurosupply.warehouse.models.Warehouse;
 import com.nvt.eurosupply.warehouse.models.WarehouseStatus;
@@ -28,6 +25,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -94,6 +92,10 @@ public class WarehouseService {
         }
 
         return mapper.toResponse(repository.save(warehouse));
+    }
+
+    public Page<WarehouseSectorResponse> getSectors(Long warehouseId, Integer page, Integer size) {
+        return sectorService.findSectorsWithTemperatureByWarehouseId(warehouseId, page, size);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -183,5 +185,9 @@ public class WarehouseService {
         status.setWarehouse(warehouse);
         status.setIsOnline(false);
         statusRepository.save(status);
+    }
+
+    public WarehouseResponseDto getWarehouse(Long id) {
+        return mapper.toResponse(find(id));
     }
 }

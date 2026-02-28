@@ -21,6 +21,23 @@ export interface WarehouseResponse {
     sectors: SectorResponse[]
 }
 
+export interface TimeRangeRequest {
+  period?: string; 
+  start?: string;  
+  end?: string;   
+}
+
+export interface SectorTemperatureChartDto {
+  timestamp: string;          
+  temperature: number;        
+}
+
+export interface WarehouseSectors {
+    id: number;
+    name: string;
+    lastTemperature: number;
+}
+
 export interface WarehouseSearchParams {
     name?: string;
     address?: string;
