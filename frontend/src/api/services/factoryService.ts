@@ -1,5 +1,6 @@
 import type {
     Factory,
+    FactoryAvailabilitySummary,
     FactoryResponse,
     FactorySearchParams
 } from "../../features/factory/types/factory.types.ts";
@@ -92,5 +93,13 @@ export const factoryService = {
 
     deleteFactory: async (id: number) => {
         await apiClient.delete(`/factories/${id}`);
-    }
+    },
+
+    getAvailability: async (factoryId: number, request: { start: string; end: string }) => {
+        const response = await apiClient.get<FactoryAvailabilitySummary>(
+            `/factories/${factoryId}/availability`,
+            { params: request }
+        );
+        return response.data;
+    },
 };

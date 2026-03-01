@@ -20,6 +20,12 @@ import { useFactoryPolling } from "../hooks/useFactoryPolling.ts";
 import type { PagedResponse } from "../../../types/api.types.ts";
 import { ProductStatsModal } from "../components/ProductStatsModal.tsx";
 import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
+import { Wifi, WifiOff } from "lucide-react";
+import { PeriodSelector } from "../../../components/common/PeriodSelector";
+import { usePeriodSelector } from "../../../hooks/common/usePeriodSelector";
+import { useFactoryAvailabilityData } from "../hooks/useFactoryAvailabilityData";
+import { useRealtimeFactoryAvailability } from "../hooks/useRealtimeFactoryAvailability.ts";
+import FactoryAvailabilityCharts from "../components/charts/FactoryAvailabilityCharts.tsx";
 
 const FactoryDetailsPage: React.FC = () => {
   const { factoryId } = useParams();
@@ -27,10 +33,10 @@ const FactoryDetailsPage: React.FC = () => {
   const [factory, setFactory] = useState<FactoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
-    null
+    null,
   );
   const [factoryStatus, setFactoryStatus] = useState<ConnectionStatus | null>(
-    null
+    null,
   );
   const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [selectedProductName, setSelectedProductName] = useState<
@@ -75,7 +81,7 @@ const FactoryDetailsPage: React.FC = () => {
       const data = await factoryService.getProductsByFactory(
         Number(factoryId),
         page,
-        size
+        size,
       );
       setProductsPage(data);
     } catch (err) {
@@ -90,6 +96,40 @@ const FactoryDetailsPage: React.FC = () => {
     onStatusUpdate: setFactoryStatus,
     enabled: !!factory,
   });
+
+  const availabilityPeriod = usePeriodSelector("7d");
+  const {
+    availabilityData,
+    loading: availabilityLoading,
+    loadPeriod: loadAvailabilityPeriod,
+    loadCustomRange: loadAvailabilityCustomRange,
+  } = useFactoryAvailabilityData(factoryId);
+
+  const isRealtimeEnabled =
+    availabilityPeriod.selectedPeriod === "3h" &&
+    !availabilityPeriod.useCustomRange;
+  const {
+    availabilityData: realtimeAvailabilityData,
+    connected: websocketConnected,
+  } = useRealtimeFactoryAvailability(factoryId, isRealtimeEnabled);
+
+  const displayAvailabilityData = isRealtimeEnabled
+    ? realtimeAvailabilityData
+    : availabilityData;
+
+  const handleAvailabilityPeriodSelect = async (period: string) => {
+    availabilityPeriod.setSelectedPeriod(period as any);
+    if (availabilityPeriod.useCustomRange) {
+      availabilityPeriod.toggleCustomRange();
+    }
+    await loadAvailabilityPeriod(period as any);
+  };
+
+  const handleAvailabilityCustomRange = async () => {
+    const range = availabilityPeriod.validateDateRange();
+    if (!range) return;
+    await loadAvailabilityCustomRange(range.from, range.to);
+  };
 
   const openImageModal = (index: number) => {
     setSelectedImageIndex(index);
@@ -115,7 +155,7 @@ const FactoryDetailsPage: React.FC = () => {
     if (selectedImageIndex !== null && factory?.imageUrls) {
       setSelectedImageIndex(
         (selectedImageIndex - 1 + factory.imageUrls.length) %
-          factory.imageUrls.length
+          factory.imageUrls.length,
       );
     }
   };
@@ -123,7 +163,7 @@ const FactoryDetailsPage: React.FC = () => {
   const goToNextImage = () => {
     if (selectedImageIndex !== null && factory?.imageUrls) {
       setSelectedImageIndex(
-        (selectedImageIndex + 1) % factory.imageUrls.length
+        (selectedImageIndex + 1) % factory.imageUrls.length,
       );
     }
   };
@@ -416,6 +456,44 @@ const FactoryDetailsPage: React.FC = () => {
           productName={selectedProductName}
           productId={selectedProductId}
           factoryId={factory.id}
+        />
+      </div>
+
+      <div className="bg-white rounded-2xl shadow p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <ChartBar size={18} /> Availability
+          </h2>
+          {isRealtimeEnabled && (
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
+                websocketConnected
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {websocketConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
+              {websocketConnected ? "Live Updates" : "Disconnected"}
+            </div>
+          )}
+        </div>
+
+        <PeriodSelector
+          selectedPeriod={availabilityPeriod.selectedPeriod}
+          onSelectPeriod={handleAvailabilityPeriodSelect}
+          useCustomRange={availabilityPeriod.useCustomRange}
+          onToggleCustomRange={availabilityPeriod.toggleCustomRange}
+          customFrom={availabilityPeriod.customFrom}
+          customTo={availabilityPeriod.customTo}
+          onCustomFromChange={availabilityPeriod.setCustomFrom}
+          onCustomToChange={availabilityPeriod.setCustomTo}
+          onApplyCustomRange={handleAvailabilityCustomRange}
+          mode="availability"
+        />
+
+        <FactoryAvailabilityCharts
+          data={displayAvailabilityData}
+          loading={availabilityLoading && !isRealtimeEnabled}
         />
       </div>
     </div>
