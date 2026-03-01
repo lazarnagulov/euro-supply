@@ -163,6 +163,33 @@ INSERT INTO countries_cities (country_id, cities_id) VALUES
     (46,1136),(46,1137),(46,1138),
     (47,1139),(47,1140),(47,1141);
 
+WITH city_data AS (
+    SELECT
+        cc.country_id,
+        cc.cities_id AS city_id,
+        c.name AS city_name,
+        ROW_NUMBER() OVER (ORDER BY cc.country_id, cc.cities_id) AS rn
+    FROM countries_cities cc
+             JOIN cities c ON cc.cities_id = c.id
+),
+     series AS (
+         SELECT
+             generate_series(1, 40000) AS seq,
+             ((generate_series(1, 40000) - 1) % (SELECT COUNT(*) FROM city_data)) + 1 AS city_index
+    )
+INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude)
+SELECT
+    CONCAT('Warehouse ', s.seq, ' - ', cd.city_name) AS name,
+    CONCAT('Street ', floor(random() * 999 + 1), ', ', cd.city_name) AS address,
+    cd.country_id,
+    cd.city_id,
+    (35.0 + random() * 30.0)::numeric(8,4) AS latitude,
+    (-10.0 + random() * 50.0)::numeric(8,4) AS longitude
+FROM series s
+         JOIN city_data cd ON s.city_index = cd.rn
+ORDER BY random();
+
+
 INSERT INTO categories (id, name) VALUES
                                       (1, 'Electronics'),
                                       (2, 'Computers & Laptops'),
