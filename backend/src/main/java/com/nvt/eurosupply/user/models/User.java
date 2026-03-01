@@ -17,7 +17,7 @@ import java.util.List;
 
 @Entity
 @Table(
-        name = "users"
+        name = "users",
         indexes = {
                 @Index(name = "idx_users_username", columnList = "username")
         })
