@@ -1,6 +1,5 @@
 package com.nvt.eurosupply.warehouse.services;
 
-import com.nvt.eurosupply.factory.models.FactoryStatus;
 import com.nvt.eurosupply.realtime.messages.SectorTemperatureMessage;
 import com.nvt.eurosupply.realtime.messages.WarehouseReportMessage;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
