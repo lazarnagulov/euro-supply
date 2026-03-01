@@ -189,6 +189,12 @@ FROM series s
          JOIN city_data cd ON s.city_index = cd.rn
 ORDER BY random();
 
+INSERT INTO warehouse_status (warehouse_id, is_online, last_heartbeat_at)
+SELECT
+    id,
+    false,
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM warehouses;
 
 INSERT INTO categories (id, name) VALUES
                                       (1, 'Electronics'),
