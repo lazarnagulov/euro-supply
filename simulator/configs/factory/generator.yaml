@@ -1,0 +1,17 @@
+influx:
+  url: "http://localhost:8086"
+  token: "tokencic"
+  org: "eurosupply"
+  bucket: "factory"
+
+factory:
+  numFactories: 1000
+  numProducts: 10
+  yearsOfHistory: 4
+  workers: 20
+  batchSize: 5000
+  minQuantity: 10
+  maxQuantity: 200
+  productionTimes:
+    - "12:00"
+    - "00:00"

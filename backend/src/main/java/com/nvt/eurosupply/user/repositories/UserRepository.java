@@ -18,35 +18,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(
             value = """
-    SELECT *
-    FROM users
-    WHERE role = 'MANAGER'
-      AND is_suspended = false
-      AND (
-        :search IS NULL OR :search = ''
-        OR to_tsvector('simple',
-            COALESCE(firstname, '') || ' ' ||
-            COALESCE(lastname, '') || ' ' ||
-            COALESCE(username, '') || ' ' ||
-            COALESCE(email, '')
-        ) @@ to_tsquery('simple', :search || ':*')
-      )
-    """,
-            countQuery = """
-    SELECT COUNT(*)
-    FROM users
-    WHERE role = 'MANAGER'
-      AND is_suspended = false
-      AND (
-        :search IS NULL OR :search = ''
-        OR to_tsvector('simple',
-            COALESCE(firstname, '') || ' ' ||
-            COALESCE(lastname, '') || ' ' ||
-            COALESCE(username, '') || ' ' ||
-            COALESCE(email, '')
-        ) @@ to_tsquery('simple', :search || ':*')
-      )
-    """,
+        SELECT *
+        FROM users
+        WHERE role = 'MANAGER'
+          AND is_suspended = false
+          AND (
+            :search IS NULL OR :search = ''
+            OR search_vector @@ to_tsquery('simple', :search || ':*')
+          )
+        """,
+                    countQuery = """
+        SELECT COUNT(*)
+        FROM users
+        WHERE role = 'MANAGER'
+          AND is_suspended = false
+          AND (
+            :search IS NULL OR :search = ''
+            OR search_vector @@ to_tsquery('simple', :search || ':*')
+          )
+        """,
             nativeQuery = true
     )
     Page<User> searchManagers(
