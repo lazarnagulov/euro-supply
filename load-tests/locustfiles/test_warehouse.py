@@ -28,7 +28,7 @@ class WarehouseTasks(HttpUser):
 
 
     @task
-    def get_vehicle(self):
+    def get_warehouse(self):
         self.client.get(f"/warehouses/{ random.randint(1, warehouse_util.MAX_WAREHOUSE_ID) }")
 
     @task

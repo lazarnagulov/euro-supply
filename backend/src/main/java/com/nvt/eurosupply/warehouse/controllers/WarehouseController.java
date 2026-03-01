@@ -141,7 +141,7 @@ public class WarehouseController {
             @ApiResponse(responseCode = "404", description = "Warehouse not found")
     })
     @GetMapping("/{id}/status")
-    public ResponseEntity<ConnectionStatusDto> getFactoryStatus(@PathVariable Long id) {
+    public ResponseEntity<ConnectionStatusDto> getWarehouseStatus(@PathVariable Long id) {
         return ResponseEntity.ok(service.getStatus(id));
     }
 

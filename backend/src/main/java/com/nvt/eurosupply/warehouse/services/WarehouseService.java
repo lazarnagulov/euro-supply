@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class WarehouseService {
 
     private final CityService cityService;
@@ -78,7 +79,7 @@ public class WarehouseService {
 
     @Transactional
     public WarehouseResponseDto updateWarehouse(Long id, UpdateWarehouseRequestDto request) {
-        Warehouse warehouse = find(id);
+        Warehouse warehouse = repository.findOneById(id);
 
         warehouse.setName(request.getName());
         warehouse.setAddress(request.getAddress());
