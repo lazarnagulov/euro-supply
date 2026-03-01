@@ -163,6 +163,70 @@ INSERT INTO countries_cities (country_id, cities_id) VALUES
     (46,1136),(46,1137),(46,1138),
     (47,1139),(47,1140),(47,1141);
 
+WITH city_data AS (
+    SELECT
+        cc.country_id,
+        cc.cities_id AS city_id,
+        c.name AS city_name,
+        ROW_NUMBER() OVER (ORDER BY cc.country_id, cc.cities_id) AS rn
+    FROM countries_cities cc
+             JOIN cities c ON cc.cities_id = c.id
+),
+     series AS (
+         SELECT
+             generate_series(1, 40000) AS seq,
+             ((generate_series(1, 40000) - 1) % (SELECT COUNT(*) FROM city_data)) + 1 AS city_index
+    )
+INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude)
+SELECT
+    CONCAT('Warehouse ', s.seq, ' - ', cd.city_name) AS name,
+    CONCAT('Street ', floor(random() * 999 + 1), ', ', cd.city_name) AS address,
+    cd.country_id,
+    cd.city_id,
+    (35.0 + random() * 30.0)::numeric(8,4) AS latitude,
+    (-10.0 + random() * 50.0)::numeric(8,4) AS longitude
+FROM series s
+         JOIN city_data cd ON s.city_index = cd.rn
+ORDER BY random();
+
+INSERT INTO warehouse_status (warehouse_id, is_online, last_heartbeat_at)
+SELECT
+    id,
+    false,
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM warehouses;
+
+WITH sector_templates AS (
+    SELECT 1 AS template_id, unnest(ARRAY['Electronics','Furniture','Clothing']) AS name, unnest(ARRAY[22.0,21.0,20.0]) AS temp
+    UNION ALL
+    SELECT 2 AS template_id, unnest(ARRAY['Frozen','Cool','Dry']), unnest(ARRAY[-20.0,5.0,20.0])
+    UNION ALL
+    SELECT 3 AS template_id, unnest(ARRAY['Gadgets','Home','Apparel']), unnest(ARRAY[23.0,21.5,20.5])
+),
+     warehouses_seq AS (
+         SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn
+         FROM warehouses
+     )
+INSERT INTO sectors (name, warehouse_id)
+SELECT st.name, w.id
+FROM warehouses_seq w
+         CROSS JOIN sector_templates st
+WHERE st.template_id = ((w.rn - 1) % 3) + 1
+ORDER BY w.id, st.template_id;
+
+INSERT INTO sector_temperatures (sector_id, temperature)
+SELECT s.id,
+       CASE
+           WHEN s.name IN ('Electronics','Gadgets') THEN 22.0
+           WHEN s.name IN ('Furniture','Home') THEN 21.0
+           WHEN s.name IN ('Clothing','Apparel') THEN 20.0
+           WHEN s.name = 'Frozen' THEN -20.0
+           WHEN s.name = 'Cool' THEN 5.0
+           WHEN s.name = 'Dry' THEN 20.0
+           ELSE 20.0
+           END
+FROM sectors s;
+
 INSERT INTO categories (id, name) VALUES
                                       (1, 'Electronics'),
                                       (2, 'Computers & Laptops'),

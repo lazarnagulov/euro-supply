@@ -1,5 +1,6 @@
 package com.nvt.eurosupply.warehouse.controllers;
 
+import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.warehouse.dtos.*;
@@ -130,4 +131,18 @@ public class WarehouseController {
     public Page<WarehouseSectorResponse> getSectors(@PathVariable Long warehouseId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return service.getSectors(warehouseId, page, size);
     }
+
+    @Operation(
+            summary = "Get warehouse connection status",
+            description = "Retrieves a warehouse connection status by its ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Warehouse connection status retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Warehouse not found")
+    })
+    @GetMapping("/{id}/status")
+    public ResponseEntity<ConnectionStatusDto> getFactoryStatus(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getStatus(id));
+    }
+
 }

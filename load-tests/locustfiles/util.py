@@ -98,4 +98,5 @@ def get_auth_token(client, username, password):
             "password": password
         }
     )
+    print(f"Login response: {response.status_code} - {response.text}")
     return response.json()["token"]

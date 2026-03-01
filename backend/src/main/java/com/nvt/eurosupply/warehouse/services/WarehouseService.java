@@ -3,6 +3,7 @@ package com.nvt.eurosupply.warehouse.services;
 import com.nvt.eurosupply.factory.models.FactoryStatus;
 import com.nvt.eurosupply.realtime.messages.SectorTemperatureMessage;
 import com.nvt.eurosupply.realtime.messages.WarehouseReportMessage;
+import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -25,6 +26,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -61,6 +63,7 @@ public class WarehouseService {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
     }
 
+    @Transactional
     public WarehouseResponseDto createWarehouse(CreateWarehouseRequestDto request) {
         Warehouse warehouse = mapper.fromRequest(request);
         City city = cityService.find(request.getCityId());
@@ -73,6 +76,7 @@ public class WarehouseService {
         return mapper.toResponse(saved);
     }
 
+    @Transactional
     public WarehouseResponseDto updateWarehouse(Long id, UpdateWarehouseRequestDto request) {
         Warehouse warehouse = find(id);
 
@@ -121,6 +125,8 @@ public class WarehouseService {
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
     }
 
+    @Transactional
+    @CacheEvict(value = "warehouse", key = "#id")
     public List<FileResponseDto> uploadImages(Long id, List<MultipartFile> images) {
         Warehouse warehouse = find(id);
         List<StoredFile> stored = fileService.uploadFiles(FileFolder.WAREHOUSE, id, images);
@@ -165,7 +171,7 @@ public class WarehouseService {
         int updated = statusRepository.applyHeartbeat(warehouseId, timestamp);
 
         if (updated == 0)
-            throw new EntityNotFoundException("Warehosue not found: " + warehouseId);
+            throw new EntityNotFoundException("Warehouse not found: " + warehouseId);
     }
 
     @Scheduled(fixedRate = 5 * 60 * 1000)
@@ -187,7 +193,14 @@ public class WarehouseService {
         statusRepository.save(status);
     }
 
+    @Cacheable(value = "warehouse", key = "#id")
     public WarehouseResponseDto getWarehouse(Long id) {
         return mapper.toResponse(find(id));
+    }
+
+    @Cacheable(value = "warehouseStatus", key = "#id")
+    public ConnectionStatusDto getStatus(Long id) {
+        WarehouseStatus status = statusRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Warehouse status not found"));
+        return new ConnectionStatusDto(status.getIsOnline());
     }
 }
