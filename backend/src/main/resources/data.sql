@@ -438,6 +438,71 @@ insert into product_factory (product_id, factory_id) values
  (2, 1), (2, 2), (2, 3),
  (3, 1), (3, 2), (3, 3);
 
+-- =============================================
+-- 20,000 FACTORIES (id 4-20003)
+-- =============================================
+WITH valid_pairs AS (
+    SELECT country_id, cities_id AS city_id,
+           ROW_NUMBER() OVER () AS rn,
+            COUNT(*) OVER () AS total
+    FROM countries_cities
+)
+INSERT INTO factories (name, address, city_id, country_id, latitude, longitude, created_at, updated_at, version)
+SELECT
+    'Factory ' || gs,
+    'Industrial Street ' || gs,
+    vp.city_id,
+    vp.country_id,
+    40.0 + random() * 15.0,
+    10.0 + random() * 25.0,
+    NOW() - (random() * INTERVAL '24 months'),
+    NOW() - (random() * INTERVAL '12 months'),
+    0
+FROM generate_series(4, 20003) gs
+         JOIN valid_pairs vp ON vp.rn = ((gs - 4) % vp.total) + 1;
+
+INSERT INTO factory_status (factory_id, is_online, last_heartbeat_at)
+SELECT
+    id,
+    (random() > 0.3),
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM factories
+WHERE id > 3;
+
+
+-- =============================================
+-- 500 PRODUCTS (id 4-503)
+-- =============================================
+INSERT INTO products (name, description, price, weight, on_sale, category_id, created_at, updated_at, image_id)
+SELECT
+    'Product ' || gs,
+    'Description for product ' || gs,
+    (5 + random() * 995)::numeric(10,2),
+        (0.1 + random() * 49.9)::numeric(10,2),
+        (random() > 0.5),
+    1 + (random() * 24)::int,
+        NOW() - (random() * INTERVAL '24 months'),
+    NOW() - (random() * INTERVAL '12 months'),
+    NULL
+FROM generate_series(4, 503) gs;
+
+INSERT INTO product_inventory (product_id, quantity, updated_at)
+SELECT id, (random() * 10000)::int, NOW()
+FROM products
+WHERE id > 3;
+
+-- =============================================
+-- PRODUCT <-> FACTORY (~10 factories per product)
+-- =============================================
+INSERT INTO product_factory (product_id, factory_id)
+SELECT DISTINCT
+    p.id,
+    3 + (1 + (random() * 19999)::int) AS factory_id
+FROM products p
+         CROSS JOIN generate_series(1, 10)
+WHERE p.id > 3
+    ON CONFLICT DO NOTHING;
+
 
 INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (1,1),
@@ -468,8 +533,8 @@ INSERT INTO sector_temperatures (sector_id, temperature) VALUES
 (2, 21.0),   -- Furniture
 (3, 20.0),   -- Clothing
 (4, -20.0),   -- Frozen
-(5, 5.0),     -- Cool 
-(6, 20.0);    -- Dry 
+(5, 5.0),     -- Cool
+(6, 20.0);    -- Dry
 
 INSERT INTO warehouses_images (images_id, warehouse_id) VALUES
                                                         (11, 1),
