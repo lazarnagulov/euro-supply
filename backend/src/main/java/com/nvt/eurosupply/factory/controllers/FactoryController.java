@@ -16,14 +16,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -35,7 +32,6 @@ public class FactoryController {
 
     private final FactoryService service;
     private final ProductService productService;
-    private final FactoryRealTimeService factoryRealTimeService;
 
     @Operation(
             summary = "Create a new factory",
@@ -208,19 +204,5 @@ public class FactoryController {
     @GetMapping("/{id}/products")
     public PagedResponse<FactoryProductListItemDto> getProductsByFactory(@PathVariable Long id, Pageable pageable) {
         return productService.getProductsByFactoryId(id, pageable);
-    }
-
-    // TODO: add docs
-    @GetMapping("/{factoryId}/availability")
-    public ResponseEntity<FactoryAvailabilitySummaryDto> getAvailability(
-            @PathVariable Long factoryId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant end) {
-
-        if (Duration.between(start, end).toDays() > 365) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        return ResponseEntity.ok(factoryRealTimeService.getAvailabilitySummary(factoryId, start, end));
     }
 }
