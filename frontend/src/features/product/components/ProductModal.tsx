@@ -432,11 +432,19 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
                 {previewUrl && (
                   <div className="mt-4 relative w-40">
-                    <AuthenticatedImage
-                      src={previewUrl}
-                      alt="Product preview"
-                      className="w-full h-24 object-cover rounded-lg"
-                    />
+                    {mode === "edit" && !isImageChanged ? (
+                      <AuthenticatedImage
+                        src={previewUrl}
+                        alt="Product preview"
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <img
+                        src={previewUrl}
+                        alt="Product preview"
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                    )}
                     <button
                       type="button"
                       onClick={removeImage}
