@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-export const warehouseSchema = z.object({
+export const warehouseCreateSchema = z.object({
     name: z.
         string()
         .min(1, 'Name is required')
-        .max(20, 'Name must not exceed 20 characters')
+        .max(50, 'Name must not exceed 50 characters')
         .regex(/^[A-Z0-9- ]+$/i, 'Name can only contain letters, numbers, hyphens and spaces')
         .trim(),
 
@@ -66,10 +66,10 @@ export const warehouseImagesSchema = z.object({
         ),
 });
 
-export type WarehouseFormData = z.infer<typeof warehouseSchema>;
+export type WarehouseFormData = z.infer<typeof warehouseCreateSchema>;
 export type WarehouseImagesData = z.infer<typeof warehouseImagesSchema>;
 export const validateWarehouse = (data: unknown) => {
-    return warehouseSchema.safeParse(data);
+    return warehouseCreateSchema.safeParse(data);
 };
 
 export const validateWarehouseImages = (data: unknown) => {

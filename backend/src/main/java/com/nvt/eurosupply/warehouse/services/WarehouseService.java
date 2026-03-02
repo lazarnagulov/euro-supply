@@ -14,6 +14,7 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
+import com.nvt.eurosupply.vehicle.models.Vehicle;
 import com.nvt.eurosupply.warehouse.dtos.*;
 import com.nvt.eurosupply.warehouse.mappers.WarehouseMapper;
 import com.nvt.eurosupply.warehouse.models.Warehouse;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class WarehouseService {
 
     private final CityService cityService;
@@ -78,7 +80,7 @@ public class WarehouseService {
 
     @Transactional
     public WarehouseResponseDto updateWarehouse(Long id, UpdateWarehouseRequestDto request) {
-        Warehouse warehouse = find(id);
+        Warehouse warehouse = repository.findOneById(id);
 
         warehouse.setName(request.getName());
         warehouse.setAddress(request.getAddress());
@@ -202,5 +204,14 @@ public class WarehouseService {
     public ConnectionStatusDto getStatus(Long id) {
         WarehouseStatus status = statusRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Warehouse status not found"));
         return new ConnectionStatusDto(status.getIsOnline());
+    }
+
+    @Transactional
+    @CacheEvict(value = "warehouse", key = "#id")
+    public void deleteImages(Long id, List<Long> imageIds) {
+        Warehouse warehouse = find(id);
+        warehouse.getImages().removeIf(img -> imageIds.contains(img.getId()));
+        repository.saveAndFlush(warehouse);
+        fileService.deleteFiles(imageIds);
     }
 }

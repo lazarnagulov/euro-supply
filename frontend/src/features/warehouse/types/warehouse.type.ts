@@ -6,7 +6,7 @@ export interface Warehouse {
     address: string;
     countryId: number;
     cityId: number;
-    sectors: Sector[];
+    sectors?: Sector[];
 }
 
 export interface WarehouseResponse {
@@ -46,6 +46,7 @@ export interface WarehouseSearchParams {
 }
 
 export interface Sector {
+    id?: number;
     name: string;
 }
 

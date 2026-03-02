@@ -1,12 +1,14 @@
 package com.nvt.eurosupply.warehouse.services;
 
 import com.nvt.eurosupply.warehouse.dtos.CreateSectorDto;
+import com.nvt.eurosupply.warehouse.dtos.UpdateSectorsRequestDto;
 import com.nvt.eurosupply.warehouse.dtos.WarehouseSectorResponse;
 import com.nvt.eurosupply.warehouse.models.Sector;
 import com.nvt.eurosupply.warehouse.models.SectorTemperature;
 import com.nvt.eurosupply.warehouse.models.Warehouse;
 import com.nvt.eurosupply.warehouse.repositories.SectorRepository;
 import com.nvt.eurosupply.warehouse.repositories.SectorTemperatureRepository;
+import com.nvt.eurosupply.warehouse.repositories.WarehouseRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import java.util.List;
 public class SectorService {
 
     private final SectorRepository repository;
+    private final WarehouseRepository warehouseRepository;
     private final SectorTemperatureRepository temperatureRepository;
 
     public void createSectors(List<CreateSectorDto> dtos, Warehouse warehouse) {
@@ -55,5 +58,28 @@ public class SectorService {
         repository.deleteAll(sectors);
 
         // then statuses will be deleted, and at the end warehouse
+    }
+
+    @Transactional
+    public void updateSectors(Long warehouseId, UpdateSectorsRequestDto request) {
+        Warehouse warehouseRef = warehouseRepository.getReferenceById(warehouseId);
+
+        if (!request.getDeleted().isEmpty()) {
+            temperatureRepository.deleteBySectorIdIn(request.getDeleted());
+            repository.deleteByIdInAndWarehouseId(request.getDeleted(), warehouseId);
+        }
+
+        request.getUpdated().forEach(dto -> repository.updateName(dto.getId(), dto.getName(), warehouseId));
+
+        List<Sector> newSectors = request.getAdded().stream()
+                .map(dto -> Sector.builder()
+                        .name(dto.getName())
+                        .warehouse(warehouseRef)
+                        .build())
+                .toList();
+
+        if (!newSectors.isEmpty()) {
+            repository.saveAll(newSectors);
+        }
     }
 }

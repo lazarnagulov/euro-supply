@@ -8,7 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "sectors", uniqueConstraints = @UniqueConstraint(columnNames = {"warehouse_id", "name"}))
+@Table(name = "sectors", uniqueConstraints = @UniqueConstraint(columnNames = {"warehouse_id", "name"}),
+                         indexes = { @Index(name = "idx_sector_warehouse_id", columnList = "warehouse_id") })
 @Builder
 public class Sector {
     @Id

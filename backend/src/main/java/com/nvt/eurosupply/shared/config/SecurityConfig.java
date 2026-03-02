@@ -75,7 +75,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/users/registration").permitAll()
                         .requestMatchers("/api/v1/users/password").permitAll()
-
+                        .requestMatchers("api/v1/users/verification").permitAll()
+                        .requestMatchers("api/v1/users/{id}/image").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
