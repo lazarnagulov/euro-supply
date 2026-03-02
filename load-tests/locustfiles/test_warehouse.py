@@ -35,3 +35,8 @@ class WarehouseTasks(HttpUser):
     def get_warehouse_status(self):
         warehouse_id = warehouse_util.random_warehouse_id()
         self.client.get(f"/warehouses/{warehouse_id}/status")
+
+    @task
+    def get_sectors_with_last_temperature(self):
+        warehouse_id = warehouse_util.random_warehouse_id()
+        self.client.get(f"/warehouses/{warehouse_id}/sectors")

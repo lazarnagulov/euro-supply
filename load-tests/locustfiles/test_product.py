@@ -22,3 +22,9 @@ class ProductTasks(HttpUser):
     def get_product(self):
         product_id = product_util.random_product_id()
         self.client.get(f"/products/{product_id}")
+
+    @task
+    def get_available_products(self):
+        self.client.get("/products/available?page=0&size=10",
+                        name="/api/products/available"
+        )
