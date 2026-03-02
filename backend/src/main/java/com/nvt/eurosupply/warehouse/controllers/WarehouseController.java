@@ -84,6 +84,7 @@ public class WarehouseController {
             @ApiResponse(responseCode = "404", description = "Warehouse not found")
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<WarehouseResponseDto> getWarehouse(@PathVariable Long id) {
         return ResponseEntity.ok(service.getWarehouse(id));
     }
@@ -181,6 +182,7 @@ public class WarehouseController {
                 """
     )
     @GetMapping("/{warehouseId}/sectors")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public Page<WarehouseSectorResponse> getSectors(@PathVariable Long warehouseId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return service.getSectors(warehouseId, page, size);
     }
