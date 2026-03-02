@@ -1,6 +1,11 @@
+from random import choice
+
 from locust import HttpUser, between, task
 from locustfiles import product_util
 from locustfiles import util
+
+
+KEYWORDS = ["laptop", "phone", "headphones", "shoes", "shirt", "book", "camera", "watch", "tablet", ""]
 
 
 class ProductTasks(HttpUser):
@@ -28,3 +33,41 @@ class ProductTasks(HttpUser):
         self.client.get("/products/available?page=0&size=10",
                         name="/api/products/available"
         )
+
+class OnSaleProductTasks(HttpUser):
+    wait_time = between(1, 5)
+    host = "http://localhost:8080/api/v1"
+
+    def on_start(self):
+        token = util.get_auth_token(self.client, "customer", "pera")
+        self.client.headers.update({
+            "Authorization": f"Bearer {token}"
+        })
+
+    @task(1)
+    def search_paginated(self):
+        keyword = choice(KEYWORDS)
+        page = choice([0, 1, 2, 3])
+        size = choice([5, 10, 20])
+        print(f"[PAGINATED] keyword='{keyword}' page={page} size={size}")
+        response = self.client.get(
+            "/products/on-sale/search",
+            params={
+                "keyword": keyword,
+                "page": page,
+                "size": size,
+            },
+            name="/products/on-sale/search [paginated]"
+        )
+        print(f"[PAGINATED] status={response.status_code} | url={response.url}")
+  
+
+    @task(1)
+    def search_empty_keyword(self):
+        print("[NO KEYWORD] page=0 size=10")
+        response = self.client.get(
+            "/products/on-sale/search",
+            params={"page": 0, "size": 10},
+            name="/products/on-sale/search [no keyword]"
+        )
+        print(f"[NO KEYWORD] status={response.status_code} | url={response.url}")
