@@ -13,7 +13,7 @@ import java.util.Map;
 
 public interface SectorTemperatureRepository extends JpaRepository<SectorTemperature, Long> { 
 
-        default int[] batchUpdateTemperature(Map<Long, Double> updates, Instant measuredAt) {
+    default int[] batchUpdateTemperature(Map<Long, Double> updates, Instant measuredAt) {
         return updates.entrySet().stream()
                 .mapToInt(entry -> updateSingleTemperature(entry.getKey(), entry.getValue(), measuredAt))
                 .toArray();

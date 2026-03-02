@@ -218,7 +218,7 @@ public class WarehouseController {
     })
     @PatchMapping("/{id}/sectors")
     public ResponseEntity<Void> updateSectors(@PathVariable Long id, @RequestBody @Valid UpdateSectorsRequestDto sectors) {
-        sectorService.patchSectors(id, sectors);
+        sectorService.updateSectors(id, sectors);
         return ResponseEntity.noContent().build();
     }
 }

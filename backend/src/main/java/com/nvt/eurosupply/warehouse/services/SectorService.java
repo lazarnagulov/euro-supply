@@ -61,7 +61,7 @@ public class SectorService {
     }
 
     @Transactional
-    public void patchSectors(Long warehouseId, UpdateSectorsRequestDto request) {
+    public void updateSectors(Long warehouseId, UpdateSectorsRequestDto request) {
         Warehouse warehouseRef = warehouseRepository.getReferenceById(warehouseId);
 
         if (!request.getDeleted().isEmpty()) {
