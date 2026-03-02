@@ -31,4 +31,8 @@ public interface SectorTemperatureRepository extends JpaRepository<SectorTempera
                                 @Param("updatedAt") Instant updatedAt);
 
     List<SectorTemperature> findBySectorIn(List<Sector> sectors);
+
+    @Modifying
+    @Query("DELETE FROM SectorTemperature st WHERE st.sector.id IN :sectorIds")
+    void deleteBySectorIdIn(@Param("sectorIds") List<Long> sectorIds);
 }

@@ -1,13 +1,16 @@
 package com.nvt.eurosupply.warehouse.controllers;
 
 import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
+import com.nvt.eurosupply.shared.dtos.DeleteImagesRequestDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.models.PagedResponse;
 import com.nvt.eurosupply.warehouse.dtos.*;
+import com.nvt.eurosupply.warehouse.services.SectorService;
 import com.nvt.eurosupply.warehouse.services.WarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +31,7 @@ import java.util.List;
 public class WarehouseController {
 
     private final WarehouseService service;
+    private final SectorService sectorService;
 
     @Operation(
             summary = "Get all warehouses",
@@ -65,13 +70,21 @@ public class WarehouseController {
         return ResponseEntity.ok(service.searchWarehouses(request, pageable));
     }
 
+    @Operation(
+            summary = "Retrieve warehouse details",
+            description = "Fetches detailed information for a warehouse by its ID"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Warehouse details retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Warehouse not found")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<WarehouseResponseDto> getWarehouse(@PathVariable Long id) {
         return ResponseEntity.ok(service.getWarehouse(id));
     }
 
     @Operation(
-            summary = "Create a new warehouse"
+            summary = "Creates a new warehouse"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Warehouse created successfully"),
@@ -84,7 +97,18 @@ public class WarehouseController {
     }
 
     @Operation(
-            summary = "Updates a warehouse."
+            summary = "Updates a warehouse",
+            description = """
+                Updates the details of an existing warehouse.
+                
+                **Updatable fields:**
+                - `name`: Warehouse name (2-50 characters)
+                - `address`: Warehouse address (2-50 characters)
+                - `cityId`: ID of the city where the warehouse is located
+                - `countryId`: ID of the country where the warehouse is located
+                - `latitude`: Geographical latitude of the warehouse
+                - `longitude`: Geographical longitude of the warehouse
+                """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Warehouse successfully updated"),
@@ -127,6 +151,23 @@ public class WarehouseController {
         return ResponseEntity.ok(service.uploadImages(id, images));
     }
 
+    @Operation(
+            summary = "Retrieve warehouse sectors with temperature",
+            description = """
+                Retrieves a paginated list of sectors for a given warehouse, including their latest temperature readings.
+                
+                **Parameters:**
+                - `warehouseId`: ID of the warehouse
+                - `page`: Page number for pagination (default: 0)
+                - `size`: Number of sectors per page (default: 10)
+                
+                **Response:**  
+                Returns a page of warehouse sectors, each containing:
+                - `id`: Sector ID
+                - `name`: Sector name
+                - `temperature`: Latest recorded temperature for the sector (nullable if no data available)
+                """
+    )
     @GetMapping("/{warehouseId}/sectors")
     public Page<WarehouseSectorResponse> getSectors(@PathVariable Long warehouseId, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return service.getSectors(warehouseId, page, size);
@@ -145,4 +186,39 @@ public class WarehouseController {
         return ResponseEntity.ok(service.getStatus(id));
     }
 
+    @Operation(
+            summary = "Delete warehouse images",
+            description = "Deletes one or more images associated with a warehouse.",
+            security = { @SecurityRequirement(name="bearerAuth") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Images deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Warehouse or images not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid image IDs or request body")
+    })
+    @DeleteMapping("/{id}/images")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    public ResponseEntity<Void> deleteImages(
+            @PathVariable Long id,
+            @Valid @RequestBody DeleteImagesRequestDto request) {
+
+        service.deleteImages(id, request.getImageIds());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Updates sectors",
+            description = "Updates names of existing sectors, adds new sectors, and removes sectors as needed"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Sectors updated successfully (existing names updated, new sectors added, deleted sectors removed)"),
+            @ApiResponse(responseCode = "404", description = "Warehouse not found")
+    })
+    @PatchMapping("/{id}/sectors")
+    public ResponseEntity<Void> updateSectors(@PathVariable Long id, @RequestBody @Valid UpdateSectorsRequestDto sectors) {
+        sectorService.patchSectors(id, sectors);
+        return ResponseEntity.noContent().build();
+    }
 }

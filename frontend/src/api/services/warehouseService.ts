@@ -56,5 +56,25 @@ export const warehouseService = {
 
     deleteWarehouse: async (id: number) => {
         await apiClient.delete(`/warehouses/${id}`);
-    }
+    },
+
+    patchSectors: async (warehouseId: number, diff: { added: { name: string }[];
+                                                    updated: { id: number; name: string }[];
+                                                    deleted: number[];
+     }) => { await apiClient.patch(`/warehouses/${warehouseId}/sectors`, diff); },
+
+     deleteImages: async (id: number, imageIds: number[]) => {
+        await apiClient.delete(`/warehouses/${id}/images`, {
+            data: { imageIds }
+        });
+    },
+
+    uploadWarehouseImages: async (warehouseId: number, formData: FormData) => {
+        await apiClient.post(
+            `/warehouses/${warehouseId}/images`,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        return true;
+    },
 }
