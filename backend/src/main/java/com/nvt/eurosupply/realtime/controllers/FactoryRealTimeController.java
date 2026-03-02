@@ -58,6 +58,7 @@ public class FactoryRealTimeController {
             @ApiResponse(responseCode = "404", description = "Factory or product not found")
     })
     @GetMapping("/{id}/production/{productId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<ProductionChartDto>> getProductions(
             @PathVariable Long id,
             @PathVariable Long productId,

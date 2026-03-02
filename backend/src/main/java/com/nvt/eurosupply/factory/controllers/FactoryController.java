@@ -3,8 +3,6 @@ package com.nvt.eurosupply.factory.controllers;
 import com.nvt.eurosupply.factory.dtos.*;
 import com.nvt.eurosupply.factory.services.FactoryService;
 import com.nvt.eurosupply.product.services.ProductService;
-import com.nvt.eurosupply.realtime.dtos.factory.FactoryAvailabilitySummaryDto;
-import com.nvt.eurosupply.realtime.services.FactoryRealTimeService;
 import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.DeleteImagesRequestDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
@@ -17,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,6 +42,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "404", description = "Country or City does not exist")
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<FactoryResponseDto> createFactory(@Valid @RequestBody CreateFactoryRequestDto request) {
         FactoryResponseDto response = service.createFactory(request);
         return ResponseEntity
@@ -60,6 +60,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "400", description = "Invalid file data")
     })
     @PostMapping("/{id}/images")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<FileResponseDto>> uploadImages(@PathVariable Long id, @Valid @RequestBody List<MultipartFile> images) {
         return ResponseEntity.ok(service.uploadFiles(id, images));
     }
@@ -75,6 +76,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "400", description = "Invalid update data")
     })
     @PutMapping ("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<FactoryResponseDto> updateFactory(
             @PathVariable Long id,
             @Valid @RequestBody UpdateFactoryRequestDto request
@@ -91,6 +93,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "404", description = "Factory not found")
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<FactoryResponseDto> getFactory(@PathVariable Long id) {
         return ResponseEntity.ok(service.getFactory(id));
     }
@@ -103,6 +106,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "200", description = "Factories retrieved successfully")
     })
     @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<PagedResponse<FactoryResponseDto>> getFactories(Pageable pageable) {
         return ResponseEntity.ok(service.getFactories(pageable));
     }
@@ -126,6 +130,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "400", description = "Invalid search parameters")
     })
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<PagedResponse<FactoryResponseDto>> searchFactories(
             @ModelAttribute FactorySearchRequestDto request,
             Pageable pageable
@@ -143,6 +148,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "400", description = "Invalid image IDs or request body")
     })
     @DeleteMapping("/{factoryId}/images")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<Void> deleteImages(
             @PathVariable Long factoryId,
             @Valid @RequestBody DeleteImagesRequestDto request) {
@@ -160,6 +166,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "404", description = "Factory not found")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<Void> deleteFactory(@PathVariable Long id) {
         service.deleteFactory(id);
         return ResponseEntity.noContent().build();
@@ -174,6 +181,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @GetMapping("/producing-product/{productId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<FactoryResponseDto>> getFactoriesByProductId(
             @PathVariable Long productId) {
         List<FactoryResponseDto> factories = service.getFactoriesByProductId(productId);
@@ -189,6 +197,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "404", description = "Factory not found")
     })
     @GetMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<ConnectionStatusDto> getFactoryStatus(@PathVariable Long id) {
         return ResponseEntity.ok(service.getFactoryStatus(id));
     }
@@ -202,6 +211,7 @@ public class FactoryController {
             @ApiResponse(responseCode = "200", description = "List of products successfully retrieved")
     })
     @GetMapping("/{id}/products")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public PagedResponse<FactoryProductListItemDto> getProductsByFactory(@PathVariable Long id, Pageable pageable) {
         return productService.getProductsByFactoryId(id, pageable);
     }
