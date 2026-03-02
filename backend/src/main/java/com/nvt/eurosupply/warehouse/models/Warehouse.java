@@ -13,7 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "warehouses")
+@Table(name = "warehouses",
+       indexes = {
+                @Index(name = "idx_warehouse_country_id", columnList = "country_id"),
+                @Index(name = "idx_warehouse_country_city", columnList = "country_id, city_id")
+        })
 @Builder
 public class Warehouse {
     @Id
@@ -26,10 +30,10 @@ public class Warehouse {
     @Column(length = 50, nullable = false)
     private String address;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private City city;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Country country;
 
     @OneToMany

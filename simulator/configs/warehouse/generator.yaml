@@ -1,0 +1,13 @@
+influx:
+  url: "http://localhost:8086"
+  token: "tokencic"
+  org: "eurosupply"
+  bucket: "warehouse"
+
+warehouse:
+  numWarehouses: 100
+  numSectors: 3
+  yearsOfHistory: 2
+  workers: 10
+  batchSize: 5000
+  intervalMinutes: 10

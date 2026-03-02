@@ -35,3 +35,16 @@ export interface FactoryProductListItemDto {
     productName: string;
     categoryName: string;
 }
+
+export interface FactoryAvailabilityDataPoint {
+    timeLabel: string;
+    online: boolean;
+}
+
+export interface FactoryAvailabilitySummary {
+    dataPoints: FactoryAvailabilityDataPoint[];
+    onlinePercentage: number;
+    offlinePercentage: number;
+    totalOnlineMinutes: number;
+    totalOfflineMinutes: number;
+}

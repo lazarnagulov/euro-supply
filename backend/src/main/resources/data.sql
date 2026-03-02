@@ -163,6 +163,63 @@ INSERT INTO countries_cities (country_id, cities_id) VALUES
     (46,1136),(46,1137),(46,1138),
     (47,1139),(47,1140),(47,1141);
 
+WITH city_data AS (
+    SELECT
+        cc.country_id,
+        cc.cities_id AS city_id,
+        c.name AS city_name,
+        ROW_NUMBER() OVER (ORDER BY cc.country_id, cc.cities_id) AS rn
+    FROM countries_cities cc
+             JOIN cities c ON cc.cities_id = c.id
+),
+     series AS (
+         SELECT
+             generate_series(1, 40000) AS seq,
+             ((generate_series(1, 40000) - 1) % (SELECT COUNT(*) FROM city_data)) + 1 AS city_index
+    )
+INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude)
+SELECT
+    CONCAT('Warehouse ', s.seq, ' - ', cd.city_name) AS name,
+    CONCAT('Street ', floor(random() * 999 + 1), ', ', cd.city_name) AS address,
+    cd.country_id,
+    cd.city_id,
+    (35.0 + random() * 30.0)::numeric(8,4) AS latitude,
+    (-10.0 + random() * 50.0)::numeric(8,4) AS longitude
+FROM series s
+         JOIN city_data cd ON s.city_index = cd.rn
+ORDER BY random();
+
+WITH sector_templates AS (
+    SELECT 1 AS template_id, unnest(ARRAY['Electronics','Furniture','Clothing']) AS name, unnest(ARRAY[22.0,21.0,20.0]) AS temp
+    UNION ALL
+    SELECT 2 AS template_id, unnest(ARRAY['Frozen','Cool','Dry']), unnest(ARRAY[-20.0,5.0,20.0])
+    UNION ALL
+    SELECT 3 AS template_id, unnest(ARRAY['Gadgets','Home','Apparel']), unnest(ARRAY[23.0,21.5,20.5])
+),
+     warehouses_seq AS (
+         SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn
+         FROM warehouses
+     )
+INSERT INTO sectors (name, warehouse_id)
+SELECT st.name, w.id
+FROM warehouses_seq w
+         CROSS JOIN sector_templates st
+WHERE st.template_id = ((w.rn - 1) % 3) + 1
+ORDER BY w.id, st.template_id;
+
+INSERT INTO sector_temperatures (sector_id, temperature)
+SELECT s.id,
+       CASE
+           WHEN s.name IN ('Electronics','Gadgets') THEN 22.0
+           WHEN s.name IN ('Furniture','Home') THEN 21.0
+           WHEN s.name IN ('Clothing','Apparel') THEN 20.0
+           WHEN s.name = 'Frozen' THEN -20.0
+           WHEN s.name = 'Cool' THEN 5.0
+           WHEN s.name = 'Dry' THEN 20.0
+           ELSE 20.0
+           END
+FROM sectors s;
+
 INSERT INTO categories (id, name) VALUES
                                       (1, 'Electronics'),
                                       (2, 'Computers & Laptops'),
@@ -388,7 +445,7 @@ INSERT INTO products
 (name, description,
  price, weight, on_sale,
  category_id, created_at,
- updated_at, version, image_id, quantity)
+ updated_at, image_id)
 VALUES
     (
         'Steel Beam S235',
@@ -399,9 +456,8 @@ VALUES
         3,
         now(),
         now(),
-        0,
-     5,
-     300
+
+     5
     ),
     (
         'Industrial Lubricant XL',
@@ -412,9 +468,8 @@ VALUES
         12,
         now(),
         now(),
-        0,
-     6,
-     170
+
+     6
     ),
     (
         'Electronic Control Unit',
@@ -425,16 +480,85 @@ VALUES
         21,
         now(),
         now(),
-        0,
-     7,
-     75
+
+     7
     );
 
+INSERT INTO product_inventory (product_id, quantity, updated_at)
+VALUES
+    (1, 0, now()),
+    (2, 0, now()),
+    (3, 0, now());
 
 insert into product_factory (product_id, factory_id) values
  (1, 1), (1, 2), (1, 3),
  (2, 1), (2, 2), (2, 3),
  (3, 1), (3, 2), (3, 3);
+
+-- =============================================
+-- 20,000 FACTORIES (id 4-20003)
+-- =============================================
+WITH valid_pairs AS (
+    SELECT country_id, cities_id AS city_id,
+           ROW_NUMBER() OVER () AS rn,
+            COUNT(*) OVER () AS total
+    FROM countries_cities
+)
+INSERT INTO factories (name, address, city_id, country_id, latitude, longitude, created_at, updated_at, version)
+SELECT
+    'Factory ' || gs,
+    'Industrial Street ' || gs,
+    vp.city_id,
+    vp.country_id,
+    40.0 + random() * 15.0,
+    10.0 + random() * 25.0,
+    NOW() - (random() * INTERVAL '24 months'),
+    NOW() - (random() * INTERVAL '12 months'),
+    0
+FROM generate_series(4, 20003) gs
+         JOIN valid_pairs vp ON vp.rn = ((gs - 4) % vp.total) + 1;
+
+INSERT INTO factory_status (factory_id, is_online, last_heartbeat_at)
+SELECT
+    id,
+    (random() > 0.3),
+    NOW() - (random() * INTERVAL '30 minutes')
+FROM factories
+WHERE id > 3;
+
+
+-- =============================================
+-- 500 PRODUCTS (id 4-503)
+-- =============================================
+INSERT INTO products (name, description, price, weight, on_sale, category_id, created_at, updated_at, image_id)
+SELECT
+    'Product ' || gs,
+    'Description for product ' || gs,
+    (5 + random() * 995)::numeric(10,2),
+        (0.1 + random() * 49.9)::numeric(10,2),
+        (random() > 0.5),
+    1 + (random() * 24)::int,
+        NOW() - (random() * INTERVAL '24 months'),
+    NOW() - (random() * INTERVAL '12 months'),
+    NULL
+FROM generate_series(4, 503) gs;
+
+INSERT INTO product_inventory (product_id, quantity, updated_at)
+SELECT id, (random() * 10000)::int, NOW()
+FROM products
+WHERE id > 3;
+
+-- =============================================
+-- PRODUCT <-> FACTORY (~10 factories per product)
+-- =============================================
+INSERT INTO product_factory (product_id, factory_id)
+SELECT DISTINCT
+    p.id,
+    3 + (1 + (random() * 19999)::int) AS factory_id
+FROM products p
+         CROSS JOIN generate_series(1, 10)
+WHERE p.id > 3
+    ON CONFLICT DO NOTHING;
 
 
 INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
@@ -443,9 +567,10 @@ INSERT INTO vehicles_images (images_id, vehicle_id) VALUES
     (3,3),
     (4,4);
 
-INSERT INTO warehouses (name, address, country_id, city_id, latitude, longitude) VALUES
-     ('Central Warehouse', 'Kralja Milana 6, Beograd', 40, 1118, 16020, 454545),
-     ('Belgrade Warehouse', 'Lamartinova 52, Vracar', 40, 1118, 16520, 454545);
+INSERT INTO warehouse_status (warehouse_id, is_online, last_heartbeat_at)
+SELECT id, false, NOW() - (random() * INTERVAL '30 minutes')
+FROM warehouses;
+
 
 INSERT INTO warehouses_images (images_id, warehouse_id) VALUES
                                                         (11, 1),

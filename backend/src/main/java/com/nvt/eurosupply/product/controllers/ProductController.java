@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +39,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Category not found"),
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<ProductResponseDto> createProduct(@Valid @RequestBody CreateProductRequestDto request) {
         ProductResponseDto response = service.createProduct(request);
         return ResponseEntity
@@ -54,6 +57,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Invalid image data")
     })
     @PostMapping("/{id}/image")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<FileResponseDto> uploadImage(
             @PathVariable Long id,
             @Valid @RequestBody MultipartFile image
@@ -69,6 +73,7 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Products retrieved successfully")
     })
     @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<PagedResponse<ProductResponseDto>> getProducts(Pageable pageable) {
         return ResponseEntity.ok(service.getProducts(pageable));
     }
@@ -82,6 +87,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<ProductResponseDto> getProduct(@PathVariable Long id) {
         return ResponseEntity.ok(service.getProduct(id));
     }
@@ -97,6 +103,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Invalid update data")
     })
     @PutMapping ("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<ProductResponseDto> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody UpdateProductRequestDto request
@@ -126,6 +133,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Invalid search parameters (e.g. negative price or invalid format)")
     })
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<PagedResponse<ProductResponseDto>> searchProducts(
             @Parameter(description = "Filter criteria for product search")
             @ModelAttribute ProductSearchRequestDto request,
@@ -151,6 +159,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         service.deleteProduct(id);
         return ResponseEntity.noContent().build();
@@ -158,20 +167,23 @@ public class ProductController {
 
     @Operation(
             summary = "Get available products",
-            description = "Returns a paginated list of products that are currently available (on sale or in stock)."
+            description = "Returns a paginated list of products that are currently available (on sale or in stock).",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved available products"),
             @ApiResponse(responseCode = "400", description = "Invalid paging parameters")
     })
     @GetMapping("/available")
+    @PreAuthorize("hasAnyRole('ROLE_CUSTOMER')")
     public ResponseEntity<PagedResponse<ProductResponseDto>> getAvailableProducts(Pageable pageable) {
         return ResponseEntity.ok(service.getAvailableProducts(pageable));
     }
 
     @Operation(
             summary = "Order a product",
-            description = "Creates an order for a specific product by a company with the specified quantity."
+            description = "Creates an order for a specific product by a company with the specified quantity.",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Order placed successfully"),
@@ -180,6 +192,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", description = "Unauthorized to order for this company")
     })
     @PostMapping("/order")
+    @PreAuthorize("hasAnyRole('ROLE_CUSTOMER')")
     public ResponseEntity<OrderResponseDto> orderProduct(@Valid @RequestBody OrderRequestDto orderRequest) {
         return ResponseEntity.ok(service.orderProduct(orderRequest));
     }

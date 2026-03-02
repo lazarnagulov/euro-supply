@@ -1,4 +1,4 @@
-package com.nvt.eurosupply.realtime.dtos;
+package com.nvt.eurosupply.realtime.dtos.factory;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

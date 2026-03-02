@@ -10,14 +10,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "factories")
+@Table(
+        name = "factories",
+        indexes = {
+                @Index(name = "idx_factory_country_id", columnList = "country_id"),
+                @Index(name = "idx_factory_country_city", columnList = "country_id, city_id")
+        }
+)
 @Builder
 public class Factory {
 
@@ -31,10 +36,10 @@ public class Factory {
     @Column(length = 50, nullable = false)
     private String address;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private City city;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Country country;
 
     @Column(nullable = false)

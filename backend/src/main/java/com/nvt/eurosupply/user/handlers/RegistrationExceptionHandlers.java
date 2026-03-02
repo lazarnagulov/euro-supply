@@ -1,6 +1,7 @@
 package com.nvt.eurosupply.user.handlers;
 
 import com.nvt.eurosupply.shared.models.ExceptionResponse;
+import com.nvt.eurosupply.user.exceptions.PasswordMismatchException;
 import com.nvt.eurosupply.user.exceptions.UserAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -27,5 +28,21 @@ public class RegistrationExceptionHandlers {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<ExceptionResponse> handlePasswordMismatch(
+            PasswordMismatchException ex,
+            HttpServletRequest request) {
+
+        ExceptionResponse response = ExceptionResponse.builder()
+                .error("Bad Request")
+                .message(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .path(request.getRequestURI())
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

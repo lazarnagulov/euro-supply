@@ -1,5 +1,9 @@
 package com.nvt.eurosupply.warehouse.services;
 
+import com.nvt.eurosupply.factory.models.FactoryStatus;
+import com.nvt.eurosupply.realtime.messages.SectorTemperatureMessage;
+import com.nvt.eurosupply.realtime.messages.WarehouseReportMessage;
+import com.nvt.eurosupply.shared.dtos.ConnectionStatusDto;
 import com.nvt.eurosupply.shared.dtos.FileResponseDto;
 import com.nvt.eurosupply.shared.enums.FileFolder;
 import com.nvt.eurosupply.shared.mappers.FileMapper;
@@ -10,53 +14,73 @@ import com.nvt.eurosupply.shared.models.StoredFile;
 import com.nvt.eurosupply.shared.services.CityService;
 import com.nvt.eurosupply.shared.services.CountryService;
 import com.nvt.eurosupply.shared.services.FileService;
-import com.nvt.eurosupply.warehouse.dtos.CreateWarehouseRequestDto;
-import com.nvt.eurosupply.warehouse.dtos.UpdateWarehouseRequestDto;
-import com.nvt.eurosupply.warehouse.dtos.WarehouseResponseDto;
-import com.nvt.eurosupply.warehouse.dtos.WarehouseSearchRequestDto;
+import com.nvt.eurosupply.vehicle.models.Vehicle;
+import com.nvt.eurosupply.warehouse.dtos.*;
 import com.nvt.eurosupply.warehouse.mappers.WarehouseMapper;
 import com.nvt.eurosupply.warehouse.models.Warehouse;
+import com.nvt.eurosupply.warehouse.models.WarehouseStatus;
+import com.nvt.eurosupply.warehouse.repositories.SectorTemperatureRepository;
 import com.nvt.eurosupply.warehouse.repositories.WarehouseRepository;
+import com.nvt.eurosupply.warehouse.repositories.WarehouseStatusRepository;
 import com.nvt.eurosupply.warehouse.specifications.WarehouseSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+@Transactional(readOnly = true)
 public class WarehouseService {
 
     private final CityService cityService;
     private final CountryService countryService;
     private final FileService fileService;
+    private final SectorService sectorService;
 
     private final WarehouseRepository repository;
     private final FileMapper fileMapper;
     private final WarehouseMapper mapper;
+    private final SectorTemperatureRepository sectorTemperatureRepository;
+    private final WarehouseStatusRepository statusRepository;
 
     public Warehouse find (Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
     }
 
+    @Transactional
     public WarehouseResponseDto createWarehouse(CreateWarehouseRequestDto request) {
         Warehouse warehouse = mapper.fromRequest(request);
         City city = cityService.find(request.getCityId());
         Country country = countryService.find(request.getCountryId());
         warehouse.setCity(city);
         warehouse.setCountry(country);
-        return mapper.toResponse(repository.save(warehouse));
+        Warehouse saved = repository.save(warehouse);
+        sectorService.createSectors(request.getSectors(), saved);
+        saveWarehouseInitialStatus(warehouse);
+        return mapper.toResponse(saved);
     }
 
+    @Transactional
     public WarehouseResponseDto updateWarehouse(Long id, UpdateWarehouseRequestDto request) {
-        Warehouse warehouse = find(id);
+        Warehouse warehouse = repository.findOneById(id);
 
         warehouse.setName(request.getName());
         warehouse.setAddress(request.getAddress());
@@ -76,6 +100,10 @@ public class WarehouseService {
         return mapper.toResponse(repository.save(warehouse));
     }
 
+    public Page<WarehouseSectorResponse> getSectors(Long warehouseId, Integer page, Integer size) {
+        return sectorService.findSectorsWithTemperatureByWarehouseId(warehouseId, page, size);
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteWarehouse(Long id) {
         Warehouse warehouse = find(id);
@@ -85,6 +113,8 @@ public class WarehouseService {
                 .toList();
 
         deleteImagesInternal(warehouse, imageIds);
+        sectorService.deleteSectorAndTemperatures(warehouse.getId());
+        statusRepository.deleteById(warehouse.getId());
         repository.delete(warehouse);
     }
 
@@ -97,6 +127,8 @@ public class WarehouseService {
         return mapper.toPagedResponse(repository.findAll(specification, pageable));
     }
 
+    @Transactional
+    @CacheEvict(value = "warehouse", key = "#id")
     public List<FileResponseDto> uploadImages(Long id, List<MultipartFile> images) {
         Warehouse warehouse = find(id);
         List<StoredFile> stored = fileService.uploadFiles(FileFolder.WAREHOUSE, id, images);
@@ -110,6 +142,75 @@ public class WarehouseService {
 
     private void deleteImagesInternal(Warehouse warehouse, List<Long> imageIds) {
         warehouse.getImages().clear();
+        repository.saveAndFlush(warehouse);
+        fileService.deleteFiles(imageIds);
+    }
+
+    @Transactional
+    public void applyReport(WarehouseReportMessage report) {
+        if (report.getTemperatures() == null || report.getTemperatures().isEmpty())
+            return;
+
+        Map<Long, Double> updates = report.getTemperatures().stream()
+                .collect(Collectors.toMap(
+                        SectorTemperatureMessage::getSectorId,
+                        SectorTemperatureMessage::getTemperature
+                ));
+
+        int[] results = sectorTemperatureRepository.batchUpdateTemperature(updates, report.getTimestamp());
+
+        int i = 0;
+        for (Long sectorId : updates.keySet()) {
+            if (results[i++] == 0) {
+                throw new EntityNotFoundException("Sector not found: " + sectorId);
+            }
+        }
+    }
+
+    @Transactional
+    @CacheEvict(value = "warehouseStatus", key = "#warehouseId")
+    public void applyHeartbeat(Long warehouseId, Instant timestamp) {
+        int updated = statusRepository.applyHeartbeat(warehouseId, timestamp);
+
+        if (updated == 0)
+            throw new EntityNotFoundException("Warehouse not found: " + warehouseId);
+    }
+
+    @Scheduled(fixedRate = 5 * 60 * 1000)
+    @Transactional
+    @CacheEvict(value = "warehouseStatus", allEntries = true)
+    public void markFactoriesOffline() {
+        Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
+
+        int updated = statusRepository.markOffline(cutoff);
+
+        if (updated > 0)
+            log.info("Marked {} factories as offline", updated);
+    }
+
+    private void saveWarehouseInitialStatus(Warehouse warehouse) {
+        WarehouseStatus status = new WarehouseStatus();
+        status.setWarehouse(warehouse);
+        status.setIsOnline(false);
+        statusRepository.save(status);
+    }
+
+    @Cacheable(value = "warehouse", key = "#id")
+    public WarehouseResponseDto getWarehouse(Long id) {
+        return mapper.toResponse(find(id));
+    }
+
+    @Cacheable(value = "warehouseStatus", key = "#id")
+    public ConnectionStatusDto getStatus(Long id) {
+        WarehouseStatus status = statusRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Warehouse status not found"));
+        return new ConnectionStatusDto(status.getIsOnline());
+    }
+
+    @Transactional
+    @CacheEvict(value = "warehouse", key = "#id")
+    public void deleteImages(Long id, List<Long> imageIds) {
+        Warehouse warehouse = find(id);
+        warehouse.getImages().removeIf(img -> imageIds.contains(img.getId()));
         repository.saveAndFlush(warehouse);
         fileService.deleteFiles(imageIds);
     }

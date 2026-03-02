@@ -19,6 +19,7 @@ import ManagerManagementPage from "./features/manager/pages/ManagerManagementPag
 import ChangePasswordPage from "./features/auth/pages/ChangePasswordPage.tsx";
 import {ROLES} from "./features/auth/types/auth.types.ts";
 import RequireAuth from "./features/auth/components/RequireAuth.tsx";
+import WarehouseDetailsPage from "./features/warehouse/pages/WarehouseDetailsPage.tsx";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
             <Route path="/products/:productId" element={<ProductDetailsPage />} />
             <Route path="/vehicles/:vehicleId" element={<VehicleDetailsPage />} />
             <Route path="/factories/:factoryId" element={<FactoryDetailsPage />} />
+            <Route path="/warehouses/:warehouseId" element={<WarehouseDetailsPage />} />
         </Route>
         <Route element={<RequireAuth allowedRoles={[ROLES.ADMIN]} />}>
           <Route path="/manager-management" element={<ManagerManagementPage />} />

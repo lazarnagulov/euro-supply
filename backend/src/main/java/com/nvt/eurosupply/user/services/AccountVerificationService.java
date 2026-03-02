@@ -9,6 +9,7 @@ import com.nvt.eurosupply.user.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -24,6 +25,7 @@ public class AccountVerificationService {
     private final EmailService emailService;
     private final UserRepository repository;
 
+    @Async
     public void sendActivationEmail(User user) {
 
         Map<String, Object> variables = new HashMap<>();

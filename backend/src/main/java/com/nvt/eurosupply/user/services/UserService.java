@@ -11,10 +11,7 @@ import com.nvt.eurosupply.user.dtos.AuthResponseDto;
 import com.nvt.eurosupply.user.dtos.ChangePasswordRequest;
 import com.nvt.eurosupply.user.dtos.ManagerResponseDto;
 import com.nvt.eurosupply.user.enums.Role;
-import com.nvt.eurosupply.user.exceptions.InvalidOldPasswordException;
-import com.nvt.eurosupply.user.exceptions.PasswordConfirmationMismatchException;
-import com.nvt.eurosupply.user.exceptions.PasswordNotChangedException;
-import com.nvt.eurosupply.user.exceptions.UserAlreadyExistsException;
+import com.nvt.eurosupply.user.exceptions.*;
 import com.nvt.eurosupply.user.mappers.UserMapper;
 import com.nvt.eurosupply.user.models.User;
 import com.nvt.eurosupply.user.repositories.UserRepository;
@@ -43,8 +40,9 @@ public class UserService {
     private final FileService fileService;
     private final FileMapper fileMapper;
 
+    @Transactional
     public AuthResponseDto register(AuthRequestDto request) {
-        validateUniqueUserData(request);
+        validateUserData(request);
         User user = mapper.fromRequest(request);
         user.setHash(HashUtils.generateHash());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -54,8 +52,9 @@ public class UserService {
         return AuthResponseDto.builder().id(createdUser.getId()).build();
     }
 
+    @Transactional
     public AuthResponseDto registerManager(AuthRequestDto request) {
-        validateUniqueUserData(request);
+        validateUserData(request);
         User manager = mapper.fromRequest(request);
         manager.setPassword(passwordEncoder.encode(request.getPassword()));
         manager.setRole(Role.MANAGER);
@@ -66,12 +65,15 @@ public class UserService {
         return new AuthResponseDto(created.getId());
     }
 
-    private void validateUniqueUserData(AuthRequestDto request) {
+    private void validateUserData(AuthRequestDto request) {
         if (repository.existsByUsername(request.getUsername()))
             throw new UserAlreadyExistsException("User with this username already exists");
 
         if (repository.existsByEmail(request.getEmail()))
             throw new UserAlreadyExistsException("User with this email already exists");
+
+        if (!request.getPassword().equals(request.getPasswordConfirmation()))
+            throw new PasswordMismatchException("Password and password confirmation must match");
     }
 
     @Transactional

@@ -22,4 +22,20 @@ public class FactoryFlux {
                 start, end, factoryId, productId, window
         );
     }
+
+    public String getAggregatedAvailability(Long factoryId, Instant start, Instant end, String window) {
+        return String.format(
+                """
+                from(bucket: "factory")
+                |> range(start: %s, stop: %s)
+                |> filter(fn: (r) => r["_measurement"] == "factory_availability")
+                |> filter(fn: (r) => r["factory_id"] == "%d")
+                |> filter(fn: (r) => r["_field"] == "status")
+                |> aggregateWindow(every: %s, fn: count, createEmpty: true)
+                |> map(fn: (r) => ({r with _value: if r._value > 0 then 1 else 0}))
+                |> yield(name: "availability")
+                """,
+                start, end, factoryId, window
+        );
+    }
 }

@@ -19,17 +19,16 @@ public class ProductBatchOperationsImpl implements ProductBatchOperations {
 
     @Override
     public int[] batchIncrementQuantity(Map<Long, Integer> updates) {
-        String sql = "UPDATE products SET quantity = quantity + ? WHERE id = ?";
+        String sql = "UPDATE product_inventory SET quantity = quantity + ? WHERE product_id = ?";
 
         List<Map.Entry<Long, Integer>> entries = new ArrayList<>(updates.entrySet());
 
         return jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Map.Entry<Long, Integer> entry = entries.get(i);
-                ps.setInt(1, entry.getValue());  // delta
-                ps.setLong(2, entry.getKey());   // id
+                ps.setInt(1, entry.getValue());
+                ps.setLong(2, entry.getKey());
             }
 
             @Override

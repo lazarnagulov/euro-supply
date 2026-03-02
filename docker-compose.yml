@@ -1,0 +1,50 @@
+version: "3.7"
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-eurosupply
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - iot-network
+
+  influxdb:
+    image: influxdb:2.6
+    container_name: influxdb-eurosupply
+    ports:
+      - "8086:8086"
+    environment:
+      # Admin korisnik i password
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORGANIZATION}
+      - DOCKER_INFLUXDB_INIT_BUCKET=warehouse
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+    volumes:
+      - ./influxdb/data:/var/lib/influxdb2
+      - ./influxdb/init:/docker-entrypoint-initdb.d
+    networks:
+      - iot-network
+
+  redis:
+    image: redis:7
+    container_name: redis-eurosupply
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/data
+    networks:
+      - iot-network
+    command: ["redis-server", "--appendonly", "yes"]
+
+volumes:
+  rabbitmq_data:
+
+networks:
+  iot-network:
+    name: iot-network

@@ -1,8 +1,9 @@
-import type { Warehouse, WarehouseSearchParams } from "../../features/warehouse/types/warehouse.type";
+import type { SectorTemperatureChartDto, TimeRangeRequest, Warehouse, WarehouseSearchParams } from "../../features/warehouse/types/warehouse.type";
 import apiClient from "../client";
 
 export const warehouseService = {
-     getWarehouses: async (page: number, size: number, params: WarehouseSearchParams) => {
+     
+    getWarehouses: async (page: number, size: number, params: WarehouseSearchParams) => {
         const isSearch = params && Object.keys(params).length !== 0;
         const response = await apiClient.get(
             isSearch ? '/warehouses/search' : '/warehouses',
@@ -12,6 +13,26 @@ export const warehouseService = {
         return response.data;
     },
 
+    getSectorTemperatureStats: async ({warehouseId, sectorId, timeRange}: {warehouseId: number; sectorId: number; timeRange: TimeRangeRequest}) => {
+        console.log('Fetching temperature stats with params:', { warehouseId, sectorId, timeRange });
+        const response = await apiClient.get<SectorTemperatureChartDto[]>(`/warehouses/${warehouseId}/sector/${sectorId}`,{ params: timeRange });
+        return response.data;
+   },
+
+    getWarehouseStatus: async (id: number) => {
+        const response = await apiClient.get(`/warehouses/${id}/status`);
+        return response.data;
+    },
+
+    getWarehouse: async (id: number) => {
+        const response = await apiClient.get(`/warehouses/${id}`);
+        return response.data;
+    },
+
+    getSectorsByWarehouse: async (warehouseId: number,page: number = 0, size: number = 10) => {
+        const response = await apiClient.get(`/warehouses/${warehouseId}/sectors`, { params: { page, size } });
+        return response.data;
+    },
 
     createWarehouse: async (request: Warehouse, images: File[]) => {
         const response = await apiClient.post('/warehouses', request);
@@ -35,5 +56,25 @@ export const warehouseService = {
 
     deleteWarehouse: async (id: number) => {
         await apiClient.delete(`/warehouses/${id}`);
-    }
+    },
+
+    patchSectors: async (warehouseId: number, diff: { added: { name: string }[];
+                                                    updated: { id: number; name: string }[];
+                                                    deleted: number[];
+     }) => { await apiClient.patch(`/warehouses/${warehouseId}/sectors`, diff); },
+
+     deleteImages: async (id: number, imageIds: number[]) => {
+        await apiClient.delete(`/warehouses/${id}/images`, {
+            data: { imageIds }
+        });
+    },
+
+    uploadWarehouseImages: async (warehouseId: number, formData: FormData) => {
+        await apiClient.post(
+            `/warehouses/${warehouseId}/images`,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        return true;
+    },
 }

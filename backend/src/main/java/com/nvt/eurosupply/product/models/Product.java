@@ -13,7 +13,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "products")
+@Table(
+        name = "products",
+        indexes = {
+                @Index(name = "idx_product_category_id", columnList = "category_id"),
+                @Index(name = "idx_product_on_sale", columnList = "on_sale"),
+                @Index(name = "idx_product_price", columnList = "price"),
+                @Index(name = "idx_product_weight", columnList = "weight"),
+                @Index(name = "idx_product_category_on_sale", columnList = "category_id, on_sale")
+        }
+)
 @Builder
 public class Product {
 
@@ -41,8 +50,8 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(nullable = false)
-    private Integer quantity = 0;
+    @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
+    private ProductInventory inventory;
 
     @ManyToMany
     @JoinTable(
@@ -56,9 +65,6 @@ public class Product {
     private Instant createdAt;
     @Column(nullable = false)
     private Instant updatedAt;
-
-    @Version
-    private Long version;
 
     @PrePersist
     public void onCreate() {
