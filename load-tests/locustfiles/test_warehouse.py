@@ -28,15 +28,17 @@ class WarehouseTasks(HttpUser):
 
 
     @task
-    def get_warehouse(self):
-        self.client.get(f"/warehouses/{ random.randint(1, warehouse_util.MAX_WAREHOUSE_ID) }")
+    def get_sector_stats(self):
+        warehouse_id = random.choice(list(warehouse_util.WAREHOUSE_SECTORS.keys()))
+        sector_id = random.choice(warehouse_util.WAREHOUSE_SECTORS[warehouse_id])
 
-    @task
-    def get_warehouse_status(self):
-        warehouse_id = warehouse_util.random_warehouse_id()
-        self.client.get(f"/warehouses/{warehouse_id}/status")
-
-    @task
-    def get_sectors_with_last_temperature(self):
-        warehouse_id = warehouse_util.random_warehouse_id()
-        self.client.get(f"/warehouses/{warehouse_id}/sectors")
+        with self.client.get(
+            f"/warehouses/{warehouse_id}/sector/{sector_id}",
+            name="/warehouses/[id]/sector/[sectorId]",
+            catch_response=True
+        ) as response:
+            
+            if response.status_code == 200:
+                response.success()
+            else:
+                response.failure(f"Failed with status {response.status_code}")
