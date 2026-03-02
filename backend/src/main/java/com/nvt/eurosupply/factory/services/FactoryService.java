@@ -184,11 +184,11 @@ public class FactoryService {
         return new ConnectionStatusDto(status.getIsOnline());
     }
 
-    @Scheduled(fixedRate = 5 * 60 * 1000)
+    @Scheduled(fixedRate = 5 * 60 * 60 * 1000)
     @Transactional
     @CacheEvict(value = "factoryStatus", allEntries = true)
     public void markFactoriesOffline() {
-        Instant cutoff = Instant.now().minus(6, ChronoUnit.MINUTES);
+        Instant cutoff = Instant.now().minus(10, ChronoUnit.HOURS);
 
         int updated = statusRepository.markOffline(cutoff);
 
