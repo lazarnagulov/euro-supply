@@ -35,12 +35,14 @@ public class WarehouseController {
 
     @Operation(
             summary = "Get all warehouses",
-            description = "Retrieves a paginated list of all warehouses."
+            description = "Retrieves a paginated list of all warehouses.",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Warehouses retrieved successfully")
     })
     @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<PagedResponse<WarehouseResponseDto>> getWarehouses(Pageable pageable) {
         return ResponseEntity.ok(service.getWarehouses(pageable));
     }
@@ -56,13 +58,16 @@ public class WarehouseController {
                 - `countryId`: Filter by warehouse country
                 - `cityId`: Filter by warehouse city
                 Results are paginated.
-                """
+                """,
+            security = { @SecurityRequirement(name="bearerAuth") }
+
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Warehouses retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid search parameters")
     })
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGER')")
     public ResponseEntity<PagedResponse<WarehouseResponseDto>> searchWarehouses(
             @ModelAttribute WarehouseSearchRequestDto request,
             Pageable pageable
@@ -84,7 +89,8 @@ public class WarehouseController {
     }
 
     @Operation(
-            summary = "Creates a new warehouse"
+            summary = "Creates a new warehouse",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Warehouse created successfully"),
@@ -92,6 +98,7 @@ public class WarehouseController {
             @ApiResponse(responseCode = "404", description = "Country or City does not exist"),
     })
     @PostMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<WarehouseResponseDto> createWarehouse(@Valid @RequestBody CreateWarehouseRequestDto request) {
         return new ResponseEntity<>(service.createWarehouse(request), HttpStatus.CREATED);
     }
@@ -115,6 +122,7 @@ public class WarehouseController {
             @ApiResponse(responseCode = "404", description = "Warehouse not found"),
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<WarehouseResponseDto> updateWarehouse(@PathVariable Long id,
                                                                 @Valid @RequestBody UpdateWarehouseRequestDto request) {
         return ResponseEntity.ok(service.updateWarehouse(id, request));
@@ -122,13 +130,15 @@ public class WarehouseController {
 
     @Operation(
             summary = "Deletes a warehouse.",
-            description = "Deletes a warehouse by its ID."
+            description = "Deletes a warehouse by its ID.",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Warehouse successfully deleted"),
             @ApiResponse(responseCode = "404", description = "Warehouse not found"),
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGER')")
     public ResponseEntity<Void> deleteWarehouse(@PathVariable Long id) {
         service.deleteWarehouse(id);
         return ResponseEntity.noContent().build();
@@ -136,7 +146,8 @@ public class WarehouseController {
 
     @Operation(
             summary = "Upload warehouse images",
-            description = "Uploads one or more images for an existing warehouse."
+            description = "Uploads one or more images for an existing warehouse.",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Images uploaded successfully"),
@@ -144,6 +155,7 @@ public class WarehouseController {
             @ApiResponse(responseCode = "400", description = "Invalid image data")
     })
     @PostMapping("/{id}/images")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<List<FileResponseDto>> uploadImage(
             @PathVariable Long id,
             @Valid @RequestBody List<MultipartFile> images
@@ -175,13 +187,16 @@ public class WarehouseController {
 
     @Operation(
             summary = "Get warehouse connection status",
-            description = "Retrieves a warehouse connection status by its ID."
+            description = "Retrieves a warehouse connection status by its ID.",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Warehouse connection status retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Warehouse not found")
     })
+
     @GetMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<ConnectionStatusDto> getWarehouseStatus(@PathVariable Long id) {
         return ResponseEntity.ok(service.getStatus(id));
     }
@@ -210,13 +225,15 @@ public class WarehouseController {
 
     @Operation(
             summary = "Updates sectors",
-            description = "Updates names of existing sectors, adds new sectors, and removes sectors as needed"
+            description = "Updates names of existing sectors, adds new sectors, and removes sectors as needed",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Sectors updated successfully (existing names updated, new sectors added, deleted sectors removed)"),
-            @ApiResponse(responseCode = "404", description = "Warehouse not found")
+            @ApiResponse(responseCode = "404", description = "Warehouse not found"),
     })
     @PatchMapping("/{id}/sectors")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<Void> updateSectors(@PathVariable Long id, @RequestBody @Valid UpdateSectorsRequestDto sectors) {
         sectorService.updateSectors(id, sectors);
         return ResponseEntity.noContent().build();

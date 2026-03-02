@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -158,20 +160,23 @@ public class ProductController {
 
     @Operation(
             summary = "Get available products",
-            description = "Returns a paginated list of products that are currently available (on sale or in stock)."
+            description = "Returns a paginated list of products that are currently available (on sale or in stock).",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved available products"),
             @ApiResponse(responseCode = "400", description = "Invalid paging parameters")
     })
     @GetMapping("/available")
+    @PreAuthorize("hasAnyRole('ROLE_CUSTOMER')")
     public ResponseEntity<PagedResponse<ProductResponseDto>> getAvailableProducts(Pageable pageable) {
         return ResponseEntity.ok(service.getAvailableProducts(pageable));
     }
 
     @Operation(
             summary = "Order a product",
-            description = "Creates an order for a specific product by a company with the specified quantity."
+            description = "Creates an order for a specific product by a company with the specified quantity.",
+            security = { @SecurityRequirement(name="bearerAuth") }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Order placed successfully"),
@@ -180,6 +185,7 @@ public class ProductController {
             @ApiResponse(responseCode = "403", description = "Unauthorized to order for this company")
     })
     @PostMapping("/order")
+    @PreAuthorize("hasAnyRole('ROLE_CUSTOMER')")
     public ResponseEntity<OrderResponseDto> orderProduct(@Valid @RequestBody OrderRequestDto orderRequest) {
         return ResponseEntity.ok(service.orderProduct(orderRequest));
     }
