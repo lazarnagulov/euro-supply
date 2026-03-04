@@ -9,7 +9,7 @@
               columnWidth="515"
               leftMargin="40"
               rightMargin="40"
-              topMargin="0"
+              topMargin="40"
               bottomMargin="40">
 
     <parameter name="customerName"/>
@@ -18,9 +18,9 @@
     <parameter name="totalPrice" class="java.lang.Double"/>
 
     <background>
-        <band height="842">
+        <band height="762">
             <rectangle>
-                <reportElement x="0" y="0" width="595" height="842" backcolor="#EEF2FF" mode="Opaque"/>
+                <reportElement x="0" y="0" width="515" height="762" backcolor="#EEF2FF" mode="Opaque"/>
                 <graphicElement><pen lineWidth="0"/></graphicElement>
             </rectangle>
         </band>
