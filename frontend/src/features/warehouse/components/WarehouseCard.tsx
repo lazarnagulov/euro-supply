@@ -1,5 +1,5 @@
 import React from "react";
-import { Edit2, Trash2, Truck, ArrowRight } from "lucide-react";
+import { Edit2, Trash2, Warehouse, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { WarehouseResponse } from "../types/warehouse.type";
 import AuthenticatedImage from "../../../components/auth/AuthenticatedImage.tsx";
@@ -24,7 +24,7 @@ const WarehouseCard: React.FC<WarehouseCardProps> = ({ warehouse, onEdit, onDele
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <Truck className="w-16 h-16 text-gray-400" />
+                        <Warehouse className="w-16 h-16 text-gray-400" />
                     </div>
                 )}
 

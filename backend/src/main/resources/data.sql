@@ -486,9 +486,9 @@ VALUES
 
 INSERT INTO product_inventory (product_id, quantity, updated_at)
 VALUES
-    (1, 0, now()),
-    (2, 0, now()),
-    (3, 0, now());
+    (1, 50000, now()),
+    (2, 50000, now()),
+    (3, 50000, now());
 
 insert into product_factory (product_id, factory_id) values
  (1, 1), (1, 2), (1, 3),

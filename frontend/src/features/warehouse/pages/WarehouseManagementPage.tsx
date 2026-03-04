@@ -186,7 +186,7 @@ const WarehouseManagementPage = () => {
                         onConfirm={handleDeleteConfirm}
                         title="Delete Warehouse"
                         message="Are you sure you want to delete this warehouse? This action cannot be undone and all associated data will be permanently removed."
-                        itemName={`${selectedWarehouse.name} ${selectedWarehouse.name}`}
+                        itemName={`${selectedWarehouse.name}`}
                         confirmText="DELETE"
                         loading={deleting}
                     />
