@@ -7,7 +7,7 @@
 
   <p align="center">
     <br />
-    <a href="https://gitlab.com/lazarnagulov/euro-supply/issues/new?labels=bug">Report Bug</a>
+    <a href="https://github.com/lazarnagulov/euro-supply/issues/new?labels=bug">Report Bug</a>
   </p>
 </div>
 
@@ -126,23 +126,26 @@ The system supports the following predefined roles for development and testing p
 
 - **Administrator**
   - Email: `admin@gmail.com`
+  - Username: `admin`
   - Password: _generated on first application startup and stored in the backend project root (first-password.txt)_
 
 - **Manager**
   - Email: `manager@gmail.com`
+  - Username: `manager`
   - Password: `pera`
 
 - **Customer**
   - Email: `customer@gmail.com`
+  - Username: `customer`
   - Password: `pera`
 
 > These credentials are intended **for local development only**.
 
 ## Contributors
 
-- [Ana Šinik](https://gitlab.com/sinikana7)
-- [Nataša Kašiković](https://gitlab.com/natasakasikovic)
-- [Lazar Nagulov](https://gitlab.com/lazarnagulov)
+- [Ana Šinik](https://github.com/anasinik)
+- [Nataša Kašiković](https://github.com/natasakasikovic)
+- [Lazar Nagulov](https://github.com/lazarnagulov)
 
 [Locust-img]: https://img.shields.io/badge/Locust-Load%20Testing-00c853?logo=locust&logoColor=white
 [Locust-url]: https://locust.io/
@@ -180,8 +183,8 @@ The system supports the following predefined roles for development and testing p
 [Tailwind-img]: https://img.shields.io/badge/Tailwind%20CSS-3-38bdf8?logo=tailwindcss&logoColor=white
 [Tailwind-url]: https://tailwindcss.com/
 
-[contributors-shield]: https://img.shields.io/gitlab/contributors/lazarnagulov/euro-supply?style=for-the-badge
-[contributors-url]: https://gitlab.com/lazarnagulov/euro-supply/-/project_members
+[contributors-shield]: https://img.shields.io/github/contributors/lazarnagulov/euro-supply?style=for-the-badge
+[contributors-url]: https://github.com/lazarnagulov/euro-supply/-/project_members
 
-[last-commit-shield]: https://img.shields.io/gitlab/last-commit/lazarnagulov/euro-supply?style=for-the-badge
-[last-commit-url]: https://gitlab.com/lazarnagulov/euro-supply/-/commits/main
+[last-commit-shield]: https://img.shields.io/github/last-commit/lazarnagulov/euro-supply?style=for-the-badge
+[last-commit-url]: https://github.com/lazarnagulov/euro-supply/-/commits/main
